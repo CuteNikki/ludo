@@ -7,9 +7,9 @@ services:
     networks:
       - arr-network
     labels:
-      homepage.group: 'Game Servers'
+      homepage.group: 'Infrastructure'
       homepage.name: 'Ludo Backend'
-      homepage.icon: 'si-nintendo'
+      homepage.icon: 'si-gamepad'
       homepage.href: 'https://ludo.niso.moe'
 
   web:
@@ -24,9 +24,9 @@ services:
     networks:
       - arr-network
     labels:
-      homepage.group: 'Game Servers'
+      homepage.group: 'Infrastructure'
       homepage.name: 'Ludo Frontend'
-      homepage.icon: 'si-nintendo'
+      homepage.icon: 'si-joystick'
       homepage.href: 'https://ludo.niso.moe'
 
 networks:
