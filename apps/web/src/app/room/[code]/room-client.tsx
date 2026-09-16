@@ -10,9 +10,11 @@ import {
   Clock3,
   Copy,
   Dices,
+  Home,
   Info,
   LogOut,
   Palette,
+  Plus,
   RotateCcw,
   Settings2,
   Sparkles,
@@ -121,7 +123,10 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
     if (socketRef.current?.readyState === WebSocket.OPEN) send(socketRef.current, event);
   }
 
-  if (error) return <Message title='Verbindung fehlgeschlagen' detail={error} />;
+  if (error) {
+    const roomNotFound = error.toLocaleLowerCase().includes('raum nicht gefunden');
+    return <Message title={roomNotFound ? 'Raum nicht gefunden' : 'Verbindung fehlgeschlagen'} detail={error} showRoomChoices={roomNotFound} />;
+  }
   if (!state || !playerId) return <Message title='Raum wird geöffnet' detail='Verbindung zum Spielserver wird hergestellt ...' />;
 
   const me = state.players.find((player) => player.id === playerId);
@@ -153,25 +158,30 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   }
 
   return (
-    <main className='room-enter mx-auto min-h-screen max-w-6xl px-6 py-8 sm:py-12'>
-      <header className='flex flex-wrap items-end justify-between gap-5 border-b-2 border-stone-900 pb-6'>
-        <div>
-          <p className='mb-1 text-xs font-bold uppercase text-stone-500'>Ludo Live · Raum</p>
-          <h1 className='font-mono text-4xl font-black tracking-widest'>{state.roomCode}</h1>
+    <main className='room-enter room-shell mx-auto min-h-screen max-w-6xl px-5 py-6 sm:px-6 sm:py-10'>
+      <header className='room-header flex flex-wrap items-center justify-between gap-5 border-2 border-stone-900 bg-white p-4 shadow-[6px_6px_0_#1c1917] sm:p-5'>
+        <div className='flex items-center gap-4'>
+          <a href='/' className='grid h-10 w-10 shrink-0 place-items-center bg-stone-950 text-lg font-black text-white' aria-label='Zur Startseite'>
+            L
+          </a>
+          <div>
+            <p className='mb-1 text-[11px] font-black uppercase tracking-[.16em] text-red-700'>Ludo Live · Raum</p>
+            <h1 className='font-mono text-3xl font-black tracking-[.18em] sm:text-4xl'>{state.roomCode}</h1>
+          </div>
         </div>
         <Button variant='outline' onClick={copyRoomLink} aria-live='polite'>
           {copied ? <CheckCheck size={17} /> : <Copy size={17} />} {copied ? 'Kopiert' : 'Link kopieren'}
         </Button>
       </header>
 
-      <div className='grid gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_20rem]'>
-        <section className='flex min-w-0 justify-center'>
+      <div className='grid gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10'>
+        <section className='flex min-w-0 justify-center lg:justify-start p-1 sm:p-3 lg:p-0'>
           <GameBoard state={state} playerId={playerId} onMove={(pieceId) => emit({ type: 'game:move', payload: { pieceId } })} />
         </section>
 
-        <aside>
+        <aside className='room-sidebar border-2 border-stone-900 bg-white p-5 shadow-[6px_6px_0_#1c1917]'>
           {state.phase !== 'lobby' && (
-            <section className='turn-panel mb-6 flex h-56 flex-col border-2 border-stone-900 bg-white p-5 shadow-[5px_5px_0_#1c1917]'>
+            <section className='turn-panel mb-6 flex h-56 flex-col border-b-2 border-stone-900 pb-6'>
               {state.phase === 'finished' ? (
                 <div className='grid flex-1 place-items-center text-center'>
                   <div className='w-full'>
@@ -263,7 +273,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                   {player.name}
                   {player.id === playerId ? ' (du)' : ''}
                 </span>
-                {player.id === state.hostPlayerId && <span className='text-[10px] font-bold uppercase text-stone-500'>Host</span>}
+                {player.id === state.hostPlayerId && state.phase === 'lobby' && <span className='text-[10px] font-bold uppercase text-stone-500'>Host</span>}
                 {player.id === state.currentPlayerId && state.phase === 'playing' && (
                   <span className='text-[10px] font-bold uppercase text-stone-500'>Am Zug</span>
                 )}
@@ -292,7 +302,9 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
             </Button>
           )}
           {state.phase === 'lobby' && (
-            <p className='mt-4 text-sm leading-6 text-stone-500'>Das Spiel startet automatisch, sobald mindestens zwei Spieler bereit sind.</p>
+            <p className='mt-4 text-sm font-medium leading-6 text-stone-700'>
+              Das Spiel startet automatisch, sobald alle Spieler bereit sind. Mindestens zwei Spieler sind erforderlich.
+            </p>
           )}
           {notice && (
             <p role='alert' className='mt-4 border border-red-300 bg-red-50 p-3 text-sm font-bold text-red-800'>
@@ -343,7 +355,7 @@ function PlayerProfile({
   }
 
   return (
-    <section className='mb-7 border-b-2 border-stone-900 pb-5'>
+    <section className='mb-0 border-b-2 border-stone-900 pb-5 lg:mb-7'>
       <h2 className='mb-4 flex items-center gap-2 text-lg font-black'>
         <UserRound size={19} /> Dein Profil
       </h2>
@@ -394,7 +406,7 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
   const moveTimes: MoveTimeSeconds[] = [15, 30, 45, 60];
 
   return (
-    <section className='mb-7 border-y-2 sm:border-t-0 sm:pt-0 border-stone-900 py-5'>
+    <section className='mb-7 border-b-2 border-stone-900 py-5 sm:pt-0'>
       <div className='mb-4 flex items-center justify-between gap-3'>
         <h2 className='flex items-center gap-2 text-lg font-black'>
           <Settings2 size={19} /> Raumeinstellungen
@@ -402,7 +414,7 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
         {!isHost && <span className='text-[10px] font-bold uppercase text-stone-500'>Nur Host</span>}
       </div>
 
-      <fieldset className='space-y-5'>
+      <fieldset className='space-y-2'>
         <div>
           <legend className='mb-2 flex w-full items-center gap-2 text-sm font-bold'>
             <Clock3 size={16} /> Zugzeit
@@ -523,12 +535,26 @@ function send(socket: WebSocket, event: ClientEvent) {
   socket.send(JSON.stringify(event));
 }
 
-function Message({ title, detail }: { title: string; detail: string }) {
+function Message({ title, detail, showRoomChoices = false }: { title: string; detail: string; showRoomChoices?: boolean }) {
   return (
     <main className='grid min-h-screen place-items-center px-6 text-center'>
-      <div>
+      <div className='border-2 border-stone-900 bg-white p-8 shadow-[6px_6px_0_#1c1917]'>
         <h1 className='text-4xl font-bold'>{title}</h1>
         <p className='mt-3 text-stone-600'>{detail}</p>
+        {showRoomChoices && (
+          <div className='mt-7 flex flex-col justify-center gap-3 sm:flex-row'>
+            <Button asChild>
+              <a href='/room/new'>
+                <Plus size={17} /> Neuen Raum erstellen
+              </a>
+            </Button>
+            <Button variant='outline' asChild>
+              <a href='/'>
+                <Home size={17} /> Zur Homepage
+              </a>
+            </Button>
+          </div>
+        )}
       </div>
     </main>
   );

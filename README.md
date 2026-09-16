@@ -29,6 +29,6 @@ Die Option „Fairer Würfel“ sorgt dafür, dass alle Zahlen regelmäßig gew�
 
 Der Ersteller eines Raums ist der Host und kann in der Lobby die Zugzeit (15, 30, 45 oder 60 Sekunden), automatische Züge und den fairen Würfel konfigurieren. Die Einstellungen werden an alle Spieler synchronisiert und nach Spielstart gesperrt. Eine Änderung in der Lobby setzt die Bereitschaft aller Spieler zurück.
 
-Jeder Spieler kann in der Lobby seinen Namen ändern und eine noch freie Spielfarbe auswählen. Namen werden pro Raum eindeutig gehalten, belegte Farben sind gesperrt und das gewählte Profil bleibt bei einem Reload erhalten.
+Jeder Spieler kann in der Lobby seinen Namen ändern und eine noch freie Spielfarbe auswählen. Namen dürfen doppelt vorkommen, belegte Farben sind gesperrt und das gewählte Profil bleibt bei einem Reload erhalten. Ohne Eingabe wird der Name "Gast" verwendet.
 
 Der Host kann andere Spieler in der Lobby aus dem Raum entfernen. Nach Spielende können Spieler ins Hauptmenü zurückkehren oder für eine weitere Runde stimmen. Die erste Rematch-Stimme startet einen 10-Sekunden-Countdown; Nichtantworter werden danach entfernt und alle Zustimmer kehren mit zurückgesetzten Figuren und unveränderten Raumeinstellungen in die Lobby zurück.

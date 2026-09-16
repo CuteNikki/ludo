@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import type { GameState, Piece, PlayerColor } from '@ludo/shared';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 
 type Coordinate = readonly [row: number, column: number];
 
@@ -145,6 +145,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
   const [preview, setPreview] = useState<{ pieceId: string; revision: number } | null>(null);
   const [visualCoordinates, setVisualCoordinates] = useState<Record<string, Coordinate>>(() => getCurrentCoordinates(state));
   const [transferringPieceIds, setTransferringPieceIds] = useState<Set<string>>(() => new Set());
+  const [captureAnimations, setCaptureAnimations] = useState<Record<string, { from: Coordinate; to: Coordinate }>>({});
   const previousPositions = useRef(new Map(state.pieces.map((piece) => [piece.id, piece.position])));
   const piecesByCell = new Map<string, Piece>();
   const positionedPieces: Array<{ piece: Piece; owner: GameState['players'][number]; coordinate: Coordinate; movable: boolean }> = [];
@@ -166,17 +167,22 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
     async function animateMoves() {
       const immediateCoordinates: Record<string, Coordinate> = {};
       const transfers = new Set<string>();
+      const captures: Record<string, { from: Coordinate; to: Coordinate }> = {};
       const movingPieces: Array<{ piece: Piece; color: PlayerColor; positions: number[] }> = [];
 
       for (const player of state.players) {
         const pieces = state.pieces.filter((piece) => piece.playerId === player.id);
         pieces.forEach((piece, yardIndex) => {
           const previousPosition = previous.get(piece.id);
+          const coordinate = getPieceCoordinate(piece, player.color, yardIndex);
+          if (previousPosition !== undefined && previousPosition >= 0 && piece.position === -1 && coordinate) {
+            const from = getPieceCoordinate({ ...piece, position: previousPosition }, player.color, yardIndex);
+            if (from) captures[piece.id] = { from, to: coordinate };
+          }
           if (previousPosition !== undefined && previousPosition >= 0 && piece.position > previousPosition) {
             movingPieces.push({ piece, color: player.color, positions: range(previousPosition + 1, piece.position) });
           } else {
-            const coordinate = getPieceCoordinate(piece, player.color, yardIndex);
-            if (coordinate) immediateCoordinates[piece.id] = coordinate;
+            if (coordinate && !captures[piece.id]) immediateCoordinates[piece.id] = coordinate;
             if (previousPosition !== undefined && previousPosition < 0 !== piece.position < 0) transfers.add(piece.id);
           }
         });
@@ -202,6 +208,15 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
           }
         }),
       );
+
+      if (Object.keys(captures).length > 0) {
+        const captureCoordinates = Object.fromEntries(Object.entries(captures).map(([pieceId, capture]) => [pieceId, capture.to]));
+        setVisualCoordinates((current) => ({ ...current, ...immediateCoordinates, ...captureCoordinates }));
+        setCaptureAnimations(captures);
+        window.setTimeout(() => {
+          if (!cancelled) setCaptureAnimations({});
+        }, 1_450);
+      }
     }
 
     void animateMoves();
@@ -263,14 +278,24 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
         <div className='pointer-events-none absolute inset-0 z-20' aria-hidden='false'>
           {positionedPieces.map(({ piece, owner, coordinate, movable }) => {
             const isCaptureTarget = previewCoordinate && key(previewCoordinate) === key(coordinate) && previewPiece?.playerId !== piece.playerId;
+            const capture = captureAnimations[piece.id];
+            const captureStyle = capture
+              ? ({
+                  '--capture-from-left': getBoardAxisPosition(capture.from[1]),
+                  '--capture-from-top': getBoardAxisPosition(capture.from[0]),
+                  '--capture-to-left': getBoardAxisPosition(capture.to[1]),
+                  '--capture-to-top': getBoardAxisPosition(capture.to[0]),
+                } as CSSProperties)
+              : undefined;
             return (
               <div
                 key={piece.id}
                 className={cn(
                   'piece-position pointer-events-none absolute grid place-items-center',
                   transferringPieceIds.has(piece.id) && 'piece-position-instant',
+                  capture && 'piece-capture-flight',
                 )}
-                style={{ left: `${((coordinate[1] + 0.5) / 11) * 100}%`, top: `${((coordinate[0] + 0.5) / 11) * 100}%` }}
+                style={{ left: getBoardAxisPosition(coordinate[1]), top: getBoardAxisPosition(coordinate[0]), ...captureStyle }}
               >
                 <button
                   type='button'
@@ -289,6 +314,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
                     colorStyles[owner.color].token,
                     movable && 'movable-piece cursor-pointer hover:scale-110',
                     isCaptureTarget && 'scale-90 ring-4 ring-amber-300',
+                    capture && 'piece-capture-token',
                   )}
                 >
                   <span className='sr-only'>{owner.name}</span>
@@ -351,6 +377,11 @@ function getYardColor(row: number, column: number): PlayerColor | null {
 
 function key(coordinate: Coordinate): string {
   return `${coordinate[0]}-${coordinate[1]}`;
+}
+
+function getBoardAxisPosition(index: number): string {
+  const gapOffset = index - ((index + 0.5) * 10) / 11;
+  return `calc(${((index + 0.5) / 11) * 100}% + ${gapOffset * 0.125}rem)`;
 }
 
 function getCurrentCoordinates(state: GameState): Record<string, Coordinate> {

@@ -114,7 +114,7 @@ export class RoomManager {
     if (state.players.some((candidate) => candidate.id !== playerId && candidate.color === color)) throw new Error('Diese Farbe ist bereits vergeben.');
 
     player.color = color;
-    player.name = this.getUniqueName(state, name, playerId);
+    player.name = this.getPlayerName(name);
     player.ready = false;
     state.revision += 1;
     return state;
@@ -273,7 +273,7 @@ export class RoomManager {
     const color = COLORS.find((candidate) => !state.players.some((player) => player.color === candidate)) ?? 'red';
     const player: Player = {
       id: playerId,
-      name: this.getUniqueName(state, rawName),
+      name: this.getPlayerName(rawName),
       color,
       connected: true,
       ready: false,
@@ -285,21 +285,9 @@ export class RoomManager {
     return { playerId, state };
   }
 
-  private getUniqueName(state: GameState, rawName: string, currentPlayerId?: string): string {
+  private getPlayerName(rawName: string): string {
     const requestedName = rawName.trim().slice(0, 24);
-    const usedNames = new Set(state.players.filter((player) => player.id !== currentPlayerId).map((player) => player.name.toLocaleLowerCase('de-DE')));
-    const baseName = requestedName && requestedName.toLocaleLowerCase('de-DE') !== 'gast' ? requestedName : this.getAvailableGuestName(usedNames);
-    if (!usedNames.has(baseName.toLocaleLowerCase('de-DE'))) return baseName;
-
-    let suffix = 2;
-    while (usedNames.has(`${baseName} ${suffix}`.toLocaleLowerCase('de-DE'))) suffix += 1;
-    return `${baseName} ${suffix}`;
-  }
-
-  private getAvailableGuestName(usedNames: Set<string>): string {
-    let number = 1;
-    while (usedNames.has(`gast ${number}`)) number += 1;
-    return `Gast ${number}`;
+    return requestedName || 'Gast';
   }
 
   private getState(roomCode: string): GameState {

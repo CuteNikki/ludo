@@ -19,14 +19,28 @@ function startGame(rolls: number[] = [6, 3]) {
 }
 
 describe('RoomManager game turns', () => {
-  test('lets players choose unique lobby names and available colors', () => {
+  test('starts only after every player is ready', () => {
+    const manager = new RoomManager();
+    const first = manager.createRoom('Ada');
+    const second = manager.joinRoom(first.state.roomCode, 'Linus');
+    const third = manager.joinRoom(first.state.roomCode, 'Mika');
+
+    manager.setReady(first.state.roomCode, first.playerId, true);
+    manager.setReady(first.state.roomCode, second.playerId, true);
+    expect(first.state.phase).toBe('lobby');
+
+    manager.setReady(first.state.roomCode, third.playerId, true);
+    expect(first.state.phase).toBe('playing');
+  });
+
+  test('keeps chosen lobby names and enforces available colors', () => {
     const manager = new RoomManager();
     const first = manager.createRoom('Ada');
     const second = manager.joinRoom(first.state.roomCode, 'Linus');
     manager.setReady(first.state.roomCode, first.playerId, true);
 
     const updated = manager.updatePlayer(first.state.roomCode, first.playerId, 'Linus', 'green');
-    expect(updated.players.find((player) => player.id === first.playerId)).toMatchObject({ name: 'Linus 2', color: 'green', ready: false });
+    expect(updated.players.find((player) => player.id === first.playerId)).toMatchObject({ name: 'Linus', color: 'green', ready: false });
     expect(() => manager.updatePlayer(first.state.roomCode, second.playerId, 'Linus', 'green')).toThrow('bereits vergeben');
   });
 
@@ -108,14 +122,14 @@ describe('RoomManager game turns', () => {
     expect(host.state.rematchPlayerIds).toEqual([]);
   });
 
-  test('assigns distinct fallback and duplicate names', () => {
+  test('uses a simple fallback and allows duplicate names', () => {
     const manager = new RoomManager();
     const first = manager.createRoom('');
     const second = manager.joinRoom(first.state.roomCode, 'Gast');
     const third = manager.joinRoom(first.state.roomCode, 'Ada');
     const fourth = manager.joinRoom(first.state.roomCode, 'Ada');
 
-    expect(first.state.players.map((player) => player.name)).toEqual(['Gast 1', 'Gast 2', 'Ada', 'Ada 2']);
+    expect(first.state.players.map((player) => player.name)).toEqual(['Gast', 'Gast', 'Ada', 'Ada']);
     expect(second.state.roomCode).toBe(third.state.roomCode);
     expect(fourth.state.players).toHaveLength(4);
   });

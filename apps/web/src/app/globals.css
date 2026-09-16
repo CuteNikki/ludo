@@ -13,6 +13,9 @@
 * {
   box-sizing: border-box;
 }
+html {
+  scroll-behavior: smooth;
+}
 body {
   margin: 0;
   color: var(--ink);
@@ -21,6 +24,37 @@ body {
   background-image: linear-gradient(rgba(28, 25, 23, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(28, 25, 23, 0.045) 1px, transparent 1px);
   background-size: 24px 24px;
   min-height: 100vh;
+}
+.font-display {
+  font-family: var(--font-display), serif;
+}
+.home-reveal {
+  animation: room-enter 0.55s ease-out both;
+}
+.home-board {
+  animation: board-enter 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s both;
+}
+.home-token {
+  box-shadow:
+    inset 0 -4px 0 rgba(28, 25, 23, 0.2),
+    0 3px 0 rgba(28, 25, 23, 0.35);
+}
+.home-moving-token {
+  position: absolute;
+  z-index: 3;
+  width: 6.3%;
+  aspect-ratio: 1;
+  border: 2px solid #1c1917;
+  border-radius: 999px;
+  box-shadow:
+    inset 0 -4px 0 rgba(28, 25, 23, 0.2),
+    0 3px 0 rgba(28, 25, 23, 0.35);
+  transform: translate(-50%, -50%);
+  transition:
+    left 0.13s cubic-bezier(0.22, 0.8, 0.25, 1),
+    top 0.13s cubic-bezier(0.22, 0.8, 0.25, 1),
+    background-color 0.2s ease;
+  will-change: left, top;
 }
 button,
 input {
@@ -120,6 +154,58 @@ input {
   }
 }
 
+@keyframes piece-capture-flight {
+  0% {
+    left: var(--capture-from-left);
+    top: var(--capture-from-top);
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  14% {
+    left: var(--capture-from-left);
+    top: var(--capture-from-top);
+    transform: translate(-50%, -50%) scale(0.72) rotate(-16deg);
+  }
+  25% {
+    left: var(--capture-from-left);
+    top: var(--capture-from-top);
+    transform: translate(-50%, -50%) scale(1.16) rotate(12deg);
+  }
+  34% {
+    transform: translate(-50%, -50%) scale(0.92) rotate(-6deg);
+  }
+  44% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  100% {
+    left: var(--capture-to-left);
+    top: var(--capture-to-top);
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes piece-capture-impact {
+  0%,
+  12% {
+    box-shadow:
+      inset 0 -4px 0 rgba(28, 25, 23, 0.2),
+      0 3px 0 rgba(28, 25, 23, 0.35),
+      0 0 0 0 rgba(248, 113, 113, 0);
+  }
+  25% {
+    box-shadow:
+      inset 0 -4px 0 rgba(28, 25, 23, 0.2),
+      0 3px 0 rgba(28, 25, 23, 0.35),
+      0 0 0 9px rgba(248, 113, 113, 0.55);
+  }
+  48%,
+  100% {
+    box-shadow:
+      inset 0 -4px 0 rgba(28, 25, 23, 0.2),
+      0 3px 0 rgba(28, 25, 23, 0.35),
+      0 0 0 14px rgba(248, 113, 113, 0);
+  }
+}
+
 @keyframes destination-enter {
   from {
     opacity: 0;
@@ -166,6 +252,14 @@ input {
 .piece-position-instant {
   transition: none;
 }
+.piece-capture-flight {
+  z-index: 10;
+  transition: none;
+  animation: piece-capture-flight 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.piece-capture-token {
+  animation: piece-capture-impact 0.52s ease-out both;
+}
 .piece-position-instant .piece-token {
   animation: piece-transfer 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
@@ -182,6 +276,9 @@ input {
 .turn-panel {
   background-image: linear-gradient(135deg, rgba(255, 255, 255, 0) 70%, rgba(28, 25, 23, 0.035));
 }
+.room-sidebar {
+  align-self: start;
+}
 .board-cell {
   transition:
     filter 0.18s ease,
@@ -189,6 +286,13 @@ input {
 }
 .player-row {
   position: relative;
+}
+
+@media (min-width: 1024px) {
+  .room-sidebar {
+    position: sticky;
+    top: 1.5rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -199,8 +303,13 @@ input {
   .dice-result,
   .movable-piece,
   .piece-position-instant .piece-token,
+  .piece-capture-flight,
+  .piece-capture-token,
   .destination-marker,
   .toast-enter {
+    animation: none;
+  }
+  .home-moving-token {
     animation: none;
   }
 }
