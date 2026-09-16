@@ -9,7 +9,7 @@ services:
     labels:
       homepage.group: 'Infrastructure'
       homepage.name: 'Ludo Backend'
-      homepage.icon: 'mdi-controller'
+      homepage.icon: 'mdi-server'
       homepage.href: 'https://ludo.niso.moe'
 
   web:
