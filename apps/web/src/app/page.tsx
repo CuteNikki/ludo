@@ -3,7 +3,7 @@
 import { GameBoard } from '@/components/game-board';
 import { Button } from '@/components/ui/button';
 import type { GameState, PlayerColor } from '@ludo/shared';
-import { ArrowDown, ArrowRight, CircleAlert, Dices, Flag, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
+import { ArrowDown, ArrowRight, CircleAlert, Dices, DicesIcon, Flag, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
@@ -222,10 +222,10 @@ export default function HomePage() {
       )}
       <nav className='mx-auto flex max-w-6xl items-center justify-between px-6 py-6'>
         <a href='/' className='flex items-center gap-2 text-lg font-black tracking-tight'>
-          <span className='grid h-8 w-8 place-items-center bg-stone-950 text-sm text-white'>L</span>
-          Ludo Live
+          <DicesIcon className='size-10 shrink-0 text-white bg-black p-1.5 rounded-lg' />
+          Ludo
         </a>
-        <a href='#so-gehts' className='hidden items-center gap-2 text-sm font-bold text-stone-600 transition-colors hover:text-stone-950 sm:flex'>
+        <a href='#how-it-works' className='hidden items-center gap-2 text-sm font-bold text-stone-600 transition-colors hover:text-stone-950 sm:flex'>
           So funktioniert&apos;s <ArrowDown size={16} />
         </a>
       </nav>
@@ -233,7 +233,11 @@ export default function HomePage() {
       <section className='mx-auto grid max-w-6xl gap-12 px-6 pb-20 pt-10 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:gap-16 lg:pb-28 lg:pt-16'>
         <div className='home-reveal'>
           <p className='mb-5 flex items-center gap-2 text-sm font-black uppercase tracking-[.18em] text-red-700'>
-            <span className='h-2 w-2 rounded-full bg-red-600' /> Das Brett ist eröffnet
+            <span className='relative h-2 w-2 flex items-center justify-center'>
+              <span className='absolute h-2 w-2 rounded-full bg-red-600 animate-ping' />
+              <span className='absolute h-2 w-2 rounded-full bg-red-600' />
+            </span>
+            Das Brett ist eröffnet
           </p>
           <h1 className='max-w-2xl font-display text-6xl font-black leading-[.9] tracking-tight sm:text-8xl'>
             Würfeln. Ziehen.
@@ -310,7 +314,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id='so-gehts' className='mx-auto max-w-6xl px-6 py-20 sm:py-28'>
+      <section id='how-it-works' className='mx-auto max-w-6xl px-6 py-20 sm:py-28'>
         <div className='max-w-xl'>
           <p className='mb-3 text-sm font-black uppercase tracking-[.16em] text-red-700'>So funktioniert&apos;s</p>
           <h2 className='font-display text-4xl font-black leading-none sm:text-5xl'>Drei Schritte bis zum ersten Rauswurf.</h2>
@@ -359,7 +363,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className='border-t-2 border-stone-900 px-6 py-7 text-center text-xs font-bold uppercase tracking-[.15em] text-stone-500'>
+      <footer className='border-t-2 bg-[#e8dfcd] border-stone-900 px-6 py-7 text-center text-xs font-bold uppercase tracking-[.15em]'>
         Ludo Live · Für Menschen, die noch eine Runde spielen
       </footer>
     </main>
