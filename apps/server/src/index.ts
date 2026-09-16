@@ -13,6 +13,7 @@ const rooms = new RoomManager((roomCode, state) => {
 });
 
 const server = Bun.serve<SocketData>({
+  hostname: '0.0.0.0',
   port,
   fetch(request, serverInstance) {
     const url = new URL(request.url);

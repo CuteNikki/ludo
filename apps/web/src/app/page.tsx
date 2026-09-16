@@ -7,49 +7,6 @@ import { ArrowDown, ArrowRight, CircleAlert, Dices, Flag, Link2, Plus, Sparkles,
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-const previewPath = new Set([
-  '4-0',
-  '4-1',
-  '4-2',
-  '4-3',
-  '4-4',
-  '3-4',
-  '2-4',
-  '1-4',
-  '0-4',
-  '0-5',
-  '0-6',
-  '1-6',
-  '2-6',
-  '3-6',
-  '4-6',
-  '4-7',
-  '4-8',
-  '4-9',
-  '4-10',
-  '5-10',
-  '6-10',
-  '6-9',
-  '6-8',
-  '6-7',
-  '6-6',
-  '7-6',
-  '8-6',
-  '9-6',
-  '10-6',
-  '10-5',
-  '10-4',
-  '9-4',
-  '8-4',
-  '7-4',
-  '6-4',
-  '6-3',
-  '6-2',
-  '6-1',
-  '6-0',
-  '5-0',
-]);
-
 const demoPath: Array<readonly [number, number]> = [
   [4, 0],
   [4, 1],
@@ -93,46 +50,7 @@ const demoPath: Array<readonly [number, number]> = [
   [5, 0],
 ];
 
-const demoColors = ['red', 'blue', 'green', 'yellow'] as const;
 const demoOffsets = [0, 10, 20, 30];
-const demoHomeSpots: Array<readonly [number, number]> = [
-  [2, 2],
-  [2, 8],
-  [8, 8],
-  [8, 2],
-];
-const demoGoalLanes: Array<Array<readonly [number, number]>> = [
-  [
-    [5, 1],
-    [5, 2],
-    [5, 3],
-    [5, 4],
-  ],
-  [
-    [1, 5],
-    [2, 5],
-    [3, 5],
-    [4, 5],
-  ],
-  [
-    [5, 9],
-    [5, 8],
-    [5, 7],
-    [5, 6],
-  ],
-  [
-    [9, 5],
-    [8, 5],
-    [7, 5],
-    [6, 5],
-  ],
-];
-const demoColorClasses = {
-  red: 'bg-red-500',
-  blue: 'bg-blue-600',
-  yellow: 'bg-amber-400',
-  green: 'bg-emerald-600',
-};
 
 const previewPlayers: Array<{ id: string; name: string; color: PlayerColor }> = [
   { id: 'preview-red', name: 'Rot', color: 'red' },
@@ -140,6 +58,7 @@ const previewPlayers: Array<{ id: string; name: string; color: PlayerColor }> = 
   { id: 'preview-green', name: 'Grün', color: 'green' },
   { id: 'preview-yellow', name: 'Gelb', color: 'yellow' },
 ];
+
 const previewStartPositions = [
   [3, -1, 25, 40],
   [-1, 12, 25, -1],
@@ -171,49 +90,6 @@ function createPreviewState(): GameState {
     rematchPlayerIds: [],
     revision: 0,
   };
-}
-
-function getDemoCoordinate(colorIndex: number, position: number): readonly [number, number] {
-  if (position < 0) return demoHomeSpots[colorIndex] ?? demoPath[0]!;
-  if (position >= 40) return demoGoalLanes[colorIndex]?.[position - 40] ?? demoPath[0]!;
-  return demoPath[((demoOffsets[colorIndex] ?? 0) + position) % demoPath.length] ?? demoPath[0]!;
-}
-
-const previewTokens = [
-  { color: 'bg-red-500', row: 1, column: 1, home: true },
-  { color: 'bg-red-500', row: 2, column: 1, home: true },
-  { color: 'bg-red-500', row: 5, column: 3, demoColor: 'red' },
-  { color: 'bg-blue-600', row: 1, column: 8, home: true },
-  { color: 'bg-blue-600', row: 1, column: 9, home: true },
-  { color: 'bg-blue-600', row: 2, column: 5 },
-  { color: 'bg-blue-600', row: 4, column: 5, demoColor: 'blue' },
-  { color: 'bg-amber-400', row: 8, column: 2, home: true },
-  { color: 'bg-amber-400', row: 9, column: 2, home: true },
-  { color: 'bg-amber-400', row: 8, column: 5 },
-  { color: 'bg-amber-400', row: 9, column: 5, demoColor: 'yellow' },
-  { color: 'bg-emerald-600', row: 9, column: 8, home: true },
-  { color: 'bg-emerald-600', row: 9, column: 9, home: true },
-  { color: 'bg-emerald-600', row: 5, column: 8, demoColor: 'green' },
-  { color: 'bg-emerald-600', row: 6, column: 10 },
-];
-
-function previewCellClass(row: number, column: number) {
-  const key = `${row}-${column}`;
-  if (key === '4-0') return 'bg-white ring-4 ring-inset ring-red-500';
-  if (key === '0-5') return 'bg-white ring-4 ring-inset ring-blue-600';
-  if (key === '6-10') return 'bg-white ring-4 ring-inset ring-emerald-600';
-  if (key === '10-4') return 'bg-white ring-4 ring-inset ring-amber-400';
-  if (key === '5-1' || key === '5-2' || key === '5-3' || key === '5-4') return 'bg-red-500';
-  if (key === '1-5' || key === '2-5' || key === '3-5' || key === '4-5') return 'bg-blue-600';
-  if (key === '5-9' || key === '5-8' || key === '5-7' || key === '5-6') return 'bg-emerald-600';
-  if (key === '9-5' || key === '8-5' || key === '7-5' || key === '6-5') return 'bg-amber-400';
-  if (previewPath.has(key)) return 'bg-white';
-  if (row >= 4 && row <= 6 && column >= 4 && column <= 6) return 'bg-stone-800';
-  if (row <= 3 && column <= 3) return 'bg-red-100';
-  if (row <= 3 && column >= 7) return 'bg-blue-100';
-  if (row >= 7 && column >= 7) return 'bg-emerald-100';
-  if (row >= 7 && column <= 3) return 'bg-amber-100';
-  return 'bg-stone-100';
 }
 
 export default function HomePage() {
