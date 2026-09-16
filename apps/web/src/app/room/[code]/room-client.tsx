@@ -10,6 +10,7 @@ import {
   Clock3,
   Copy,
   Dices,
+  DicesIcon,
   Home,
   Info,
   LogOut,
@@ -161,12 +162,12 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
     <main className='room-enter room-shell mx-auto min-h-screen max-w-6xl px-5 py-6 sm:px-6 sm:py-10'>
       <header className='room-header flex flex-wrap items-center justify-between gap-5 border-2 border-stone-900 bg-white p-4 shadow-[6px_6px_0_#1c1917] sm:p-5'>
         <div className='flex items-center gap-4'>
-          <a href='/' className='grid h-10 w-10 shrink-0 place-items-center bg-stone-950 text-lg font-black text-white' aria-label='Zur Startseite'>
-            L
+          <a href='/' aria-label='Zur Startseite'>
+            <DicesIcon className='size-10 shrink-0 text-white bg-black p-1.5 rounded-lg' />
           </a>
           <div>
-            <p className='mb-1 text-[11px] font-black uppercase tracking-[.16em] text-red-700'>Ludo Live · Raum</p>
-            <h1 className='font-mono text-3xl font-black tracking-[.18em] sm:text-4xl'>{state.roomCode}</h1>
+            <p className='text-xs font-black uppercase tracking-[.16em] text-red-700'>Ludo · Raum</p>
+            <h1 className='font-mono font-black tracking-widest text-xl'>{state.roomCode}</h1>
           </div>
         </div>
         <Button variant='outline' onClick={copyRoomLink} aria-live='polite'>
