@@ -1,8 +1,10 @@
-import type { GameState, Player, PlayerColor } from '@ludo/shared';
+import type { GameState, MoveTimeSeconds, Player, PlayerColor, RoomSettings } from '@ludo/shared';
 import { FairDice } from './fair-dice';
 
 const COLORS: PlayerColor[] = ['red', 'blue', 'green', 'yellow'];
 const COLOR_NAMES: Record<PlayerColor, string> = { red: 'Rot', blue: 'Blau', green: 'Grün', yellow: 'Gelb' };
+const MOVE_TIMES: MoveTimeSeconds[] = [15, 30, 45, 60];
+const DEFAULT_SETTINGS: RoomSettings = { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true };
 
 interface Room {
   state: GameState;
@@ -19,10 +21,11 @@ export class RoomManager {
 
   constructor(
     private readonly onStateChange: StateListener = () => undefined,
-    private readonly turnDurationMs = 30_000,
+    private readonly turnDurationMs?: number,
     private readonly rollDice?: () => number,
     private readonly rollAnimationMs = 900,
     private readonly noMoveDelayMs = 1_800,
+    private readonly autoMoveDelayMs: number | null = 1_300,
   ) {}
 
   createRoom(playerName: string): { playerId: string; state: GameState } {
@@ -31,6 +34,8 @@ export class RoomManager {
 
     const state: GameState = {
       roomCode,
+      hostPlayerId: null,
+      settings: { ...DEFAULT_SETTINGS },
       phase: 'lobby',
       turnStage: 'rolling',
       turnDeadline: null,
@@ -43,7 +48,9 @@ export class RoomManager {
       revision: 0,
     };
     this.rooms.set(roomCode, { state });
-    return this.addPlayer(state, playerName);
+    const joined = this.addPlayer(state, playerName);
+    state.hostPlayerId = joined.playerId;
+    return joined;
   }
 
   joinRoom(roomCode: string, playerName: string, reconnectPlayerId?: string): { playerId: string; state: GameState } {
@@ -53,7 +60,6 @@ export class RoomManager {
     const reconnectingPlayer = room.state.players.find((player) => player.id === reconnectPlayerId);
     if (reconnectingPlayer) {
       reconnectingPlayer.connected = true;
-      reconnectingPlayer.name = this.getUniqueName(room.state, playerName, reconnectingPlayer.color, reconnectingPlayer.id);
       const playerCleanupKey = `${normalizedCode}:${reconnectingPlayer.id}`;
       const playerCleanupTimer = this.playerCleanupTimers.get(playerCleanupKey);
       if (playerCleanupTimer) clearTimeout(playerCleanupTimer);
@@ -84,6 +90,34 @@ export class RoomManager {
     return state;
   }
 
+  setSettings(roomCode: string, playerId: string, settings: RoomSettings): GameState {
+    const state = this.getState(roomCode);
+    if (state.phase !== 'lobby') throw new Error('Einstellungen können nur in der Lobby geändert werden.');
+    if (state.hostPlayerId !== playerId) throw new Error('Nur der Host kann die Raumeinstellungen ändern.');
+    if (!MOVE_TIMES.includes(settings.moveTimeSeconds)) throw new Error('Ungültige Zugzeit.');
+    if (typeof settings.automaticSingleMove !== 'boolean' || typeof settings.fairDice !== 'boolean') throw new Error('Ungültige Raumeinstellungen.');
+
+    state.settings = { ...settings };
+    for (const player of state.players) player.ready = false;
+    state.revision += 1;
+    return state;
+  }
+
+  updatePlayer(roomCode: string, playerId: string, name: string, color: PlayerColor): GameState {
+    const state = this.getState(roomCode);
+    if (state.phase !== 'lobby') throw new Error('Das Profil kann nur in der Lobby geändert werden.');
+    if (!COLORS.includes(color)) throw new Error('Ungültige Spielerfarbe.');
+    const player = state.players.find((candidate) => candidate.id === playerId);
+    if (!player) throw new Error('Spieler nicht gefunden.');
+    if (state.players.some((candidate) => candidate.id !== playerId && candidate.color === color)) throw new Error('Diese Farbe ist bereits vergeben.');
+
+    player.color = color;
+    player.name = this.getUniqueName(state, name, color, playerId);
+    player.ready = false;
+    state.revision += 1;
+    return state;
+  }
+
   roll(roomCode: string, playerId: string): GameState {
     const state = this.getState(roomCode);
     if (state.phase !== 'playing') throw new Error('Das Spiel hat noch nicht begonnen.');
@@ -91,9 +125,13 @@ export class RoomManager {
     if (state.turnStage !== 'rolling') throw new Error('Der Würfel wurde bereits geworfen.');
 
     this.clearTurnTimer(roomCode);
-    state.diceResult = this.rollDice?.() ?? this.fairDice.roll(playerId);
+    state.diceResult = this.rollDice?.() ?? (state.settings.fairDice ? this.fairDice.roll(playerId) : randomDice());
     state.movablePieceIds = this.getMovablePieces(state, playerId, state.diceResult).map((piece) => piece.id);
-    if (state.movablePieceIds.length > 0) {
+    if (state.movablePieceIds.length === 1 && state.settings.automaticSingleMove && this.autoMoveDelayMs !== null) {
+      state.turnStage = 'auto-move';
+      state.turnDeadline = null;
+      this.scheduleAutoMove(state, playerId, state.movablePieceIds[0]!);
+    } else if (state.movablePieceIds.length > 0) {
       state.turnStage = 'move';
       this.scheduleMoveDeadline(state);
     } else {
@@ -109,6 +147,11 @@ export class RoomManager {
     const state = this.getState(roomCode);
     if (state.phase !== 'playing' || state.currentPlayerId !== playerId) throw new Error('Du bist nicht am Zug.');
     if (state.turnStage !== 'move' || state.diceResult === null) throw new Error('Würfle zuerst.');
+    return this.performMove(state, playerId, pieceId);
+  }
+
+  private performMove(state: GameState, playerId: string, pieceId: string): GameState {
+    if (state.diceResult === null) throw new Error('Würfelergebnis fehlt.');
     if (!state.movablePieceIds.includes(pieceId)) throw new Error('Diese Figur kann nicht gezogen werden.');
 
     const piece = state.pieces.find((candidate) => candidate.id === pieceId && candidate.playerId === playerId);
@@ -129,7 +172,8 @@ export class RoomManager {
       state.phase = 'finished';
       state.winnerId = playerId;
       state.turnDeadline = null;
-      this.clearTurnTimer(roomCode);
+      state.movablePieceIds = [];
+      this.clearTurnTimer(state.roomCode);
     } else {
       this.advanceTurn(state, state.diceResult === 6);
     }
@@ -185,13 +229,14 @@ export class RoomManager {
       room.state.currentPlayerId = room.state.players[0]?.id ?? null;
       this.beginTurn(room.state);
     }
+    if (room.state.hostPlayerId === playerId) room.state.hostPlayerId = room.state.players[0]?.id ?? null;
     room.state.revision += 1;
     return room.state;
   }
 
   private addPlayer(state: GameState, rawName: string): { playerId: string; state: GameState } {
     const playerId = crypto.randomUUID();
-    const color = COLORS[state.players.length] ?? 'red';
+    const color = COLORS.find((candidate) => !state.players.some((player) => player.color === candidate)) ?? 'red';
     const player: Player = {
       id: playerId,
       name: this.getUniqueName(state, rawName, color),
@@ -260,7 +305,8 @@ export class RoomManager {
 
   private scheduleMoveDeadline(state: GameState) {
     this.clearTurnTimer(state.roomCode);
-    state.turnDeadline = Date.now() + this.turnDurationMs;
+    const turnDurationMs = this.turnDurationMs ?? state.settings.moveTimeSeconds * 1_000;
+    state.turnDeadline = Date.now() + turnDurationMs;
     const room = this.rooms.get(state.roomCode);
     if (!room) return;
     room.turnTimer = setTimeout(() => {
@@ -268,7 +314,17 @@ export class RoomManager {
       this.advanceTurn(state, false);
       state.revision += 1;
       this.onStateChange(state.roomCode, state);
-    }, this.turnDurationMs);
+    }, turnDurationMs);
+  }
+
+  private scheduleAutoMove(state: GameState, playerId: string, pieceId: string) {
+    const room = this.rooms.get(state.roomCode);
+    if (!room || this.autoMoveDelayMs === null) return;
+    room.turnTimer = setTimeout(() => {
+      if (state.phase !== 'playing' || state.turnStage !== 'auto-move' || state.currentPlayerId !== playerId) return;
+      this.performMove(state, playerId, pieceId);
+      this.onStateChange(state.roomCode, state);
+    }, this.autoMoveDelayMs);
   }
 
   private scheduleNoMoveTransition(state: GameState) {
@@ -296,4 +352,10 @@ export class RoomManager {
     const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     return Array.from({ length: 6 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
   }
+}
+
+function randomDice(): number {
+  const values = new Uint32Array(1);
+  crypto.getRandomValues(values);
+  return (values[0]! % 6) + 1;
 }

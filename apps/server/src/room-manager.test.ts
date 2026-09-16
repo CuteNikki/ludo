@@ -7,6 +7,9 @@ function startGame(rolls: number[] = [6, 3]) {
     () => undefined,
     60_000,
     () => rolls[rollIndex++] ?? 1,
+    900,
+    1_800,
+    null,
   );
   const first = manager.createRoom('Ada');
   const second = manager.joinRoom(first.state.roomCode, 'Linus');
@@ -16,6 +19,54 @@ function startGame(rolls: number[] = [6, 3]) {
 }
 
 describe('RoomManager game turns', () => {
+  test('lets players choose unique lobby names and available colors', () => {
+    const manager = new RoomManager();
+    const first = manager.createRoom('Ada');
+    const second = manager.joinRoom(first.state.roomCode, 'Linus');
+    manager.setReady(first.state.roomCode, first.playerId, true);
+
+    const updated = manager.updatePlayer(first.state.roomCode, first.playerId, 'Linus', 'green');
+    expect(updated.players.find((player) => player.id === first.playerId)).toMatchObject({ name: 'Linus 2', color: 'green', ready: false });
+    expect(() => manager.updatePlayer(first.state.roomCode, second.playerId, 'Linus', 'green')).toThrow('bereits vergeben');
+  });
+
+  test('only lets the host change settings in the lobby', () => {
+    const manager = new RoomManager();
+    const host = manager.createRoom('Ada');
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+    manager.setReady(host.state.roomCode, guest.playerId, true);
+
+    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: false };
+    expect(() => manager.setSettings(host.state.roomCode, guest.playerId, settings)).toThrow('Nur der Host');
+    const updated = manager.setSettings(host.state.roomCode, host.playerId, settings);
+    expect(updated.settings).toEqual(settings);
+    expect(updated.players.every((player) => !player.ready)).toBe(true);
+    expect(updated.hostPlayerId).toBe(host.playerId);
+  });
+
+  test('applies the configured move time and locks settings after start', () => {
+    const manager = new RoomManager(
+      () => undefined,
+      undefined,
+      () => 6,
+      60_000,
+      1_800,
+      null,
+    );
+    const host = manager.createRoom('Ada');
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: true };
+    manager.setSettings(host.state.roomCode, host.playerId, settings);
+    manager.setReady(host.state.roomCode, host.playerId, true);
+    manager.setReady(host.state.roomCode, guest.playerId, true);
+
+    const beforeRoll = Date.now();
+    const rolled = manager.roll(host.state.roomCode, host.playerId);
+    expect(rolled.turnDeadline).toBeGreaterThanOrEqual(beforeRoll + 44_900);
+    expect(rolled.turnDeadline).toBeLessThanOrEqual(beforeRoll + 45_100);
+    expect(() => manager.setSettings(host.state.roomCode, host.playerId, settings)).toThrow('nur in der Lobby');
+  });
+
   test('assigns distinct fallback and duplicate names', () => {
     const manager = new RoomManager();
     const first = manager.createRoom('');
@@ -51,6 +102,55 @@ describe('RoomManager game turns', () => {
 
     expect(moved.pieces.find((piece) => piece.id === pieceId)?.position).toBe(3);
     expect(moved.currentPlayerId).toBe(second.playerId);
+  });
+
+  test('automatically performs the only legal move', async () => {
+    let rollIndex = 0;
+    const rolls = [6, 3];
+    let movedPieceId = '';
+    let resolveMove: (() => void) | undefined;
+    const moveCompleted = new Promise<void>((resolve) => {
+      resolveMove = resolve;
+    });
+    const manager = new RoomManager(
+      (_roomCode, state) => {
+        if (state.pieces.find((piece) => piece.id === movedPieceId)?.position === 3) resolveMove?.();
+      },
+      60_000,
+      () => rolls[rollIndex++] ?? 1,
+      60_000,
+      10,
+      5,
+    );
+    const first = manager.createRoom('Ada');
+    const second = manager.joinRoom(first.state.roomCode, 'Linus');
+    manager.setReady(first.state.roomCode, first.playerId, true);
+    manager.setReady(first.state.roomCode, second.playerId, true);
+    const firstRoll = manager.roll(first.state.roomCode, first.playerId);
+    movedPieceId = firstRoll.movablePieceIds[0]!;
+    manager.move(first.state.roomCode, first.playerId, movedPieceId);
+
+    const automaticRoll = manager.roll(first.state.roomCode, first.playerId);
+    expect(automaticRoll.turnStage).toBe('auto-move');
+    expect(automaticRoll.movablePieceIds).toEqual([movedPieceId]);
+    await moveCompleted;
+    expect(first.state.pieces.find((piece) => piece.id === movedPieceId)?.position).toBe(3);
+  });
+
+  test('clears movable pieces after the winning move', () => {
+    const { manager, first } = startGame([6]);
+    const pieces = first.state.pieces.filter((piece) => piece.playerId === first.playerId);
+    pieces[0]!.position = 40;
+    pieces[1]!.position = 41;
+    pieces[2]!.position = 42;
+    pieces[3]!.position = 37;
+    const rolled = manager.roll(first.state.roomCode, first.playerId);
+
+    const finished = manager.move(first.state.roomCode, first.playerId, rolled.movablePieceIds[0]!);
+    expect(finished.phase).toBe('finished');
+    expect(finished.winnerId).toBe(first.playerId);
+    expect(finished.movablePieceIds).toEqual([]);
+    expect(finished.turnDeadline).toBeNull();
   });
 
   test('captures an opponent on the shared track', () => {

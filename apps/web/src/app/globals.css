@@ -20,6 +20,7 @@ body {
   background-color: var(--paper);
   background-image: linear-gradient(rgba(28, 25, 23, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(28, 25, 23, 0.045) 1px, transparent 1px);
   background-size: 24px 24px;
+  min-height: 100vh;
 }
 button,
 input {
@@ -45,8 +46,146 @@ input {
   animation: dice-roll 0.65s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
+@keyframes room-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes board-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes status-swap {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dice-result {
+  0% {
+    opacity: 0;
+    transform: scale(0.72) rotate(-8deg);
+  }
+  65% {
+    transform: scale(1.08) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes piece-ready {
+  0%,
+  100% {
+    outline-color: rgba(251, 191, 36, 0.95);
+    outline-offset: 2px;
+  }
+  50% {
+    outline-color: rgba(251, 191, 36, 0.45);
+    outline-offset: 5px;
+  }
+}
+
+@keyframes piece-transfer {
+  0% {
+    opacity: 0.25;
+    transform: scale(0.55);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes destination-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.room-enter {
+  animation: room-enter 0.4s ease-out both;
+}
+.board-enter {
+  animation: board-enter 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s both;
+}
+.status-swap {
+  animation: status-swap 0.22s ease-out both;
+}
+.dice-result {
+  animation: dice-result 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.piece-position {
+  width: 6.3%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  transition:
+    left 0.13s cubic-bezier(0.22, 0.8, 0.25, 1),
+    top 0.13s cubic-bezier(0.22, 0.8, 0.25, 1);
+  will-change: left, top;
+}
+.piece-position-instant {
+  transition: none;
+}
+.piece-position-instant .piece-token {
+  animation: piece-transfer 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.destination-marker {
+  animation: destination-enter 0.16s ease-out both;
+}
+.movable-piece {
+  outline: 3px solid rgba(251, 191, 36, 0.95);
+  animation: piece-ready 1.15s ease-in-out infinite;
+}
+.turn-panel {
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0) 70%, rgba(28, 25, 23, 0.035));
+}
+.board-cell {
+  transition:
+    filter 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.player-row {
+  position: relative;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .dice-rolling {
+  .dice-rolling,
+  .room-enter,
+  .board-enter,
+  .status-swap,
+  .dice-result,
+  .movable-piece,
+  .piece-position-instant .piece-token,
+  .destination-marker {
     animation: none;
   }
 }

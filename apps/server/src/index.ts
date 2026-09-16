@@ -55,6 +55,10 @@ const server = Bun.serve<SocketData>({
 
         if (event.type === 'player:ready') {
           broadcast(roomCode, { type: 'game:state', payload: rooms.setReady(roomCode, playerId, event.payload.ready) });
+        } else if (event.type === 'player:update') {
+          broadcast(roomCode, { type: 'game:state', payload: rooms.updatePlayer(roomCode, playerId, event.payload.name, event.payload.color) });
+        } else if (event.type === 'room:settings') {
+          broadcast(roomCode, { type: 'game:state', payload: rooms.setSettings(roomCode, playerId, event.payload) });
         } else if (event.type === 'game:move') {
           broadcast(roomCode, { type: 'game:state', payload: rooms.move(roomCode, playerId, event.payload.pieceId) });
         }

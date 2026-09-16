@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import type { GameState, Piece, PlayerColor } from '@ludo/shared';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type Coordinate = readonly [row: number, column: number];
 
@@ -104,11 +104,35 @@ const YARDS: Record<PlayerColor, Coordinate[]> = {
 };
 
 const START_OFFSETS: Record<PlayerColor, number> = { red: 0, blue: 10, green: 20, yellow: 30 };
-const colorStyles: Record<PlayerColor, { base: string; pale: string; start: string; token: string }> = {
-  red: { base: 'bg-red-500', pale: 'bg-red-100', start: 'bg-white ring-4 ring-inset ring-red-500', token: 'bg-red-500 border-red-800' },
-  blue: { base: 'bg-blue-600', pale: 'bg-blue-100', start: 'bg-white ring-4 ring-inset ring-blue-600', token: 'bg-blue-600 border-blue-900' },
-  green: { base: 'bg-emerald-600', pale: 'bg-emerald-100', start: 'bg-white ring-4 ring-inset ring-emerald-600', token: 'bg-emerald-600 border-emerald-900' },
-  yellow: { base: 'bg-amber-400', pale: 'bg-amber-100', start: 'bg-white ring-4 ring-inset ring-amber-400', token: 'bg-amber-400 border-amber-700' },
+const colorStyles: Record<PlayerColor, { base: string; marker: string; pale: string; start: string; token: string }> = {
+  red: {
+    base: 'bg-red-500',
+    marker: 'border-red-500',
+    pale: 'bg-red-100',
+    start: 'bg-white ring-4 ring-inset ring-red-500',
+    token: 'bg-red-500 border-red-800',
+  },
+  blue: {
+    base: 'bg-blue-600',
+    marker: 'border-blue-600',
+    pale: 'bg-blue-100',
+    start: 'bg-white ring-4 ring-inset ring-blue-600',
+    token: 'bg-blue-600 border-blue-900',
+  },
+  green: {
+    base: 'bg-emerald-600',
+    marker: 'border-emerald-600',
+    pale: 'bg-emerald-100',
+    start: 'bg-white ring-4 ring-inset ring-emerald-600',
+    token: 'bg-emerald-600 border-emerald-900',
+  },
+  yellow: {
+    base: 'bg-amber-400',
+    marker: 'border-amber-500',
+    pale: 'bg-amber-100',
+    start: 'bg-white ring-4 ring-inset ring-amber-400',
+    token: 'bg-amber-400 border-amber-700',
+  },
 };
 
 interface GameBoardProps {
@@ -119,7 +143,11 @@ interface GameBoardProps {
 
 export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
   const [preview, setPreview] = useState<{ pieceId: string; revision: number } | null>(null);
+  const [visualCoordinates, setVisualCoordinates] = useState<Record<string, Coordinate>>(() => getCurrentCoordinates(state));
+  const [transferringPieceIds, setTransferringPieceIds] = useState<Set<string>>(() => new Set());
+  const previousPositions = useRef(new Map(state.pieces.map((piece) => [piece.id, piece.position])));
   const piecesByCell = new Map<string, Piece>();
+  const positionedPieces: Array<{ piece: Piece; owner: GameState['players'][number]; coordinate: Coordinate; movable: boolean }> = [];
   const previewPiece =
     preview?.revision === state.revision && state.movablePieceIds.includes(preview.pieceId)
       ? state.pieces.find((piece) => piece.id === preview.pieceId)
@@ -130,22 +158,80 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
       ? getPieceCoordinate({ ...previewPiece, position: previewPiece.position === -1 ? 0 : previewPiece.position + state.diceResult }, previewOwner.color, 0)
       : null;
 
+  useEffect(() => {
+    let cancelled = false;
+    const previous = previousPositions.current;
+    previousPositions.current = new Map(state.pieces.map((piece) => [piece.id, piece.position]));
+
+    async function animateMoves() {
+      const immediateCoordinates: Record<string, Coordinate> = {};
+      const transfers = new Set<string>();
+      const movingPieces: Array<{ piece: Piece; color: PlayerColor; positions: number[] }> = [];
+
+      for (const player of state.players) {
+        const pieces = state.pieces.filter((piece) => piece.playerId === player.id);
+        pieces.forEach((piece, yardIndex) => {
+          const previousPosition = previous.get(piece.id);
+          if (previousPosition !== undefined && previousPosition >= 0 && piece.position > previousPosition) {
+            movingPieces.push({ piece, color: player.color, positions: range(previousPosition + 1, piece.position) });
+          } else {
+            const coordinate = getPieceCoordinate(piece, player.color, yardIndex);
+            if (coordinate) immediateCoordinates[piece.id] = coordinate;
+            if (previousPosition !== undefined && previousPosition < 0 !== piece.position < 0) transfers.add(piece.id);
+          }
+        });
+      }
+
+      if (Object.keys(immediateCoordinates).length > 0) {
+        if (transfers.size > 0) setTransferringPieceIds(transfers);
+        setVisualCoordinates((current) => ({ ...current, ...immediateCoordinates }));
+        if (transfers.size > 0) {
+          window.setTimeout(() => {
+            if (!cancelled) setTransferringPieceIds(new Set());
+          }, 260);
+        }
+      }
+
+      await Promise.all(
+        movingPieces.map(async ({ piece, color, positions }) => {
+          for (const position of positions) {
+            if (cancelled) return;
+            const coordinate = getPieceCoordinate({ ...piece, position }, color, 0);
+            if (coordinate) setVisualCoordinates((current) => ({ ...current, [piece.id]: coordinate }));
+            await wait(135);
+          }
+        }),
+      );
+    }
+
+    void animateMoves();
+    return () => {
+      cancelled = true;
+    };
+  }, [state.pieces, state.players, state.revision]);
+
   for (const player of state.players) {
     const pieces = state.pieces.filter((piece) => piece.playerId === player.id);
     pieces.forEach((piece, index) => {
       const coordinate = getPieceCoordinate(piece, player.color, index);
-      if (coordinate) piecesByCell.set(key(coordinate), piece);
+      if (coordinate) {
+        piecesByCell.set(key(coordinate), piece);
+        positionedPieces.push({
+          piece,
+          owner: player,
+          coordinate: visualCoordinates[piece.id] ?? coordinate,
+          movable: state.phase === 'playing' && state.turnStage === 'move' && state.movablePieceIds.includes(piece.id) && piece.playerId === playerId,
+        });
+      }
     });
   }
 
   return (
-    <div className='aspect-square w-full max-w-170 border-2 border-stone-900 bg-stone-900 p-0.5 shadow-[8px_8px_0_#1c1917]'>
-      <div className='grid h-full w-full grid-cols-11 grid-rows-11 gap-0.5 bg-stone-900' aria-label='Ludo-Spielfeld'>
+    <div className='board-enter aspect-square w-full max-w-170 border-2 border-stone-900 bg-stone-900 p-0.5 shadow-[8px_8px_0_#1c1917]'>
+      <div className='relative grid h-full w-full grid-cols-11 grid-rows-11 gap-0.5 bg-stone-900' aria-label='Ludo-Spielfeld'>
         {Array.from({ length: 121 }, (_, index) => {
           const coordinate: Coordinate = [Math.floor(index / 11), index % 11];
           const piece = piecesByCell.get(key(coordinate));
-          const owner = piece ? state.players.find((player) => player.id === piece.playerId) : undefined;
-          const movable = piece ? state.movablePieceIds.includes(piece.id) && piece.playerId === playerId : false;
           const cellColor = getCellColor(coordinate);
           const isStart = cellColor !== null && isStartCoordinate(coordinate);
           const isPreviewTarget = previewCoordinate && key(previewCoordinate) === key(coordinate);
@@ -156,17 +242,36 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
               key={key(coordinate)}
               data-cell-role={isStart ? 'start' : cellColor ? 'goal' : undefined}
               className={cn(
-                'relative grid min-h-0 min-w-0 place-items-center',
+                'board-cell relative grid min-h-0 min-w-0 place-items-center',
                 getCellStyle(coordinate, cellColor, isStart),
-                isPreviewTarget && 'z-10 ring-4 ring-inset ring-amber-300',
+                isPreviewTarget && 'z-10 brightness-95',
               )}
             >
               {isPreviewTarget && !piece && previewOwner && (
                 <span
-                  className={cn('pointer-events-none h-[62%] w-[62%] rounded-full border-2 border-dashed opacity-55', colorStyles[previewOwner.color].token)}
-                />
+                  className={cn(
+                    'destination-marker pointer-events-none grid h-[52%] w-[52%] place-items-center rounded-full border-[3px] bg-white/90 shadow-sm',
+                    colorStyles[previewOwner.color].marker,
+                  )}
+                >
+                  <span className={cn('h-1.5 w-1.5 rounded-full', colorStyles[previewOwner.color].base)} />
+                </span>
               )}
-              {piece && owner && (
+            </div>
+          );
+        })}
+        <div className='pointer-events-none absolute inset-0 z-20' aria-hidden='false'>
+          {positionedPieces.map(({ piece, owner, coordinate, movable }) => {
+            const isCaptureTarget = previewCoordinate && key(previewCoordinate) === key(coordinate) && previewPiece?.playerId !== piece.playerId;
+            return (
+              <div
+                key={piece.id}
+                className={cn(
+                  'piece-position pointer-events-none absolute grid place-items-center',
+                  transferringPieceIds.has(piece.id) && 'piece-position-instant',
+                )}
+                style={{ left: `${((coordinate[1] + 0.5) / 11) * 100}%`, top: `${((coordinate[0] + 0.5) / 11) * 100}%` }}
+              >
                 <button
                   type='button'
                   disabled={!movable}
@@ -180,26 +285,26 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
                   onBlur={() => setPreview(null)}
                   aria-label={`Figur von ${owner.name}${movable ? ' bewegen' : ''}`}
                   className={cn(
-                    'h-[72%] w-[72%] rounded-full border-2 shadow-sm transition-transform',
+                    'piece-token pointer-events-auto h-full w-full rounded-full border-2 shadow-[inset_0_2px_0_rgba(255,255,255,.35),0_2px_3px_rgba(28,25,23,.3)] transition-[transform,box-shadow] duration-200',
                     colorStyles[owner.color].token,
-                    movable && 'z-10 cursor-pointer ring-4 ring-white ring-offset-2 ring-offset-stone-950 hover:scale-110 animate-pulse',
+                    movable && 'movable-piece cursor-pointer hover:scale-110',
                     isCaptureTarget && 'scale-90 ring-4 ring-amber-300',
                   )}
                 >
                   <span className='sr-only'>{owner.name}</span>
                 </button>
-              )}
-              {isCaptureTarget && (
-                <span
-                  className='pointer-events-none absolute -right-1 -top-1 z-30 grid h-5 w-5 place-items-center rounded-full bg-stone-950 text-xs font-black text-white'
-                  aria-label='Figur wird geschlagen'
-                >
-                  ×
-                </span>
-              )}
-            </div>
-          );
-        })}
+                {isCaptureTarget && (
+                  <span
+                    className='pointer-events-none absolute -right-1.5 -top-1.5 z-30 grid h-4 w-4 place-items-center rounded-full border border-white bg-stone-950 text-[10px] font-black leading-none text-white shadow-sm'
+                    aria-label='Figur wird geschlagen'
+                  >
+                    ×
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -246,4 +351,25 @@ function getYardColor(row: number, column: number): PlayerColor | null {
 
 function key(coordinate: Coordinate): string {
   return `${coordinate[0]}-${coordinate[1]}`;
+}
+
+function getCurrentCoordinates(state: GameState): Record<string, Coordinate> {
+  const coordinates: Record<string, Coordinate> = {};
+  for (const player of state.players) {
+    state.pieces
+      .filter((piece) => piece.playerId === player.id)
+      .forEach((piece, yardIndex) => {
+        const coordinate = getPieceCoordinate(piece, player.color, yardIndex);
+        if (coordinate) coordinates[piece.id] = coordinate;
+      });
+  }
+  return coordinates;
+}
+
+function range(start: number, end: number): number[] {
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+}
+
+function wait(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }

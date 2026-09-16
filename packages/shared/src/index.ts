@@ -14,10 +14,20 @@ export interface Piece {
   position: number;
 }
 
+export type MoveTimeSeconds = 15 | 30 | 45 | 60;
+
+export interface RoomSettings {
+  moveTimeSeconds: MoveTimeSeconds;
+  automaticSingleMove: boolean;
+  fairDice: boolean;
+}
+
 export interface GameState {
   roomCode: string;
+  hostPlayerId: string | null;
+  settings: RoomSettings;
   phase: 'lobby' | 'playing' | 'finished';
-  turnStage: 'rolling' | 'move' | 'no-move';
+  turnStage: 'rolling' | 'move' | 'auto-move' | 'no-move';
   turnDeadline: number | null;
   players: Player[];
   pieces: Piece[];
@@ -31,6 +41,8 @@ export interface GameState {
 export type ClientEvent =
   | { type: 'room:create'; payload: { playerName: string } }
   | { type: 'room:join'; payload: { roomCode: string; playerName: string; playerId?: string } }
+  | { type: 'room:settings'; payload: RoomSettings }
+  | { type: 'player:update'; payload: { name: string; color: PlayerColor } }
   | { type: 'player:ready'; payload: { ready: boolean } }
   | { type: 'game:move'; payload: { pieceId: string } };
 
