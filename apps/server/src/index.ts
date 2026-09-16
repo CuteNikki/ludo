@@ -59,6 +59,16 @@ const server = Bun.serve<SocketData>({
           broadcast(roomCode, { type: 'game:state', payload: rooms.updatePlayer(roomCode, playerId, event.payload.name, event.payload.color) });
         } else if (event.type === 'room:settings') {
           broadcast(roomCode, { type: 'game:state', payload: rooms.setSettings(roomCode, playerId, event.payload) });
+        } else if (event.type === 'room:kick') {
+          broadcast(roomCode, { type: 'game:state', payload: rooms.kickPlayer(roomCode, playerId, event.payload.playerId) });
+        } else if (event.type === 'room:leave') {
+          const state = rooms.leaveRoom(roomCode, playerId);
+          if (state) broadcast(roomCode, { type: 'game:state', payload: state });
+          socket.unsubscribe(roomCode);
+          delete socket.data.roomCode;
+          delete socket.data.playerId;
+        } else if (event.type === 'game:rematch') {
+          broadcast(roomCode, { type: 'game:state', payload: rooms.voteRematch(roomCode, playerId) });
         } else if (event.type === 'game:move') {
           broadcast(roomCode, { type: 'game:state', payload: rooms.move(roomCode, playerId, event.payload.pieceId) });
         }

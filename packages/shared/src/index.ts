@@ -35,6 +35,8 @@ export interface GameState {
   diceResult: number | null;
   movablePieceIds: string[];
   winnerId: string | null;
+  rematchDeadline: number | null;
+  rematchPlayerIds: string[];
   revision: number;
 }
 
@@ -42,8 +44,11 @@ export type ClientEvent =
   | { type: 'room:create'; payload: { playerName: string } }
   | { type: 'room:join'; payload: { roomCode: string; playerName: string; playerId?: string } }
   | { type: 'room:settings'; payload: RoomSettings }
+  | { type: 'room:leave'; payload: Record<string, never> }
+  | { type: 'room:kick'; payload: { playerId: string } }
   | { type: 'player:update'; payload: { name: string; color: PlayerColor } }
   | { type: 'player:ready'; payload: { ready: boolean } }
+  | { type: 'game:rematch'; payload: Record<string, never> }
   | { type: 'game:move'; payload: { pieceId: string } };
 
 export type ServerEvent =

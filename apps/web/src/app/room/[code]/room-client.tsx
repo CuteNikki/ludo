@@ -4,8 +4,23 @@ import { GameBoard } from '@/components/game-board';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { ClientEvent, GameState, MoveTimeSeconds, Player, PlayerColor, RoomSettings, ServerEvent } from '@ludo/shared';
-import { Check, CheckCheck, Clock3, Copy, Dices, Info, Palette, Settings2, Sparkles, Trophy, UserRound, Users } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import {
+  Check,
+  CheckCheck,
+  Clock3,
+  Copy,
+  Dices,
+  Info,
+  LogOut,
+  Palette,
+  RotateCcw,
+  Settings2,
+  Sparkles,
+  Trophy,
+  UserMinus,
+  UserRound,
+  Users,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 const colorClasses: Record<PlayerColor, string> = {
@@ -30,7 +45,6 @@ const activePlayerClasses: Record<PlayerColor, string> = {
 };
 
 export function RoomClient({ requestedCode }: { requestedCode: string }) {
-  const searchParams = useSearchParams();
   const socketRef = useRef<WebSocket | null>(null);
   const [state, setState] = useState<GameState | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
@@ -38,11 +52,11 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   const [notice, setNotice] = useState('');
   const [now, setNow] = useState(Date.now());
   const [copied, setCopied] = useState(false);
-  const playerName = searchParams.get('name')?.trim() ?? '';
 
   useEffect(() => {
     let active = true;
     let joined = false;
+    const playerName = sessionStorage.getItem('ludo-player-name')?.trim() ?? '';
     const socket = new WebSocket(process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:3001/ws');
     socketRef.current = socket;
     socket.addEventListener('open', () => {
@@ -69,10 +83,20 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
         setPlayerId(event.payload.playerId);
         setState(event.payload.state);
         sessionStorage.setItem(`ludo-player:${event.payload.state.roomCode}`, event.payload.playerId);
+        const joinedPlayer = event.payload.state.players.find((player) => player.id === event.payload.playerId);
+        if (joinedPlayer) sessionStorage.setItem('ludo-player-name', joinedPlayer.name);
         if (requestedCode === 'NEW') {
-          window.history.replaceState(null, '', `/room/${event.payload.state.roomCode}?name=${encodeURIComponent(playerName)}`);
+          window.history.replaceState(null, '', `/room/${event.payload.state.roomCode}`);
         }
       } else if (event.type === 'game:state') {
+        const storedPlayerId = sessionStorage.getItem(`ludo-player:${event.payload.roomCode}`);
+        if (storedPlayerId && !event.payload.players.some((player) => player.id === storedPlayerId)) {
+          sessionStorage.removeItem(`ludo-player:${event.payload.roomCode}`);
+          window.location.assign('/?notice=removed');
+          return;
+        }
+        const currentPlayer = event.payload.players.find((player) => player.id === storedPlayerId);
+        if (currentPlayer) sessionStorage.setItem('ludo-player-name', currentPlayer.name);
         setState(event.payload);
       } else if (event.type === 'room:error') {
         if (joined) setNotice(event.payload.message);
@@ -86,7 +110,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
       active = false;
       socket.close();
     };
-  }, [playerName, requestedCode]);
+  }, [requestedCode]);
 
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 250);
@@ -106,8 +130,11 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   const isMyTurn = state.currentPlayerId === playerId;
   const isHost = state.hostPlayerId === playerId;
   const settings = state.settings;
+  const roomCode = state.roomCode;
   const secondsLeft = state.turnDeadline === null ? 0 : Math.min(settings.moveTimeSeconds, Math.max(0, Math.ceil((state.turnDeadline - now) / 1000)));
-  const shareUrl = typeof window === 'undefined' ? '' : `${window.location.origin}/room/${state.roomCode}`;
+  const rematchSecondsLeft = state.rematchDeadline === null ? 10 : Math.max(0, Math.ceil((state.rematchDeadline - now) / 1000));
+  const wantsRematch = state.rematchPlayerIds.includes(playerId);
+  const shareUrl = typeof window === 'undefined' ? '' : `${window.location.origin}/room/${roomCode}`;
 
   async function copyRoomLink() {
     await navigator.clipboard.writeText(shareUrl);
@@ -117,6 +144,12 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
 
   function updateSettings(update: Partial<RoomSettings>) {
     emit({ type: 'room:settings', payload: { ...settings, ...update } });
+  }
+
+  function leaveRoom() {
+    sessionStorage.removeItem(`ludo-player:${roomCode}`);
+    emit({ type: 'room:leave', payload: {} });
+    window.setTimeout(() => window.location.assign('/'), 80);
   }
 
   return (
@@ -141,10 +174,24 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
             <section className='turn-panel mb-6 flex h-56 flex-col border-2 border-stone-900 bg-white p-5 shadow-[5px_5px_0_#1c1917]'>
               {state.phase === 'finished' ? (
                 <div className='grid flex-1 place-items-center text-center'>
-                  <div>
-                    <Trophy className='mx-auto mb-2 text-amber-500' size={32} />
+                  <div className='w-full'>
+                    <Trophy className='mx-auto mb-1 text-amber-500' size={27} />
                     <p className='text-xs font-bold uppercase text-stone-500'>Gewonnen</p>
                     <p className='mt-1 text-2xl font-black'>{winner?.name}</p>
+                    <p className='mt-1 h-5 text-xs font-bold text-stone-500' aria-live='polite'>
+                      {state.rematchDeadline === null
+                        ? 'Noch eine Runde?'
+                        : `${state.rematchPlayerIds.length}/${state.players.length} dafür · ${rematchSecondsLeft}s`}
+                    </p>
+                    <div className='mt-3 grid grid-cols-2 gap-2'>
+                      <Button className='h-10 px-3 text-xs' disabled={wantsRematch} onClick={() => emit({ type: 'game:rematch', payload: {} })}>
+                        {wantsRematch ? <Check size={16} /> : <RotateCcw size={16} />}
+                        {wantsRematch ? 'Zugesagt' : 'Nochmal'}
+                      </Button>
+                      <Button className='h-10 px-3 text-xs' variant='outline' onClick={leaveRoom}>
+                        <LogOut size={16} /> Hauptmenü
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -182,7 +229,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                         {state.turnStage === 'move' && (
                           <p className='mt-2 text-sm font-bold'>{isMyTurn ? 'Wähle eine Figur, um sie zu bewegen' : 'Wählt eine Figur'}</p>
                         )}
-                        {state.turnStage === 'auto-move' && <p className='mt-2 text-sm font-bold'>Einziger Zug wird automatisch ausgeführt</p>}
+                        {state.turnStage === 'auto-move' && <p className='mt-2 text-sm font-bold'>Figur wird automatisch bewegt</p>}
                         {state.turnStage === 'no-move' && <p className='mt-2 text-sm font-bold text-red-700'>Kein gültiger Zug</p>}
                       </div>
                     )}
@@ -221,6 +268,17 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                   <span className='text-[10px] font-bold uppercase text-stone-500'>Am Zug</span>
                 )}
                 {player.ready && <Check size={18} className='text-emerald-700' aria-label='Bereit' />}
+                {state.phase === 'lobby' && isHost && player.id !== playerId && (
+                  <button
+                    type='button'
+                    onClick={() => emit({ type: 'room:kick', payload: { playerId: player.id } })}
+                    aria-label={`${player.name} entfernen`}
+                    title={`${player.name} entfernen`}
+                    className='grid h-8 w-8 shrink-0 place-items-center text-stone-500 transition-colors hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-stone-950'
+                  >
+                    <UserMinus size={17} />
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -371,8 +429,8 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
 
         <SettingToggle
           icon={<Sparkles size={17} />}
-          label='Einzelzug automatisch'
-          description='Kann nur eine Figur ziehen, führt der Server den Zug nach einer kurzen Anzeige automatisch aus.'
+          label='Automatische Züge'
+          description='Wenn es keinen anderen möglichen Zug gibt, wird die Figur automatisch bewegt.'
           checked={settings.automaticSingleMove}
           disabled={!isHost}
           onChange={(checked) => onChange({ automaticSingleMove: checked })}
@@ -380,7 +438,7 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
         <SettingToggle
           icon={<Dices size={17} />}
           label='Fairer Würfel'
-          description='Jeder Spieler würfelt innerhalb von sechs persönlichen Würfen jede Augenzahl genau einmal – in zufälliger Reihenfolge.'
+          description='Alle Zahlen werden regelmäßig gewürfelt, damit niemand lange auf eine Sechs warten muss.'
           checked={settings.fairDice}
           disabled={!isHost}
           onChange={(checked) => onChange({ fairDice: checked })}

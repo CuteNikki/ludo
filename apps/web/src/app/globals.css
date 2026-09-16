@@ -131,6 +131,17 @@ input {
   }
 }
 
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .room-enter {
   animation: room-enter 0.4s ease-out both;
 }
@@ -161,6 +172,9 @@ input {
 .destination-marker {
   animation: destination-enter 0.16s ease-out both;
 }
+.toast-enter {
+  animation: toast-enter 0.25s ease-out both;
+}
 .movable-piece {
   outline: 3px solid rgba(251, 191, 36, 0.95);
   animation: piece-ready 1.15s ease-in-out infinite;
@@ -185,7 +199,8 @@ input {
   .dice-result,
   .movable-piece,
   .piece-position-instant .piece-token,
-  .destination-marker {
+  .destination-marker,
+  .toast-enter {
     animation: none;
   }
 }

@@ -1,22 +1,53 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Plus } from 'lucide-react';
+import { ArrowRight, CircleAlert, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function HomePage() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
+  const [wasRemoved, setWasRemoved] = useState(false);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('notice') === 'removed') {
+      setWasRemoved(true);
+      url.searchParams.delete('notice');
+      window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+    setName(sessionStorage.getItem('ludo-player-name') ?? '');
+  }, []);
 
   function enter(path: string) {
-    const playerName = name.trim();
-    router.push(`${path}?name=${encodeURIComponent(playerName)}`);
+    sessionStorage.setItem('ludo-player-name', name.trim());
+    router.push(path);
   }
 
   return (
     <main className='mx-auto flex min-h-screen max-w-6xl items-center px-6 py-12'>
+      {wasRemoved && (
+        <div
+          role='alert'
+          className='toast-enter fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 border-2 border-stone-900 bg-white p-4 pr-3 shadow-[5px_5px_0_#1c1917] sm:right-6 sm:top-6'
+        >
+          <CircleAlert className='mt-0.5 shrink-0 text-red-600' size={19} />
+          <div>
+            <p className='text-sm font-black'>Aus dem Raum entfernt</p>
+            <p className='mt-0.5 text-xs text-stone-600'>Der Host hat dich aus dem Raum entfernt.</p>
+          </div>
+          <button
+            type='button'
+            onClick={() => setWasRemoved(false)}
+            aria-label='Meldung schließen'
+            className='grid h-7 w-7 shrink-0 place-items-center text-stone-500 hover:bg-stone-100 hover:text-stone-950 focus-visible:outline-2 focus-visible:outline-stone-950'
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
       <div className='grid w-full gap-12 lg:grid-cols-[1.15fr_.85fr] lg:items-center'>
         <section>
           <p className='mb-4 text-sm font-bold uppercase text-red-700'>Ludo Live</p>

@@ -2,7 +2,6 @@ import type { GameState, MoveTimeSeconds, Player, PlayerColor, RoomSettings } fr
 import { FairDice } from './fair-dice';
 
 const COLORS: PlayerColor[] = ['red', 'blue', 'green', 'yellow'];
-const COLOR_NAMES: Record<PlayerColor, string> = { red: 'Rot', blue: 'Blau', green: 'Grün', yellow: 'Gelb' };
 const MOVE_TIMES: MoveTimeSeconds[] = [15, 30, 45, 60];
 const DEFAULT_SETTINGS: RoomSettings = { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true };
 
@@ -26,6 +25,7 @@ export class RoomManager {
     private readonly rollAnimationMs = 900,
     private readonly noMoveDelayMs = 1_800,
     private readonly autoMoveDelayMs: number | null = 1_300,
+    private readonly rematchDurationMs = 10_000,
   ) {}
 
   createRoom(playerName: string): { playerId: string; state: GameState } {
@@ -45,6 +45,8 @@ export class RoomManager {
       diceResult: null,
       movablePieceIds: [],
       winnerId: null,
+      rematchDeadline: null,
+      rematchPlayerIds: [],
       revision: 0,
     };
     this.rooms.set(roomCode, { state });
@@ -112,8 +114,36 @@ export class RoomManager {
     if (state.players.some((candidate) => candidate.id !== playerId && candidate.color === color)) throw new Error('Diese Farbe ist bereits vergeben.');
 
     player.color = color;
-    player.name = this.getUniqueName(state, name, color, playerId);
+    player.name = this.getUniqueName(state, name, playerId);
     player.ready = false;
+    state.revision += 1;
+    return state;
+  }
+
+  kickPlayer(roomCode: string, hostPlayerId: string, targetPlayerId: string): GameState {
+    const state = this.getState(roomCode);
+    if (state.phase !== 'lobby') throw new Error('Spieler können nur in der Lobby entfernt werden.');
+    if (state.hostPlayerId !== hostPlayerId) throw new Error('Nur der Host kann Spieler entfernen.');
+    if (targetPlayerId === hostPlayerId) throw new Error('Der Host kann sich nicht selbst entfernen.');
+    if (!state.players.some((player) => player.id === targetPlayerId)) throw new Error('Spieler nicht gefunden.');
+    return this.removePlayer(roomCode, targetPlayerId) ?? state;
+  }
+
+  leaveRoom(roomCode: string, playerId: string): GameState | null {
+    return this.removePlayer(roomCode, playerId);
+  }
+
+  voteRematch(roomCode: string, playerId: string): GameState {
+    const state = this.getState(roomCode);
+    if (state.phase !== 'finished') throw new Error('Die Abstimmung ist noch nicht verfügbar.');
+    if (!state.players.some((player) => player.id === playerId)) throw new Error('Spieler nicht gefunden.');
+    if (!state.rematchPlayerIds.includes(playerId)) state.rematchPlayerIds.push(playerId);
+
+    if (state.rematchDeadline === null) {
+      state.rematchDeadline = Date.now() + this.rematchDurationMs;
+      this.scheduleRematchResolution(state);
+    }
+    if (state.rematchPlayerIds.length === state.players.length) this.resolveRematch(state);
     state.revision += 1;
     return state;
   }
@@ -173,6 +203,8 @@ export class RoomManager {
       state.winnerId = playerId;
       state.turnDeadline = null;
       state.movablePieceIds = [];
+      state.rematchDeadline = null;
+      state.rematchPlayerIds = [];
       this.clearTurnTimer(state.roomCode);
     } else {
       this.advanceTurn(state, state.diceResult === 6);
@@ -212,9 +244,11 @@ export class RoomManager {
 
     room.state.players = room.state.players.filter((player) => player.id !== playerId);
     room.state.pieces = room.state.pieces.filter((piece) => piece.playerId !== playerId);
+    room.state.rematchPlayerIds = room.state.rematchPlayerIds.filter((candidate) => candidate !== playerId);
     this.fairDice.removePlayer(playerId);
     if (room.state.players.length === 0) {
       this.clearTurnTimer(roomCode);
+      room.state.hostPlayerId = null;
       const cleanupTimer = setTimeout(
         () => {
           this.rooms.delete(roomCode);
@@ -239,26 +273,33 @@ export class RoomManager {
     const color = COLORS.find((candidate) => !state.players.some((player) => player.color === candidate)) ?? 'red';
     const player: Player = {
       id: playerId,
-      name: this.getUniqueName(state, rawName, color),
+      name: this.getUniqueName(state, rawName),
       color,
       connected: true,
       ready: false,
     };
     state.players.push(player);
+    if (state.hostPlayerId === null) state.hostPlayerId = playerId;
     state.pieces.push(...Array.from({ length: 4 }, (_, index) => ({ id: `${playerId}-${index}`, playerId, position: -1 })));
     state.revision += 1;
     return { playerId, state };
   }
 
-  private getUniqueName(state: GameState, rawName: string, color: PlayerColor, currentPlayerId?: string): string {
+  private getUniqueName(state: GameState, rawName: string, currentPlayerId?: string): string {
     const requestedName = rawName.trim().slice(0, 24);
-    const baseName = requestedName && requestedName.toLocaleLowerCase('de-DE') !== 'gast' ? requestedName : `Gast ${COLOR_NAMES[color]}`;
     const usedNames = new Set(state.players.filter((player) => player.id !== currentPlayerId).map((player) => player.name.toLocaleLowerCase('de-DE')));
+    const baseName = requestedName && requestedName.toLocaleLowerCase('de-DE') !== 'gast' ? requestedName : this.getAvailableGuestName(usedNames);
     if (!usedNames.has(baseName.toLocaleLowerCase('de-DE'))) return baseName;
 
     let suffix = 2;
     while (usedNames.has(`${baseName} ${suffix}`.toLocaleLowerCase('de-DE'))) suffix += 1;
     return `${baseName} ${suffix}`;
+  }
+
+  private getAvailableGuestName(usedNames: Set<string>): string {
+    let number = 1;
+    while (usedNames.has(`gast ${number}`)) number += 1;
+    return `Gast ${number}`;
   }
 
   private getState(roomCode: string): GameState {
@@ -336,6 +377,39 @@ export class RoomManager {
       state.revision += 1;
       this.onStateChange(state.roomCode, state);
     }, this.noMoveDelayMs);
+  }
+
+  private scheduleRematchResolution(state: GameState) {
+    this.clearTurnTimer(state.roomCode);
+    const room = this.rooms.get(state.roomCode);
+    if (!room) return;
+    room.turnTimer = setTimeout(() => {
+      if (state.phase !== 'finished' || state.rematchDeadline === null) return;
+      this.resolveRematch(state);
+      state.revision += 1;
+      this.onStateChange(state.roomCode, state);
+    }, this.rematchDurationMs);
+  }
+
+  private resolveRematch(state: GameState) {
+    this.clearTurnTimer(state.roomCode);
+    const accepted = new Set(state.rematchPlayerIds);
+    const removedPlayerIds = state.players.filter((player) => !accepted.has(player.id)).map((player) => player.id);
+    state.players = state.players.filter((player) => accepted.has(player.id));
+    state.pieces = state.pieces.filter((piece) => accepted.has(piece.playerId));
+    for (const playerId of removedPlayerIds) this.fairDice.removePlayer(playerId);
+    if (!state.players.some((player) => player.id === state.hostPlayerId)) state.hostPlayerId = state.players[0]?.id ?? null;
+    for (const player of state.players) player.ready = false;
+    for (const piece of state.pieces) piece.position = -1;
+    state.phase = 'lobby';
+    state.turnStage = 'rolling';
+    state.turnDeadline = null;
+    state.currentPlayerId = null;
+    state.diceResult = null;
+    state.movablePieceIds = [];
+    state.winnerId = null;
+    state.rematchDeadline = null;
+    state.rematchPlayerIds = [];
   }
 
   private clearTurnTimer(roomCode: string) {
