@@ -1,0 +1,16 @@
+{
+  "name": "ludo-realtime",
+  "private": true,
+  "packageManager": "bun@1.4.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun --filter '*' dev",
+    "dev:web": "bun --filter @ludo/web dev",
+    "dev:server": "bun --filter @ludo/server dev",
+    "build": "bun --filter '*' build",
+    "typecheck": "bun --filter '*' typecheck"
+  }
+}
