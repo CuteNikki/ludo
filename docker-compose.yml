@@ -9,7 +9,7 @@ services:
     labels:
       homepage.group: 'Infrastructure'
       homepage.name: 'Ludo Backend'
-      homepage.icon: 'si-gamepad'
+      homepage.icon: 'mdi-joystick'
       homepage.href: 'https://ludo.niso.moe'
 
   web:
@@ -26,7 +26,7 @@ services:
     labels:
       homepage.group: 'Infrastructure'
       homepage.name: 'Ludo Frontend'
-      homepage.icon: 'si-joystick'
+      homepage.icon: 'mdi-controller'
       homepage.href: 'https://ludo.niso.moe'
 
 networks:
