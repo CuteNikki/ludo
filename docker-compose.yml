@@ -3,9 +3,14 @@ services:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
-    ports:
-      - '127.0.0.1:3001:3001'
     restart: unless-stopped
+    networks:
+      - arr-network
+    labels:
+      homepage.group: 'Game Servers'
+      homepage.name: 'Ludo Backend'
+      homepage.icon: 'si-nintendo'
+      homepage.href: 'https://ludo.niso.moe'
 
   web:
     build:
@@ -13,8 +18,18 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         - NEXT_PUBLIC_WS_URL=wss://ludo.niso.moe/ws
-    ports:
-      - '127.0.0.1:3002:3000'
     restart: unless-stopped
     depends_on:
       - server
+    networks:
+      - arr-network
+    labels:
+      homepage.group: 'Game Servers'
+      homepage.name: 'Ludo Frontend'
+      homepage.icon: 'si-nintendo'
+      homepage.href: 'https://ludo.niso.moe'
+
+networks:
+  arr-network:
+    external: true
+    name: arr-stack_default
