@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
+    ports:
+      - '127.0.0.1:3001:3001'
     restart: unless-stopped
 
   web:
@@ -11,24 +13,8 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         - NEXT_PUBLIC_WS_URL=wss://ludo.niso.moe/ws
-    restart: unless-stopped
-    depends_on:
-      - server
-
-  caddy:
-    image: caddy:latest
-    restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - '127.0.0.1:3002:3000'
+    restart: unless-stopped
     depends_on:
-      - web
       - server
-
-volumes:
-  caddy_data:
-  caddy_config:
