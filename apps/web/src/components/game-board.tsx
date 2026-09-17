@@ -243,7 +243,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
 
   return (
     <div className='board-enter aspect-square h-fit w-full max-w-170 border-2 border-stone-900 bg-stone-900 p-0.5 shadow-[8px_8px_0_#1c1917]'>
-      <div className='relative grid h-full w-full grid-cols-11 grid-rows-11 gap-0.5 bg-stone-900' aria-label='Ludo-Spielfeld'>
+      <div className='relative grid h-full w-full grid-cols-11 grid-rows-11 gap-0.5 bg-stone-900' aria-label='Ludo game board'>
         {Array.from({ length: 121 }, (_, index) => {
           const coordinate: Coordinate = [Math.floor(index / 11), index % 11];
           const piece = piecesByCell.get(key(coordinate));
@@ -291,7 +291,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
               <div
                 key={piece.id}
                 className={cn(
-                  'piece-position pointer-events-none absolute grid place-items-center',
+                  'piece-position pointer-events-none absolute grid h-[9.09%] w-[9.09%] place-items-center',
                   transferringPieceIds.has(piece.id) && 'piece-position-instant',
                   capture && 'piece-capture-flight',
                 )}

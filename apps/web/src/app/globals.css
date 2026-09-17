@@ -9,8 +9,8 @@
 }
 
 .dark {
-  --background: #1c1917;
-  --foreground: #f4f0e7;
+  --background: #292524;
+  --foreground: #fafaf9;
 }
 
 @theme inline {
