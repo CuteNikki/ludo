@@ -1,7 +1,6 @@
 'use client';
 
 import { GameBoard } from '@/components/game-board';
-import { LanguageToggle } from '@/components/language-toggle';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -182,7 +181,6 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
           </div>
         </div>
         <div className='flex items-center gap-3'>
-          <LanguageToggle />
           <ThemeToggle />
           <Button variant='outline' onClick={copyRoomLink} aria-live='polite'>
             {copied ? <CheckCheck size={17} /> : <Copy size={17} />} {copied ? t('room.copied') : t('room.copyLink')}
