@@ -16,7 +16,7 @@ export function ThemeToggle() {
 
   if (!mounted)
     return (
-      <Button variant='outline' disabled aria-label={t('theme.toLight')} className='h-10 w-10 border-2 border-border bg-background-alternative text-foreground'>
+      <Button variant='outline' disabled aria-label={t('theme.toLight')} className='h-10 w-10 px-2 border-2 border-border bg-background-alternative text-foreground'>
         <Sun size={18} />
       </Button>
     );
