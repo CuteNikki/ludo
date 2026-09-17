@@ -109,28 +109,28 @@ const colorStyles: Record<PlayerColor, { base: string; marker: string; pale: str
     base: 'bg-red-500',
     marker: 'border-red-500',
     pale: 'bg-red-100',
-    start: 'bg-white ring-4 ring-inset ring-red-500',
+    start: 'bg-stone-50 ring-4 ring-inset ring-red-500 dark:bg-stone-700',
     token: 'bg-red-500 border-red-800',
   },
   blue: {
     base: 'bg-blue-600',
     marker: 'border-blue-600',
     pale: 'bg-blue-100',
-    start: 'bg-white ring-4 ring-inset ring-blue-600',
+    start: 'bg-stone-50 ring-4 ring-inset ring-blue-600 dark:bg-stone-700',
     token: 'bg-blue-600 border-blue-900',
   },
   green: {
     base: 'bg-emerald-600',
     marker: 'border-emerald-600',
     pale: 'bg-emerald-100',
-    start: 'bg-white ring-4 ring-inset ring-emerald-600',
+    start: 'bg-stone-50 ring-4 ring-inset ring-emerald-600 dark:bg-stone-700',
     token: 'bg-emerald-600 border-emerald-900',
   },
   yellow: {
     base: 'bg-amber-400',
     marker: 'border-amber-500',
     pale: 'bg-amber-100',
-    start: 'bg-white ring-4 ring-inset ring-amber-400',
+    start: 'bg-stone-50 ring-4 ring-inset ring-amber-400 dark:bg-stone-700',
     token: 'bg-amber-400 border-amber-700',
   },
 };
@@ -291,7 +291,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
               <div
                 key={piece.id}
                 className={cn(
-                  'piece-position pointer-events-none absolute grid h-[9.09%] w-[9.09%] place-items-center',
+                  'piece-position pointer-events-none absolute grid h-[8%] w-[8%] -translate-x-1/2 -translate-y-1/2 place-items-center',
                   transferringPieceIds.has(piece.id) && 'piece-position-instant',
                   capture && 'piece-capture-flight',
                 )}
@@ -357,10 +357,10 @@ function getCellStyle(coordinate: Coordinate, color: PlayerColor | null, isStart
   const isCenter = row >= 4 && row <= 6 && column >= 4 && column <= 6 && !isPath && !color;
 
   if (color) return isStart ? colorStyles[color].start : colorStyles[color].base;
-  if (isPath) return 'bg-white';
-  if (isCenter) return 'bg-stone-800';
-  if (yardColor) return colorStyles[yardColor].pale;
-  return 'bg-stone-100';
+  if (isPath) return 'bg-stone-50 dark:bg-stone-700';
+  if (isCenter) return 'bg-stone-800 dark:bg-stone-950';
+  if (yardColor) return cn(colorStyles[yardColor].pale, 'dark:brightness-75');
+  return 'bg-stone-100 dark:bg-stone-800';
 }
 
 function isStartCoordinate(coordinate: Coordinate): boolean {

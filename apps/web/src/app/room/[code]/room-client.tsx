@@ -133,7 +133,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
     return (
       <Message
         title={roomNotFound ? t('room.message.roomNotFound') : t('room.message.connectionFailed')}
-        detail={t(`room.errors.${error.code}`, { defaultValue: t('room.errors.UNKNOWN') })}
+        detail={t(`errors.${error.code}`, { defaultValue: t('errors.UNKNOWN') })}
         showRoomChoices={roomNotFound}
       />
     );

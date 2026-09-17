@@ -12,7 +12,6 @@ export function LanguageToggle() {
     if (lng === current) return;
     document.cookie = `${cookieName}=${lng}; path=/; max-age=31536000; SameSite=Lax`;
     void i18n.changeLanguage(lng);
-    window.location.reload();
   }
 
   return (
@@ -24,11 +23,13 @@ export function LanguageToggle() {
             key={lng}
             type='button'
             onClick={() => change(lng)}
+            disabled={active}
             aria-pressed={active}
-            className={`btn-press h-10 px-3 text-xs font-black uppercase tracking-wider transition-colors ${
+            aria-current={active ? 'true' : undefined}
+            className={`btn-press h-10 px-3 text-xs font-black uppercase tracking-wider transition-colors disabled:cursor-default ${
               active
-                ? 'bg-stone-950 text-white dark:bg-stone-100 dark:text-stone-950'
-                : 'text-stone-600 bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800'
+                ? 'bg-stone-950 text-white ring-2 ring-inset ring-red-500 dark:bg-stone-100 dark:text-stone-950'
+                : 'bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700'
             }`}
           >
             {languageCodes[lng]}
