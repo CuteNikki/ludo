@@ -1,0 +1,183 @@
+{
+  "nav": {
+    "howItWorks": "How it works"
+  },
+  "hero": {
+    "live": "The board is open",
+    "titleLine1": "Roll. Move.",
+    "titleEm": "Don't get mad.",
+    "subtitle": "The classic board game, rebuilt for real people and quick rounds. Open a room, share the link, start playing.",
+    "cta": "Start a round now"
+  },
+  "preview": {
+    "aria": "Illustration of a Ludo board",
+    "badge": "Demo-Game",
+    "caption": "One round · four colors · infinite spite"
+  },
+  "start": {
+    "eyebrow": "Ready?",
+    "title": "Your table is waiting.",
+    "subtitle": "Pick a name and open a room. Your friends only need the six-character code.",
+    "nameLabel": "Your name",
+    "namePlaceholder": "Player name",
+    "createRoom": "Create room",
+    "or": "or",
+    "roomLabel": "Room code",
+    "roomPlaceholder": "ABC123",
+    "joinAria": "Join room"
+  },
+  "howItWorks": {
+    "eyebrow": "How it works",
+    "title": "Three steps to the first capture.",
+    "steps": [
+      {
+        "title": "Share a room",
+        "text": "Create a room and send the code to up to three friends."
+      },
+      {
+        "title": "Roll the dice",
+        "text": "Roll, pick your piece, and get all four safely home."
+      },
+      {
+        "title": "Celebrate",
+        "text": "Knock pieces out, stay within the time limit, and take first place."
+      }
+    ],
+    "players": {
+      "title": "2–4 players",
+      "text": "Together in one room."
+    },
+    "sync": {
+      "title": "Live sync",
+      "text": "Every move appears instantly."
+    },
+    "fairDice": {
+      "title": "Fair dice",
+      "text": "No one waits forever for a six."
+    }
+  },
+  "toast": {
+    "removedTitle": "Removed from room",
+    "removedText": "The host removed you from the room.",
+    "close": "Dismiss notice"
+  },
+  "footer": "Ludo · For people who want one more round",
+  "theme": {
+    "toLight": "Switch to light theme",
+    "toDark": "Switch to dark theme"
+  },
+  "language": {
+    "aria": "Language"
+  },
+  "room": {
+    "eyebrow": "Ludo · Room",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "players": "Players",
+    "host": "Host",
+    "yourTurn": "Current turn",
+    "you": " (you)",
+    "removePlayerAria": "Remove {{name}}",
+    "won": "Won",
+    "oneMoreRound": "One more round?",
+    "rematchStatus": "{{accepted}}/{{total}} in favor · {{seconds}}s",
+    "rematchAccepted": "Confirmed",
+    "rematchCta": "Play again",
+    "mainMenu": "Main menu",
+    "rollAnimating": "Rolling dice ...",
+    "chooseAPieceSelf": "Choose a piece to move it",
+    "chooseAPieceOther": "Choosing a piece",
+    "autoMoving": "Piece is moving automatically",
+    "noValidMove": "No valid move",
+    "imReady": "I'm ready",
+    "notReady": "Not ready",
+    "startHint": "The game starts automatically once all players are ready. At least two players are required.",
+    "profile": {
+      "title": "Your profile",
+      "nameAria": "Player name",
+      "color": "Color",
+      "colorGroupAria": "Player color",
+      "occupiedSuffix": " – taken"
+    },
+    "settings": {
+      "title": "Room settings",
+      "hostOnly": "Host only",
+      "moveTime": "Move time",
+      "moveTimeInfo": "Time to pick a piece when several valid moves are possible.",
+      "moveTimeGroupAria": "Move time in seconds",
+      "autoMoves": "Automatic moves",
+      "autoMovesInfo": "If there's no other possible move, the piece is moved automatically.",
+      "fairDice": "Fair dice",
+      "fairDiceInfo": "All numbers come up regularly, so no one waits forever for a six."
+    },
+    "colors": {
+      "red": "Red",
+      "blue": "Blue",
+      "green": "Green",
+      "yellow": "Yellow"
+    },
+    "message": {
+      "roomNotFound": "Room not found",
+      "connectionFailed": "Connection failed",
+      "openingRoom": "Opening room",
+      "connecting": "Connecting to the game server ...",
+      "noConnection": "No connection to the game server.",
+      "newRoom": "Create new room",
+      "toHomepage": "Go to homepage"
+    },
+    "errors": {
+      "roomNotFound": "Room not found.",
+      "gameAlreadyRunning": "The game has already started.",
+      "roomFull": "The room is full.",
+      "playerNotFound": "Player not found.",
+      "notYourTurn": "It's not your turn.",
+      "alreadyRolled": "The dice have already been rolled.",
+      "rollFirst": "Roll first.",
+      "pieceNotMovable": "This piece can't be moved.",
+      "settingsOnlyInLobby": "Settings can only be changed in the lobby.",
+      "hostOnlySettings": "Only the host can change the room settings.",
+      "invalidMoveTime": "Invalid move time.",
+      "invalidSettings": "Invalid room settings.",
+      "profileOnlyInLobby": "The profile can only be changed in the lobby.",
+      "invalidColor": "Invalid player color.",
+      "colorTaken": "This color is already taken.",
+      "playersOnlyInLobby": "Players can only be removed in the lobby.",
+      "hostOnlyKick": "Only the host can remove players.",
+      "hostCannotKickSelf": "The host can't remove themselves.",
+      "rematchNotAvailable": "Voting isn't available yet.",
+      "generic": "Unknown error."
+    }
+  },
+  "board": {
+    "ariaLabel": "Ludo board",
+    "pieceAria": "Piece of {{name}}",
+    "pieceAriaMovable": "Piece of {{name}}, move it",
+    "captureAria": "Piece is about to be captured"
+  },
+  "errors": {
+    "ROOM_NOT_FOUND": "Room not found.",
+    "GAME_ALREADY_RUNNING": "The game has already started.",
+    "ROOM_FULL": "The room is full.",
+    "GAME_NOT_STARTED": "The game hasn't started yet.",
+    "PLAYER_NOT_FOUND": "Player not found.",
+    "PIECE_NOT_FOUND": "Piece not found.",
+    "NOT_YOUR_TURN": "It's not your turn.",
+    "ALREADY_ROLLED": "The dice have already been rolled.",
+    "ROLL_FIRST": "Roll first.",
+    "MISSING_DICE_RESULT": "Missing dice result.",
+    "PIECE_NOT_MOVABLE": "This piece can't be moved.",
+    "SETTINGS_ONLY_LOBBY": "Settings can only be changed in the lobby.",
+    "HOST_ONLY_SETTINGS": "Only the host can change the room settings.",
+    "INVALID_MOVE_TIME": "Invalid move time.",
+    "INVALID_SETTINGS": "Invalid room settings.",
+    "PROFILE_ONLY_LOBBY": "The profile can only be changed in the lobby.",
+    "INVALID_COLOR": "Invalid player color.",
+    "COLOR_TAKEN": "This color is already taken.",
+    "PLAYERS_ONLY_LOBBY": "Players can only be removed in the lobby.",
+    "HOST_ONLY_KICK": "Only the host can remove players.",
+    "HOST_CANNOT_KICK_SELF": "The host can't remove themselves.",
+    "REMATCH_NOT_AVAILABLE": "Voting isn't available yet.",
+    "INVALID_EVENT": "Invalid message.",
+    "UNKNOWN": "Unknown error."
+  }
+}

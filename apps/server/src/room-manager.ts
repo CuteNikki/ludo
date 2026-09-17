@@ -1,5 +1,15 @@
-import type { GameState, MoveTimeSeconds, Player, PlayerColor, RoomSettings } from '@ludo/shared';
+import type { GameState, MoveTimeSeconds, Player, PlayerColor, RoomErrorCode, RoomSettings } from '@ludo/shared';
 import { FairDice } from './fair-dice';
+
+export class RoomError extends Error {
+  constructor(
+    public readonly code: RoomErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'RoomError';
+  }
+}
 
 const COLORS: PlayerColor[] = ['red', 'blue', 'green', 'yellow'];
 const MOVE_TIMES: MoveTimeSeconds[] = [15, 30, 45, 60];
@@ -58,7 +68,7 @@ export class RoomManager {
   joinRoom(roomCode: string, playerName: string, reconnectPlayerId?: string): { playerId: string; state: GameState } {
     const normalizedCode = roomCode.toUpperCase();
     const room = this.rooms.get(normalizedCode);
-    if (!room) throw new Error('Raum nicht gefunden.');
+    if (!room) throw new RoomError('ROOM_NOT_FOUND', 'Room was not found');
     const reconnectingPlayer = room.state.players.find((player) => player.id === reconnectPlayerId);
     if (reconnectingPlayer) {
       reconnectingPlayer.connected = true;
@@ -69,8 +79,8 @@ export class RoomManager {
       room.state.revision += 1;
       return { playerId: reconnectingPlayer.id, state: room.state };
     }
-    if (room.state.phase !== 'lobby') throw new Error('Das Spiel läuft bereits.');
-    if (room.state.players.length >= COLORS.length) throw new Error('Der Raum ist voll.');
+    if (room.state.phase !== 'lobby') throw new RoomError('GAME_ALREADY_RUNNING', 'The game is already running.');
+    if (room.state.players.length >= COLORS.length) throw new RoomError('ROOM_FULL', 'The room is full.');
     const cleanupTimer = this.cleanupTimers.get(normalizedCode);
     if (cleanupTimer) clearTimeout(cleanupTimer);
     this.cleanupTimers.delete(normalizedCode);
@@ -80,7 +90,7 @@ export class RoomManager {
   setReady(roomCode: string, playerId: string, ready: boolean): GameState {
     const state = this.getState(roomCode);
     const player = state.players.find((candidate) => candidate.id === playerId);
-    if (!player) throw new Error('Spieler nicht gefunden.');
+    if (!player) throw new RoomError('PLAYER_NOT_FOUND', 'Player was not found.');
     player.ready = ready;
 
     if (state.players.length >= 2 && state.players.every((candidate) => candidate.ready)) {
@@ -94,10 +104,11 @@ export class RoomManager {
 
   setSettings(roomCode: string, playerId: string, settings: RoomSettings): GameState {
     const state = this.getState(roomCode);
-    if (state.phase !== 'lobby') throw new Error('Einstellungen können nur in der Lobby geändert werden.');
-    if (state.hostPlayerId !== playerId) throw new Error('Nur der Host kann die Raumeinstellungen ändern.');
-    if (!MOVE_TIMES.includes(settings.moveTimeSeconds)) throw new Error('Ungültige Zugzeit.');
-    if (typeof settings.automaticSingleMove !== 'boolean' || typeof settings.fairDice !== 'boolean') throw new Error('Ungültige Raumeinstellungen.');
+    if (state.phase !== 'lobby') throw new RoomError('SETTINGS_ONLY_LOBBY', 'Settings can only be changed in the lobby.');
+    if (state.hostPlayerId !== playerId) throw new RoomError('HOST_ONLY_SETTINGS', 'Only the host can change the room settings.');
+    if (!MOVE_TIMES.includes(settings.moveTimeSeconds)) throw new RoomError('INVALID_MOVE_TIME', 'Invalid move time.');
+    if (typeof settings.automaticSingleMove !== 'boolean' || typeof settings.fairDice !== 'boolean')
+      throw new RoomError('INVALID_SETTINGS', 'Invalid room settings.');
 
     state.settings = { ...settings };
     for (const player of state.players) player.ready = false;
@@ -107,11 +118,12 @@ export class RoomManager {
 
   updatePlayer(roomCode: string, playerId: string, name: string, color: PlayerColor): GameState {
     const state = this.getState(roomCode);
-    if (state.phase !== 'lobby') throw new Error('Das Profil kann nur in der Lobby geändert werden.');
-    if (!COLORS.includes(color)) throw new Error('Ungültige Spielerfarbe.');
+    if (state.phase !== 'lobby') throw new RoomError('PROFILE_ONLY_LOBBY', 'Profile can only be updated in the lobby.');
+    if (!COLORS.includes(color)) throw new RoomError('INVALID_COLOR', 'Invalid player color.');
     const player = state.players.find((candidate) => candidate.id === playerId);
-    if (!player) throw new Error('Spieler nicht gefunden.');
-    if (state.players.some((candidate) => candidate.id !== playerId && candidate.color === color)) throw new Error('Diese Farbe ist bereits vergeben.');
+    if (!player) throw new RoomError('PLAYER_NOT_FOUND', 'Player was not found.');
+    if (state.players.some((candidate) => candidate.id !== playerId && candidate.color === color))
+      throw new RoomError('COLOR_TAKEN', 'This color is already taken.');
 
     player.color = color;
     player.name = this.getPlayerName(name);
@@ -122,10 +134,10 @@ export class RoomManager {
 
   kickPlayer(roomCode: string, hostPlayerId: string, targetPlayerId: string): GameState {
     const state = this.getState(roomCode);
-    if (state.phase !== 'lobby') throw new Error('Spieler können nur in der Lobby entfernt werden.');
-    if (state.hostPlayerId !== hostPlayerId) throw new Error('Nur der Host kann Spieler entfernen.');
-    if (targetPlayerId === hostPlayerId) throw new Error('Der Host kann sich nicht selbst entfernen.');
-    if (!state.players.some((player) => player.id === targetPlayerId)) throw new Error('Spieler nicht gefunden.');
+    if (state.phase !== 'lobby') throw new RoomError('PLAYERS_ONLY_LOBBY', 'Players can only be removed in the lobby.');
+    if (state.hostPlayerId !== hostPlayerId) throw new RoomError('HOST_ONLY_KICK', 'Only the host can kick players.');
+    if (targetPlayerId === hostPlayerId) throw new RoomError('HOST_CANNOT_KICK_SELF', 'The host cannot kick themselves.');
+    if (!state.players.some((player) => player.id === targetPlayerId)) throw new RoomError('PLAYER_NOT_FOUND', 'Player was not found.');
     return this.removePlayer(roomCode, targetPlayerId) ?? state;
   }
 
@@ -135,8 +147,8 @@ export class RoomManager {
 
   voteRematch(roomCode: string, playerId: string): GameState {
     const state = this.getState(roomCode);
-    if (state.phase !== 'finished') throw new Error('Die Abstimmung ist noch nicht verfügbar.');
-    if (!state.players.some((player) => player.id === playerId)) throw new Error('Spieler nicht gefunden.');
+    if (state.phase !== 'finished') throw new RoomError('REMATCH_NOT_AVAILABLE', 'The rematch vote is not available yet.');
+    if (!state.players.some((player) => player.id === playerId)) throw new RoomError('PLAYER_NOT_FOUND', 'Player was not found.');
     if (!state.rematchPlayerIds.includes(playerId)) state.rematchPlayerIds.push(playerId);
 
     if (state.rematchDeadline === null) {
@@ -150,9 +162,9 @@ export class RoomManager {
 
   roll(roomCode: string, playerId: string): GameState {
     const state = this.getState(roomCode);
-    if (state.phase !== 'playing') throw new Error('Das Spiel hat noch nicht begonnen.');
-    if (state.currentPlayerId !== playerId) throw new Error('Du bist nicht am Zug.');
-    if (state.turnStage !== 'rolling') throw new Error('Der Würfel wurde bereits geworfen.');
+    if (state.phase !== 'playing') throw new RoomError('GAME_NOT_STARTED', 'The game has not started yet.');
+    if (state.currentPlayerId !== playerId) throw new RoomError('NOT_YOUR_TURN', 'It is not your turn.');
+    if (state.turnStage !== 'rolling') throw new RoomError('ALREADY_ROLLED', 'The dice has already been rolled.');
 
     this.clearTurnTimer(roomCode);
     state.diceResult = this.rollDice?.() ?? (state.settings.fairDice ? this.fairDice.roll(playerId) : randomDice());
@@ -175,18 +187,18 @@ export class RoomManager {
 
   move(roomCode: string, playerId: string, pieceId: string): GameState {
     const state = this.getState(roomCode);
-    if (state.phase !== 'playing' || state.currentPlayerId !== playerId) throw new Error('Du bist nicht am Zug.');
-    if (state.turnStage !== 'move' || state.diceResult === null) throw new Error('Würfle zuerst.');
+    if (state.phase !== 'playing' || state.currentPlayerId !== playerId) throw new RoomError('NOT_YOUR_TURN', 'It is not your turn.');
+    if (state.turnStage !== 'move' || state.diceResult === null) throw new RoomError('ROLL_FIRST', 'You must roll the dice first.');
     return this.performMove(state, playerId, pieceId);
   }
 
   private performMove(state: GameState, playerId: string, pieceId: string): GameState {
-    if (state.diceResult === null) throw new Error('Würfelergebnis fehlt.');
-    if (!state.movablePieceIds.includes(pieceId)) throw new Error('Diese Figur kann nicht gezogen werden.');
+    if (state.diceResult === null) throw new RoomError('MISSING_DICE_RESULT', 'The dice result is missing.');
+    if (!state.movablePieceIds.includes(pieceId)) throw new RoomError('PIECE_NOT_MOVABLE', 'This piece cannot be moved.');
 
     const piece = state.pieces.find((candidate) => candidate.id === pieceId && candidate.playerId === playerId);
     const player = state.players.find((candidate) => candidate.id === playerId);
-    if (!piece || !player) throw new Error('Figur nicht gefunden.');
+    if (!piece || !player) throw new RoomError('PIECE_NOT_FOUND', 'The piece was not found.');
 
     piece.position = piece.position === -1 ? 0 : piece.position + state.diceResult;
     if (piece.position < 40) {
@@ -292,7 +304,7 @@ export class RoomManager {
 
   private getState(roomCode: string): GameState {
     const room = this.rooms.get(roomCode);
-    if (!room) throw new Error('Raum nicht gefunden.');
+    if (!room) throw new RoomError('ROOM_NOT_FOUND', 'The room was not found.');
     return room.state;
   }
 

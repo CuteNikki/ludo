@@ -55,4 +55,30 @@ export type ServerEvent =
   | { type: 'room:joined'; payload: { playerId: string; state: GameState } }
   | { type: 'game:state'; payload: GameState }
   | { type: 'player:left'; payload: { playerId: string } }
-  | { type: 'room:error'; payload: { code: string; message: string } };
+  | { type: 'room:error'; payload: { code: RoomErrorCode; message: string } };
+
+export type RoomErrorCode =
+  | 'ROOM_NOT_FOUND'
+  | 'GAME_ALREADY_RUNNING'
+  | 'ROOM_FULL'
+  | 'GAME_NOT_STARTED'
+  | 'PLAYER_NOT_FOUND'
+  | 'PIECE_NOT_FOUND'
+  | 'NOT_YOUR_TURN'
+  | 'ALREADY_ROLLED'
+  | 'ROLL_FIRST'
+  | 'MISSING_DICE_RESULT'
+  | 'PIECE_NOT_MOVABLE'
+  | 'SETTINGS_ONLY_LOBBY'
+  | 'HOST_ONLY_SETTINGS'
+  | 'INVALID_MOVE_TIME'
+  | 'INVALID_SETTINGS'
+  | 'PROFILE_ONLY_LOBBY'
+  | 'INVALID_COLOR'
+  | 'COLOR_TAKEN'
+  | 'PLAYERS_ONLY_LOBBY'
+  | 'HOST_ONLY_KICK'
+  | 'HOST_CANNOT_KICK_SELF'
+  | 'REMATCH_NOT_AVAILABLE'
+  | 'INVALID_EVENT'
+  | 'UNKNOWN';

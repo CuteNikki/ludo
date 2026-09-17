@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --paper: #f4f0e7;
   --ink: #1c1917;
@@ -8,6 +10,17 @@
   --blue: #2574a9;
   --green: #27865b;
   --yellow: #e5a820;
+  --grid-line: rgba(28, 25, 23, 0.045);
+}
+
+[data-theme='dark'] {
+  --paper: #17130f;
+  --ink: #f2ede2;
+  --red: #ef5f5f;
+  --blue: #5aa8de;
+  --green: #43b586;
+  --yellow: #f0c15a;
+  --grid-line: rgba(244, 240, 231, 0.06);
 }
 
 * {
@@ -21,9 +34,12 @@ body {
   color: var(--ink);
   font-family: var(--font-sans), sans-serif;
   background-color: var(--paper);
-  background-image: linear-gradient(rgba(28, 25, 23, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(28, 25, 23, 0.045) 1px, transparent 1px);
+  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 24px 24px;
   min-height: 100vh;
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease;
 }
 .font-display {
   font-family: var(--font-display), serif;
@@ -295,6 +311,89 @@ input {
   }
 }
 
+.stagger-fade-in > * {
+  opacity: 0;
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+.stagger-fade-in > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.stagger-fade-in > *:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.stagger-fade-in > *:nth-child(3) {
+  animation-delay: 0.25s;
+}
+.stagger-fade-in > *:nth-child(4) {
+  animation-delay: 0.35s;
+}
+.stagger-fade-in > *:nth-child(5) {
+  animation-delay: 0.45s;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-hover-lift {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.card-hover-lift:hover {
+  transform: translateY(-3px);
+}
+
+.btn-press {
+  transition: transform 0.12s ease;
+}
+.btn-press:active {
+  transform: scale(0.96);
+}
+
+.icon-swap {
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.link-underline {
+  position: relative;
+}
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 2px;
+  width: 0;
+  background: currentColor;
+  transition: width 0.25s ease;
+}
+.link-underline:hover::after {
+  width: 100%;
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 63, 63, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(220, 63, 63, 0);
+  }
+}
+.pulse-soft {
+  animation: pulse-soft 2.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dice-rolling,
   .room-enter,
@@ -306,7 +405,9 @@ input {
   .piece-capture-flight,
   .piece-capture-token,
   .destination-marker,
-  .toast-enter {
+  .toast-enter .stagger-fade-in > *,
+  .pulse-soft,
+  .icon-swap {
     animation: none;
   }
   .home-moving-token {

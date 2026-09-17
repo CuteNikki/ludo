@@ -242,7 +242,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
   }
 
   return (
-    <div className='board-enter aspect-square w-full max-w-170 border-2 border-stone-900 bg-stone-900 p-0.5 shadow-[8px_8px_0_#1c1917]'>
+    <div className='board-enter aspect-square h-fit w-full max-w-170 border-2 border-stone-900 bg-stone-900 p-0.5 shadow-[8px_8px_0_#1c1917]'>
       <div className='relative grid h-full w-full grid-cols-11 grid-rows-11 gap-0.5 bg-stone-900' aria-label='Ludo-Spielfeld'>
         {Array.from({ length: 121 }, (_, index) => {
           const coordinate: Coordinate = [Math.floor(index / 11), index % 11];
@@ -250,7 +250,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
           const cellColor = getCellColor(coordinate);
           const isStart = cellColor !== null && isStartCoordinate(coordinate);
           const isPreviewTarget = previewCoordinate && key(previewCoordinate) === key(coordinate);
-          const isCaptureTarget = isPreviewTarget && piece && previewPiece && piece.playerId !== previewPiece.playerId;
+          // const isCaptureTarget = isPreviewTarget && piece && previewPiece && piece.playerId !== previewPiece.playerId;
 
           return (
             <div

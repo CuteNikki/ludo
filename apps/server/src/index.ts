@@ -1,5 +1,6 @@
 import type { ClientEvent, ServerEvent } from '@ludo/shared';
-import { RoomManager } from './room-manager';
+
+import { RoomError, RoomManager } from './room-manager';
 
 interface SocketData {
   clientId: string;
@@ -33,7 +34,7 @@ const server = Bun.serve<SocketData>({
       try {
         const event = JSON.parse(String(rawMessage)) as ClientEvent;
         if (!event || typeof event !== 'object' || typeof event.type !== 'string') {
-          throw new Error('Ungültige Nachricht.');
+          throw new Error('Invalid message.');
         }
 
         if (event.type === 'room:create') {
@@ -52,7 +53,7 @@ const server = Bun.serve<SocketData>({
         }
 
         const { roomCode, playerId } = socket.data;
-        if (!roomCode || !playerId) throw new Error('Du bist keinem Raum beigetreten.');
+        if (!roomCode || !playerId) throw new Error('You have not joined a room.');
 
         if (event.type === 'player:ready') {
           broadcast(roomCode, { type: 'game:state', payload: rooms.setReady(roomCode, playerId, event.payload.ready) });
@@ -76,7 +77,10 @@ const server = Bun.serve<SocketData>({
       } catch (error) {
         send(socket, {
           type: 'room:error',
-          payload: { code: 'INVALID_EVENT', message: error instanceof Error ? error.message : 'Unbekannter Fehler.' },
+          payload: {
+            code: error instanceof RoomError ? error.code : 'UNKNOWN',
+            message: error instanceof Error ? error.message : 'Unknown Error.',
+          },
         });
       }
     },
