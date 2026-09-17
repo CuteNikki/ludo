@@ -171,7 +171,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
 
   return (
     <main className='room-enter room-shell mx-auto min-h-screen max-w-6xl px-5 py-6 sm:px-6 sm:py-10'>
-      <header className='room-header flex flex-wrap items-center justify-between gap-5 border-2 border-stone-900 bg-white p-4 shadow-[6px_6px_0_#1c1917] sm:p-5 dark:border-stone-100 dark:bg-stone-950 dark:shadow-[6px_6px_0_#f4f0e7]'>
+      <header className='room-header flex flex-wrap items-center justify-between gap-5 border-2 border-stone-900 bg-white p-4 shadow-[6px_6px_0_#1c1917] sm:p-5 dark:border-stone-700 dark:bg-stone-950 dark:shadow-[6px_6px_0_#44403c]'>
         <div className='flex items-center gap-4'>
           <a href='/' aria-label={t('room.message.toHomepage')}>
             <DicesIcon className='size-10 shrink-0 rounded-lg bg-black p-1.5 text-white' />
@@ -195,9 +195,9 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
           <GameBoard state={state} playerId={playerId} onMove={(pieceId) => emit({ type: 'game:move', payload: { pieceId } })} />
         </section>
 
-        <aside className='room-sidebar border-2 border-stone-900 bg-white p-5 shadow-[6px_6px_0_#1c1917] dark:border-stone-100 dark:bg-stone-950 dark:shadow-[6px_6px_0_#f4f0e7]'>
+        <aside className='room-sidebar border-2 border-stone-900 bg-white p-5 shadow-[6px_6px_0_#1c1917] dark:border-stone-700 dark:bg-stone-950 dark:shadow-[6px_6px_0_#44403c]'>
           {state.phase !== 'lobby' && (
-            <section className='turn-panel mb-6 flex h-56 flex-col border-b-2 border-stone-900 pb-6 dark:border-stone-100'>
+            <section className='turn-panel mb-6 flex h-56 flex-col border-b-2 border-stone-900 pb-6 dark:border-stone-700'>
               {state.phase === 'finished' ? (
                 <div className='grid flex-1 place-items-center text-center'>
                   <div className='w-full'>
@@ -384,7 +384,7 @@ function PlayerProfile({
   }
 
   return (
-    <section className='mb-0 border-b-2 border-stone-900 pb-5 lg:mb-7 dark:border-stone-100'>
+    <section className='mb-0 border-b-2 border-stone-900 pb-5 lg:mb-7 dark:border-stone-700'>
       <h2 className='mb-4 flex items-center gap-2 text-lg font-black'>
         <UserRound size={19} /> {t('room.profile.title')}
       </h2>
@@ -436,7 +436,7 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
   const moveTimes: MoveTimeSeconds[] = [15, 30, 45, 60];
 
   return (
-    <section className='mb-7 border-b-2 border-stone-900 py-5 sm:pt-0 dark:border-stone-100'>
+    <section className='mb-7 border-b-2 border-stone-900 py-5 sm:pt-0 dark:border-stone-700'>
       <div className='mb-4 flex items-center justify-between gap-3'>
         <h2 className='flex items-center gap-2 text-lg font-black'>
           <Settings2 size={19} /> {t('room.settings.title')}
@@ -528,13 +528,13 @@ function SettingToggle({
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(
-          'relative h-7 w-12 shrink-0 rounded-full border-2 border-stone-900 transition-colors disabled:cursor-not-allowed disabled:opacity-60 dark:border-stone-100',
+          'relative h-7 w-12 shrink-0 rounded-full border-2 border-stone-900 transition-colors disabled:cursor-not-allowed disabled:opacity-60 dark:border-stone-700',
           checked ? 'bg-emerald-500' : 'bg-stone-200 dark:bg-stone-800',
         )}
       >
         <span
           className={cn(
-            'absolute left-0.5 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border border-stone-900 bg-white transition-transform dark:border-stone-100 dark:bg-stone-200',
+            'absolute left-0.5 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border border-stone-900 bg-white transition-transform dark:border-stone-700 dark:bg-stone-200',
             checked && 'translate-x-5',
           )}
         />
@@ -560,7 +560,7 @@ function InfoTooltip({ text }: { text: string }) {
       <span
         id={tooltipId}
         role='tooltip'
-        className='pointer-events-none invisible absolute right-0 top-9 z-50 w-64 border border-stone-900 bg-stone-950 p-3 text-left text-xs font-medium leading-5 text-white opacity-0 shadow-[4px_4px_0_rgba(28,25,23,.2)] transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 dark:border-stone-100 dark:bg-stone-100 dark:text-stone-950'
+        className='pointer-events-none invisible absolute right-0 top-9 z-50 w-64 border border-stone-900 bg-stone-950 p-3 text-left text-xs font-medium leading-5 text-white opacity-0 shadow-[4px_4px_0_rgba(28,25,23,.2)] transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 dark:border-stone-700 dark:bg-stone-100 dark:text-stone-950'
       >
         {text}
       </span>
@@ -576,7 +576,7 @@ function Message({ title, detail, showRoomChoices = false }: { title: string; de
   const { t } = useTranslation();
   return (
     <main className='grid min-h-screen place-items-center px-6 text-center'>
-      <div className='room-enter border-2 border-stone-900 bg-white p-8 shadow-[6px_6px_0_#1c1917] dark:border-stone-100 dark:bg-stone-950 dark:shadow-[6px_6px_0_#f4f0e7]'>
+      <div className='room-enter border-2 border-stone-900 bg-white p-8 shadow-[6px_6px_0_#1c1917] dark:border-stone-700 dark:bg-stone-950 dark:shadow-[6px_6px_0_#44403c]'>
         <h1 className='text-4xl font-bold'>{title}</h1>
         <p className='mt-3 text-stone-600 dark:text-stone-400'>{detail}</p>
         {showRoomChoices && (

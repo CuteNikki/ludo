@@ -212,7 +212,7 @@ export default function HomePage() {
       {wasRemoved && (
         <div
           role='alert'
-          className='toast-enter fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 border-2 border-stone-900 bg-white p-4 pr-3 shadow-[5px_5px_0_#1c1917] sm:right-6 sm:top-6 dark:border-stone-100 dark:bg-stone-900 dark:shadow-[5px_5px_0_#f4f0e7]'
+          className='toast-enter fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 border-2 border-stone-900 bg-white p-4 pr-3 shadow-[5px_5px_0_#1c1917] sm:right-6 sm:top-6 dark:border-stone-700 dark:bg-stone-900 dark:shadow-[5px_5px_0_#44403c]'
         >
           <CircleAlert className='mt-0.5 shrink-0 text-red-600' size={19} />
           <div>
@@ -270,7 +270,7 @@ export default function HomePage() {
         </div>
 
         <div className='home-board relative mx-auto w-full max-w-lg' aria-label={t('preview.aria')}>
-          <div className='absolute -right-2 -top-5 z-10 grid h-20 w-20 rotate-12 place-items-center border-2 border-stone-900 bg-white shadow-[5px_5px_0_#1c1917] sm:-right-5 sm:h-24 sm:w-24 dark:border-stone-100 dark:bg-stone-900 dark:shadow-[5px_5px_0_#f4f0e7]'>
+          <div className='absolute -right-2 -top-5 z-10 grid h-20 w-20 rotate-12 place-items-center border-2 border-stone-900 bg-white shadow-[5px_5px_0_#1c1917] sm:-right-5 sm:h-24 sm:w-24 dark:border-stone-700 dark:bg-stone-900 dark:shadow-[5px_5px_0_#44403c]'>
             <Dices size={38} strokeWidth={1.7} />
             <span className='absolute bottom-1 hidden text-[10px] font-black uppercase tracking-widest sm:block'>{t('preview.badge')}</span>
           </div>
@@ -279,14 +279,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id='start' className='border-y-2 border-stone-900 bg-[#e8dfcd] dark:border-stone-100 dark:bg-stone-900'>
+      <section id='start' className='border-y-2 border-stone-900 bg-[#e8dfcd] dark:border-stone-700 dark:bg-stone-900'>
         <div className='mx-auto grid min-w-0 max-w-6xl gap-10 px-6 py-14 lg:grid-cols-[.8fr_1.2fr] lg:items-center lg:py-20'>
           <div className='min-w-0'>
             <p className='mb-3 text-sm font-black uppercase tracking-[.16em] text-red-700 dark:text-red-400'>{t('start.eyebrow')}</p>
             <h2 className='max-w-full wrap-break-word font-display text-4xl font-black leading-none sm:text-5xl'>{t('start.title')}</h2>
             <p className='mt-4 max-w-md wrap-break-word leading-7 text-stone-600 dark:text-stone-400'>{t('start.subtitle')}</p>
           </div>
-          <section className='min-w-0 max-w-full border-2 border-stone-900 bg-white p-6 shadow-[8px_8px_0_#1c1917] sm:p-8 dark:border-stone-100 dark:bg-stone-950 dark:shadow-[8px_8px_0_#f4f0e7]'>
+          <section className='min-w-0 max-w-full border-2 border-stone-900 bg-white p-6 shadow-[8px_8px_0_#1c1917] sm:p-8 dark:border-stone-700 dark:bg-stone-950 dark:shadow-[8px_8px_0_#f4f0e7]'>
             <label className='mb-2 block text-sm font-bold' htmlFor='name'>
               {t('start.nameLabel')}
             </label>
@@ -335,7 +335,7 @@ export default function HomePage() {
             return (
               <article
                 key={step.title}
-                className={`card-hover-lift ${index === 0 ? 'border-t-0 md:border-l-0 md:pl-0' : 'border-t-2 border-stone-900 md:border-l-2 md:border-t-0 md:border-stone-900 md:pl-8 dark:border-stone-100'} pt-5 md:pt-0`}
+                className={`card-hover-lift ${index === 0 ? 'border-t-0 md:border-l-0 md:pl-0' : 'border-t-2 border-stone-900 md:border-l-2 md:border-t-0 md:border-stone-900 md:pl-8 dark:border-stone-700'} pt-5 md:pt-0`}
               >
                 <div className='flex items-center justify-between'>
                   <span className='font-mono text-sm font-bold text-red-700 dark:text-red-400'>{String(index + 1).padStart(2, '0')}</span>
@@ -347,7 +347,7 @@ export default function HomePage() {
             );
           })}
         </div>
-        <div className='mt-10 grid gap-6 border-t-2 border-stone-900 pt-8 sm:grid-cols-3 dark:border-stone-100'>
+        <div className='mt-10 grid gap-6 border-t-2 border-stone-900 pt-8 sm:grid-cols-3 dark:border-stone-700'>
           <div className='flex gap-3'>
             <Users className='shrink-0 text-red-600 dark:text-red-400' size={22} />
             <p>
@@ -372,7 +372,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className='border-t-2 border-stone-900 bg-[#e8dfcd] px-6 py-7 text-center text-xs font-bold uppercase tracking-[.15em] dark:border-stone-100 dark:bg-stone-900'>
+      <footer className='border-t-2 border-stone-900 bg-[#e8dfcd] px-6 py-7 text-center text-xs font-bold uppercase tracking-[.15em] dark:border-stone-700 dark:bg-stone-900'>
         {t('footer')}
       </footer>
     </main>
