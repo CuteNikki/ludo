@@ -2,3 +2,94 @@
 @import 'tw-animate-css';
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f4f0e7;
+  --foreground: #1c1917;
+}
+
+.dark {
+  --background: #1c1917;
+  --foreground: #f4f0e7;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-display: var(--font-display);
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  min-width: 320px;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: #ef4444;
+  color: #fff;
+}
+
+@keyframes home-reveal {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toast-enter {
+  from { opacity: 0; transform: translateY(-10px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes dice-rolling {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-12deg) scale(1.04); }
+  75% { transform: rotate(12deg) scale(1.04); }
+}
+
+@keyframes status-swap {
+  from { opacity: 0; transform: scale(.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.home-reveal { animation: home-reveal .7s cubic-bezier(.22,1,.36,1) both; }
+.room-enter { animation: home-reveal .55s cubic-bezier(.22,1,.36,1) both; }
+.toast-enter { animation: toast-enter .25s ease-out both; }
+.dice-rolling { animation: dice-rolling 1s ease-in-out infinite; }
+.status-swap { animation: status-swap .25s ease-out both; }
+
+.stagger-fade-in > * { animation: home-reveal .45s cubic-bezier(.22,1,.36,1) both; }
+.stagger-fade-in > *:nth-child(2) { animation-delay: 80ms; }
+.stagger-fade-in > *:nth-child(3) { animation-delay: 160ms; }
+.stagger-fade-in > *:nth-child(4) { animation-delay: 240ms; }
+
+.link-underline { position: relative; }
+.link-underline::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -4px;
+  left: 0;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform .2s ease;
+}
+.link-underline:hover::after { transform: scaleX(1); transform-origin: left; }
+
+.btn-press:active { transform: translateY(2px); }
+.card-hover-lift:hover { transform: translateY(-3px); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
