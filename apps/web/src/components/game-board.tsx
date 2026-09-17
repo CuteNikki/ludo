@@ -104,34 +104,35 @@ const YARDS: Record<PlayerColor, Coordinate[]> = {
 };
 
 const START_OFFSETS: Record<PlayerColor, number> = { red: 0, blue: 10, green: 20, yellow: 30 };
+
 const colorStyles: Record<PlayerColor, { base: string; marker: string; pale: string; start: string; token: string }> = {
   red: {
     base: 'bg-red-500',
     marker: 'border-red-500',
-    pale: 'bg-red-100',
-    start: 'bg-white ring-4 ring-inset ring-red-500',
+    pale: 'bg-red-300',
+    start: 'bg-background-alternative before:absolute before:inset-1 before:border-4 before:border-red-500 before:content-[""]',
     token: 'bg-red-500 border-red-800',
   },
   blue: {
     base: 'bg-blue-600',
     marker: 'border-blue-600',
-    pale: 'bg-blue-100',
-    start: 'bg-white ring-4 ring-inset ring-blue-600',
+    pale: 'bg-blue-300',
+    start: 'bg-background-alternative before:absolute before:inset-1 before:border-4 before:border-blue-600 before:content-[""]',
     token: 'bg-blue-600 border-blue-900',
   },
   green: {
-    base: 'bg-emerald-600',
-    marker: 'border-emerald-600',
-    pale: 'bg-emerald-100',
-    start: 'bg-white ring-4 ring-inset ring-emerald-600',
-    token: 'bg-emerald-600 border-emerald-900',
+    base: 'bg-green-600',
+    marker: 'border-green-600',
+    pale: 'bg-green-300',
+    start: 'bg-background-alternative before:absolute before:inset-1 before:border-4 before:border-green-600 before:content-[""]',
+    token: 'bg-green-600 border-green-900',
   },
   yellow: {
-    base: 'bg-amber-400',
-    marker: 'border-amber-500',
-    pale: 'bg-amber-100',
-    start: 'bg-white ring-4 ring-inset ring-amber-400',
-    token: 'bg-amber-400 border-amber-700',
+    base: 'bg-yellow-500',
+    marker: 'border-yellow-500',
+    pale: 'bg-yellow-200',
+    start: 'bg-background-alternative before:absolute before:inset-1 before:border-4 before:border-yellow-400 before:content-[""]',
+    token: 'bg-yellow-400 border-yellow-700',
   },
 };
 
@@ -146,9 +147,13 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
   const [visualCoordinates, setVisualCoordinates] = useState<Record<string, Coordinate>>(() => getCurrentCoordinates(state));
   const [transferringPieceIds, setTransferringPieceIds] = useState<Set<string>>(() => new Set());
   const [captureAnimations, setCaptureAnimations] = useState<Record<string, { from: Coordinate; to: Coordinate }>>({});
+  const [movingPieceIds, setMovingPieceIds] = useState<Set<string>>(() => new Set());
+  const [spawnAnimations, setSpawnAnimations] = useState<Record<string, { from: Coordinate; to: Coordinate }>>({});
+
   const previousPositions = useRef(new Map(state.pieces.map((piece) => [piece.id, piece.position])));
   const piecesByCell = new Map<string, Piece>();
   const positionedPieces: Array<{ piece: Piece; owner: GameState['players'][number]; coordinate: Coordinate; movable: boolean }> = [];
+
   const previewPiece =
     preview?.revision === state.revision && state.movablePieceIds.includes(preview.pieceId)
       ? state.pieces.find((piece) => piece.id === preview.pieceId)
@@ -169,32 +174,74 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
       const transfers = new Set<string>();
       const captures: Record<string, { from: Coordinate; to: Coordinate }> = {};
       const movingPieces: Array<{ piece: Piece; color: PlayerColor; positions: number[] }> = [];
+      const activeMovers = new Set<string>();
+      const spawnAnim: Record<string, { from: Coordinate; to: Coordinate }> = {};
 
       for (const player of state.players) {
         const pieces = state.pieces.filter((piece) => piece.playerId === player.id);
         pieces.forEach((piece, yardIndex) => {
           const previousPosition = previous.get(piece.id);
           const coordinate = getPieceCoordinate(piece, player.color, yardIndex);
+
           if (previousPosition !== undefined && previousPosition >= 0 && piece.position === -1 && coordinate) {
             const from = getPieceCoordinate({ ...piece, position: previousPosition }, player.color, yardIndex);
-            if (from) captures[piece.id] = { from, to: coordinate };
+            if (from) {
+              captures[piece.id] = { from, to: coordinate };
+              activeMovers.add(piece.id);
+            }
           }
           if (previousPosition !== undefined && previousPosition >= 0 && piece.position > previousPosition) {
             movingPieces.push({ piece, color: player.color, positions: range(previousPosition + 1, piece.position) });
+            activeMovers.add(piece.id);
           } else {
-            if (coordinate && !captures[piece.id]) immediateCoordinates[piece.id] = coordinate;
-            if (previousPosition !== undefined && previousPosition < 0 !== piece.position < 0) transfers.add(piece.id);
+            // Detect spawn from yard (-1 to start position)
+            if (previousPosition !== undefined && previousPosition < 0 && piece.position >= 0) {
+              const yardCoord = YARDS[player.color][yardIndex];
+              const startCoord = getPieceCoordinate(piece, player.color, 0);
+              if (yardCoord && startCoord) {
+                spawnAnim[piece.id] = { from: yardCoord, to: startCoord };
+                transfers.add(piece.id);
+                activeMovers.add(piece.id);
+              }
+            } else if (coordinate && !captures[piece.id]) {
+              immediateCoordinates[piece.id] = coordinate;
+            }
           }
         });
+      }
+
+      if (Object.keys(spawnAnim).length > 0) {
+        setSpawnAnimations(spawnAnim);
+        window.setTimeout(() => {
+          if (!cancelled) setSpawnAnimations({});
+        }, 450);
+      }
+
+      if (activeMovers.size > 0) {
+        setMovingPieceIds(activeMovers);
       }
 
       if (Object.keys(immediateCoordinates).length > 0) {
         if (transfers.size > 0) setTransferringPieceIds(transfers);
         setVisualCoordinates((current) => ({ ...current, ...immediateCoordinates }));
+
         if (transfers.size > 0) {
           window.setTimeout(() => {
+            if (cancelled) return;
+            const realCoordinates: Record<string, Coordinate> = {};
+            for (const player of state.players) {
+              const pieces = state.pieces.filter((piece) => piece.playerId === player.id && transfers.has(piece.id));
+              pieces.forEach((piece) => {
+                const coord = getPieceCoordinate(piece, player.color, 0);
+                if (coord) realCoordinates[piece.id] = coord;
+              });
+            }
+            setVisualCoordinates((current) => ({ ...current, ...realCoordinates }));
+          }, 30);
+
+          window.setTimeout(() => {
             if (!cancelled) setTransferringPieceIds(new Set());
-          }, 260);
+          }, 350);
         }
       }
 
@@ -217,6 +264,10 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
           if (!cancelled) setCaptureAnimations({});
         }, 1_450);
       }
+
+      window.setTimeout(() => {
+        if (!cancelled) setMovingPieceIds(new Set());
+      }, 300);
     }
 
     void animateMoves();
@@ -242,22 +293,21 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
   }
 
   return (
-    <div className='board-enter aspect-square h-fit w-full max-w-170 border-2 border-stone-900 bg-stone-900 p-0.5 shadow-[8px_8px_0_#1c1917]'>
-      <div className='relative grid h-full w-full grid-cols-11 grid-rows-11 gap-0.5 bg-stone-900' aria-label='Ludo-Spielfeld'>
+    <div className='aspect-square h-fit w-full max-w-170 border-4 border-border bg-border shadow-[8px_8px_0_var(--shadow-color)]'>
+      <div className='relative grid h-full w-full grid-cols-11 grid-rows-11 gap-0.5 bg-border' aria-label='Ludo-Spielfeld'>
         {Array.from({ length: 121 }, (_, index) => {
           const coordinate: Coordinate = [Math.floor(index / 11), index % 11];
           const piece = piecesByCell.get(key(coordinate));
           const cellColor = getCellColor(coordinate);
           const isStart = cellColor !== null && isStartCoordinate(coordinate);
           const isPreviewTarget = previewCoordinate && key(previewCoordinate) === key(coordinate);
-          // const isCaptureTarget = isPreviewTarget && piece && previewPiece && piece.playerId !== previewPiece.playerId;
 
           return (
             <div
               key={key(coordinate)}
               data-cell-role={isStart ? 'start' : cellColor ? 'goal' : undefined}
               className={cn(
-                'board-cell relative grid min-h-0 min-w-0 place-items-center',
+                'relative grid min-h-0 min-w-0 place-items-center transition-[filter,box-shadow] duration-180 ease-out',
                 getCellStyle(coordinate, cellColor, isStart),
                 isPreviewTarget && 'z-10 brightness-95',
               )}
@@ -265,7 +315,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
               {isPreviewTarget && !piece && previewOwner && (
                 <span
                   className={cn(
-                    'destination-marker pointer-events-none grid h-[52%] w-[52%] place-items-center rounded-full border-[3px] bg-white/90 shadow-sm',
+                    'animate-destination-enter pointer-events-none grid h-[52%] w-[52%] place-items-center rounded-full border-[3px] bg-background-alternative/90 shadow-sm',
                     colorStyles[previewOwner.color].marker,
                   )}
                 >
@@ -277,25 +327,33 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
         })}
         <div className='pointer-events-none absolute inset-0 z-20' aria-hidden='false'>
           {positionedPieces.map(({ piece, owner, coordinate, movable }) => {
+            const isInstant = transferringPieceIds.has(piece.id);
+            const isMoving = movingPieceIds.has(piece.id);
             const isCaptureTarget = previewCoordinate && key(previewCoordinate) === key(coordinate) && previewPiece?.playerId !== piece.playerId;
             const capture = captureAnimations[piece.id];
-            const captureStyle = capture
-              ? ({
-                  '--capture-from-left': getBoardAxisPosition(capture.from[1]),
-                  '--capture-from-top': getBoardAxisPosition(capture.from[0]),
-                  '--capture-to-left': getBoardAxisPosition(capture.to[1]),
-                  '--capture-to-top': getBoardAxisPosition(capture.to[0]),
-                } as CSSProperties)
-              : undefined;
+            const spawn = spawnAnimations[piece.id];
+
+            const activeAnimStyle =
+              capture || spawn
+                ? ({
+                    '--capture-from-left': getBoardAxisPosition((capture || spawn)!.from[1]),
+                    '--capture-from-top': getBoardAxisPosition((capture || spawn)!.from[0]),
+                    '--capture-to-left': getBoardAxisPosition((capture || spawn)!.to[1]),
+                    '--capture-to-top': getBoardAxisPosition((capture || spawn)!.to[0]),
+                  } as CSSProperties)
+                : undefined;
+
             return (
               <div
                 key={piece.id}
                 className={cn(
-                  'piece-position pointer-events-none absolute grid place-items-center',
-                  transferringPieceIds.has(piece.id) && 'piece-position-instant',
-                  capture && 'piece-capture-flight',
+                  'pointer-events-none absolute grid w-[6.3%] aspect-square -translate-x-1/2 -translate-y-1/2 place-items-center',
+                  isMoving || capture || spawn ? 'z-50' : 'z-10',
+                  !isInstant && !capture && !spawn && 'transition-[left,top] duration-130 ease-[cubic-bezier(0.22,0.8,0.25,1)] will-change-[left,top]',
+                  capture && 'animate-piece-capture-flight',
+                  spawn && 'animate-piece-spawn-flight',
                 )}
-                style={{ left: getBoardAxisPosition(coordinate[1]), top: getBoardAxisPosition(coordinate[0]), ...captureStyle }}
+                style={{ left: getBoardAxisPosition(coordinate[1]), top: getBoardAxisPosition(coordinate[0]), ...activeAnimStyle }}
               >
                 <button
                   type='button'
@@ -310,18 +368,19 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
                   onBlur={() => setPreview(null)}
                   aria-label={`Figur von ${owner.name}${movable ? ' bewegen' : ''}`}
                   className={cn(
-                    'piece-token pointer-events-auto h-full w-full rounded-full border-2 shadow-[inset_0_2px_0_rgba(255,255,255,.35),0_2px_3px_rgba(28,25,23,.3)] transition-[transform,box-shadow] duration-200',
+                    'pointer-events-auto h-full w-full rounded-full border-2 shadow-[inset_0_2px_0_rgba(255,255,255,.35),0_2px_3px_rgba(0,0,0,.4)] transition-[transform,box-shadow] duration-200',
                     colorStyles[owner.color].token,
-                    movable && 'movable-piece cursor-pointer hover:scale-110',
+                    movable && 'animate-movable-piece cursor-pointer outline-4 outline-amber-300 hover:scale-110',
                     isCaptureTarget && 'scale-90 ring-4 ring-amber-300',
-                    capture && 'piece-capture-token',
+                    capture && 'animate-piece-capture-token',
                   )}
                 >
                   <span className='sr-only'>{owner.name}</span>
                 </button>
-                {isCaptureTarget && (
+                {/* Notice 'capture' is required here so the '×' only shows up on actual attacks, not spawns! */}
+                {isCaptureTarget && capture && (
                   <span
-                    className='pointer-events-none absolute -right-1.5 -top-1.5 z-30 grid h-4 w-4 place-items-center rounded-full border border-white bg-stone-950 text-[10px] font-black leading-none text-white shadow-sm'
+                    className='pointer-events-none absolute -right-1.5 -top-1.5 z-30 grid h-4 w-4 place-items-center rounded-full border border-background-alternative bg-foreground text-[10px] font-black leading-none text-background shadow-sm'
                     aria-label='Figur wird geschlagen'
                   >
                     ×
@@ -357,10 +416,10 @@ function getCellStyle(coordinate: Coordinate, color: PlayerColor | null, isStart
   const isCenter = row >= 4 && row <= 6 && column >= 4 && column <= 6 && !isPath && !color;
 
   if (color) return isStart ? colorStyles[color].start : colorStyles[color].base;
-  if (isPath) return 'bg-white';
-  if (isCenter) return 'bg-stone-800';
+  if (isPath) return 'bg-background-alternative';
+  if (isCenter) return 'bg-foreground/10';
   if (yardColor) return colorStyles[yardColor].pale;
-  return 'bg-stone-100';
+  return 'bg-background';
 }
 
 function isStartCoordinate(coordinate: Coordinate): boolean {

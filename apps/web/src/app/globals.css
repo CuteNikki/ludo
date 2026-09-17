@@ -1,26 +1,49 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --paper: #f4f0e7;
-  --ink: #1c1917;
-  --red: #dc3f3f;
-  --blue: #2574a9;
-  --green: #27865b;
-  --yellow: #e5a820;
+  --background: #f4f0e7;
+  --foreground: #1c1917;
   --grid-line: rgba(28, 25, 23, 0.045);
+  --border: #000000;
+  --background-alternative: #ffffff;
+  --shadow-color: #000000;
+  --shadow: 6px 6px 0 var(--shadow-color);
 }
 
-[data-theme='dark'] {
-  --paper: #17130f;
-  --ink: #f2ede2;
-  --red: #ef5f5f;
-  --blue: #5aa8de;
-  --green: #43b586;
-  --yellow: #f0c15a;
+.dark {
+  --background: #292524;
+  --foreground: #fafaf9;
   --grid-line: rgba(244, 240, 231, 0.06);
+  --border: #000000;
+  --background-alternative: #222222;
+  --shadow-color: #000000;
+  --shadow: 6px 6px 0 var(--shadow-color);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-shadow: var(--shadow-color);
+  --font-display: var(--font-display);
+  --color-border: var(--border);
+  --color-background-alternative: var(--background-alternative);
+  --shadow-card: var(--shadow);
+
+  /* Centralized animation registry */
+  --animate-movable-piece: piece-ready 1.15s ease-in-out infinite;
+  --animate-piece-capture-token: piece-capture-impact 0.52s ease-out both;
+  --animate-dice-rolling: dice-roll 0.65s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  --animate-status-swap: status-swap 0.22s ease-out both;
+  --animate-dice-result: dice-result 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-piece-transfer: piece-transfer 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-board-enter: board-enter 0.35s ease-out both;
+  --animate-destination-enter: destination-enter 0.16s ease-out both;
+  --animate-toast-enter: toast-enter 0.25s ease-out both;
+  --animate-piece-capture-flight: piece-capture-flight 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-piece-spawn-flight: piece-spawn-flight 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 * {
@@ -29,144 +52,28 @@
 html {
   scroll-behavior: smooth;
 }
+
 body {
   margin: 0;
-  color: var(--ink);
   font-family: var(--font-sans), sans-serif;
-  background-color: var(--paper);
   background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 24px 24px;
   min-height: 100vh;
-  transition:
-    background-color 0.35s ease,
-    color 0.35s ease;
-}
-.font-display {
-  font-family: var(--font-display), serif;
-}
-.home-reveal {
-  animation: room-enter 0.55s ease-out both;
-}
-.home-board {
-  animation: board-enter 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s both;
-}
-.home-token {
-  box-shadow:
-    inset 0 -4px 0 rgba(28, 25, 23, 0.2),
-    0 3px 0 rgba(28, 25, 23, 0.35);
-}
-.home-moving-token {
-  position: absolute;
-  z-index: 3;
-  width: 6.3%;
-  aspect-ratio: 1;
-  border: 2px solid #1c1917;
-  border-radius: 999px;
-  box-shadow:
-    inset 0 -4px 0 rgba(28, 25, 23, 0.2),
-    0 3px 0 rgba(28, 25, 23, 0.35);
-  transform: translate(-50%, -50%);
-  transition:
-    left 0.13s cubic-bezier(0.22, 0.8, 0.25, 1),
-    top 0.13s cubic-bezier(0.22, 0.8, 0.25, 1),
-    background-color 0.2s ease;
-  will-change: left, top;
-}
-button,
-input {
-  font: inherit;
+  @apply transition-colors duration-350 ease-in-out bg-background text-foreground;
 }
 
-@keyframes dice-roll {
+@keyframes piece-spawn-flight {
   0% {
-    transform: rotate(0deg) scale(0.92);
-  }
-  40% {
-    transform: rotate(145deg) scale(1.08);
-  }
-  70% {
-    transform: rotate(250deg) scale(0.96);
+    left: var(--capture-from-left);
+    top: var(--capture-from-top);
+    scale: 0.6;
+    opacity: 0.5;
   }
   100% {
-    transform: rotate(360deg) scale(0.92);
-  }
-}
-
-.dice-rolling {
-  animation: dice-roll 0.65s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
-
-@keyframes room-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
+    left: var(--capture-to-left);
+    top: var(--capture-to-top);
+    scale: 1;
     opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes board-enter {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes status-swap {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes dice-result {
-  0% {
-    opacity: 0;
-    transform: scale(0.72) rotate(-8deg);
-  }
-  65% {
-    transform: scale(1.08) rotate(2deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0);
-  }
-}
-
-@keyframes piece-ready {
-  0%,
-  100% {
-    outline-color: rgba(251, 191, 36, 0.95);
-    outline-offset: 2px;
-  }
-  50% {
-    outline-color: rgba(251, 191, 36, 0.45);
-    outline-offset: 5px;
-  }
-}
-
-@keyframes piece-transfer {
-  0% {
-    opacity: 0.25;
-    transform: scale(0.55);
-  }
-  70% {
-    opacity: 1;
-    transform: scale(1.12);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -174,28 +81,100 @@ input {
   0% {
     left: var(--capture-from-left);
     top: var(--capture-from-top);
-    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    scale: 1;
+    rotate: 0deg;
   }
   14% {
     left: var(--capture-from-left);
     top: var(--capture-from-top);
-    transform: translate(-50%, -50%) scale(0.72) rotate(-16deg);
+    scale: 0.72;
+    rotate: -16deg;
   }
   25% {
     left: var(--capture-from-left);
     top: var(--capture-from-top);
-    transform: translate(-50%, -50%) scale(1.16) rotate(12deg);
+    scale: 1.16;
+    rotate: 12deg;
   }
   34% {
-    transform: translate(-50%, -50%) scale(0.92) rotate(-6deg);
+    scale: 0.92;
+    rotate: -6deg;
   }
   44% {
-    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    scale: 1;
+    rotate: 0deg;
   }
   100% {
     left: var(--capture-to-left);
     top: var(--capture-to-top);
-    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes piece-transfer {
+  0% {
+    opacity: 0.25;
+    scale: 0.55;
+  }
+  70% {
+    opacity: 1;
+    scale: 1.12;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes board-enter {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+    scale: 0.985;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes status-swap {
+  from {
+    opacity: 0;
+    translate: 0 5px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes dice-result {
+  0% {
+    opacity: 0;
+    scale: 0.72;
+    rotate: -8deg;
+  }
+  65% {
+    scale: 1.08;
+    rotate: 2deg;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes piece-ready {
+  0%,
+  100% {
+    outline-offset: 2px;
+  }
+  50% {
+    outline-offset: 5px;
   }
 }
 
@@ -222,195 +201,47 @@ input {
   }
 }
 
+@keyframes dice-roll {
+  0% {
+    rotate: 0deg;
+    scale: 0.92;
+  }
+  40% {
+    rotate: 145deg;
+    scale: 1.08;
+  }
+  70% {
+    rotate: 250deg;
+    scale: 0.96;
+  }
+  100% {
+    rotate: 360deg;
+    scale: 0.92;
+  }
+}
+
 @keyframes destination-enter {
   from {
     opacity: 0;
-    transform: scale(0.72);
+    scale: 0.72;
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    scale: 1;
   }
 }
 
 @keyframes toast-enter {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    translate: 0 -8px;
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    translate: 0 0;
   }
 }
 
-.room-enter {
-  animation: room-enter 0.4s ease-out both;
-}
-.board-enter {
-  animation: board-enter 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s both;
-}
-.status-swap {
-  animation: status-swap 0.22s ease-out both;
-}
-.dice-result {
-  animation: dice-result 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-.piece-position {
-  width: 6.3%;
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  transition:
-    left 0.13s cubic-bezier(0.22, 0.8, 0.25, 1),
-    top 0.13s cubic-bezier(0.22, 0.8, 0.25, 1);
-  will-change: left, top;
-}
-.piece-position-instant {
-  transition: none;
-}
-.piece-capture-flight {
-  z-index: 10;
-  transition: none;
-  animation: piece-capture-flight 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-.piece-capture-token {
-  animation: piece-capture-impact 0.52s ease-out both;
-}
-.piece-position-instant .piece-token {
-  animation: piece-transfer 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-.destination-marker {
-  animation: destination-enter 0.16s ease-out both;
-}
-.toast-enter {
-  animation: toast-enter 0.25s ease-out both;
-}
-.movable-piece {
-  outline: 3px solid rgba(251, 191, 36, 0.95);
-  animation: piece-ready 1.15s ease-in-out infinite;
-}
-.turn-panel {
-  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0) 70%, rgba(28, 25, 23, 0.035));
-}
-.room-sidebar {
-  align-self: start;
-}
-.board-cell {
-  transition:
-    filter 0.18s ease,
-    box-shadow 0.18s ease;
-}
-.player-row {
-  position: relative;
-}
-
-@media (min-width: 1024px) {
-  .room-sidebar {
-    position: sticky;
-    top: 1.5rem;
-  }
-}
-
-.stagger-fade-in > * {
-  opacity: 0;
-  animation: fade-in-up 0.5s ease-out forwards;
-}
-.stagger-fade-in > *:nth-child(1) {
-  animation-delay: 0.05s;
-}
-.stagger-fade-in > *:nth-child(2) {
-  animation-delay: 0.15s;
-}
-.stagger-fade-in > *:nth-child(3) {
-  animation-delay: 0.25s;
-}
-.stagger-fade-in > *:nth-child(4) {
-  animation-delay: 0.35s;
-}
-.stagger-fade-in > *:nth-child(5) {
-  animation-delay: 0.45s;
-}
-
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.card-hover-lift {
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-.card-hover-lift:hover {
-  transform: translateY(-3px);
-}
-
-.btn-press {
-  transition: transform 0.12s ease;
-}
-.btn-press:active {
-  transform: scale(0.96);
-}
-
-.icon-swap {
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
-}
-
-.link-underline {
-  position: relative;
-}
-.link-underline::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -2px;
-  height: 2px;
-  width: 0;
-  background: currentColor;
-  transition: width 0.25s ease;
-}
-.link-underline:hover::after {
-  width: 100%;
-}
-
-@keyframes pulse-soft {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(220, 63, 63, 0.35);
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(220, 63, 63, 0);
-  }
-}
-.pulse-soft {
-  animation: pulse-soft 2.4s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dice-rolling,
-  .room-enter,
-  .board-enter,
-  .status-swap,
-  .dice-result,
-  .movable-piece,
-  .piece-position-instant .piece-token,
-  .piece-capture-flight,
-  .piece-capture-token,
-  .destination-marker,
-  .toast-enter .stagger-fade-in > *,
-  .pulse-soft,
-  .icon-swap {
-    animation: none;
-  }
-  .home-moving-token {
-    animation: none;
-  }
+@utility link-underline {
+  @apply relative after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-current after:transition-[width] after:duration-250 after:ease-in-out hover:after:w-full;
 }

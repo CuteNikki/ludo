@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDown, ArrowRight, CircleAlert, Dices, DicesIcon, Flag, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
+import { ArrowRight, CircleAlert, Dices, DicesIcon, Flag, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -192,6 +192,7 @@ export default function HomePage() {
 
     return <GameBoard state={state} playerId='preview-viewer' onMove={() => undefined} />;
   }
+
   useEffect(() => {
     const url = new URL(window.location.href);
     if (url.searchParams.get('notice') === 'removed') {
@@ -212,43 +213,38 @@ export default function HomePage() {
       {wasRemoved && (
         <div
           role='alert'
-          className='toast-enter fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 border-2 border-stone-900 bg-white p-4 pr-3 shadow-[5px_5px_0_#1c1917] sm:right-6 sm:top-6 dark:border-stone-100 dark:bg-stone-900 dark:shadow-[5px_5px_0_#f4f0e7]'
+          className='toast-enter fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 border-2 border-border bg-background-alternative p-4 pr-3 shadow-card sm:right-6 sm:top-6'
         >
           <CircleAlert className='mt-0.5 shrink-0 text-red-600' size={19} />
           <div>
             <p className='text-sm font-black'>{t('toast.removedTitle')}</p>
-            <p className='mt-0.5 text-xs text-stone-600 dark:text-stone-400'>{t('toast.removedText')}</p>
+            <p className='mt-0.5 text-xs text-foreground/70'>{t('toast.removedText')}</p>
           </div>
           <button
             type='button'
             onClick={() => setWasRemoved(false)}
             aria-label={t('toast.close')}
-            className='grid h-7 w-7 shrink-0 place-items-center text-stone-500 hover:bg-stone-100 hover:text-stone-950 focus-visible:outline-2 focus-visible:outline-stone-950 dark:hover:bg-stone-800 dark:hover:text-stone-100'
+            className='grid h-7 w-7 shrink-0 place-items-center text-foreground/60 hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-foreground'
           >
             <X size={16} />
           </button>
         </div>
       )}
-      <nav className='mx-auto flex max-w-6xl items-center justify-between gap-3 px-6 py-6'>
+
+      <nav className='mx-auto mt-2 sm:mt-4 flex w-[calc(100%-1.5rem)] max-w-6xl items-center justify-between gap-2 p-4 bg-background-alternative z-120 border-4 shadow-card border-border'>
         <a href='/' className='flex items-center gap-2 text-lg font-black tracking-tight'>
-          <DicesIcon className='size-10 shrink-0 rounded-lg bg-black p-1.5 text-white' />
+          <DicesIcon className='size-10 shrink-0 rounded-lg bg-foreground p-1.5 text-background' />
           Ludo
         </a>
-        <div className='flex items-center gap-3'>
-          <a
-            href='#how-it-works'
-            className='link-underline hidden items-center gap-2 text-sm font-bold text-stone-600 transition-colors hover:text-stone-950 sm:flex dark:text-stone-400 dark:hover:text-stone-100'
-          >
-            {t('nav.howItWorks')} <ArrowDown size={16} />
-          </a>
+        <div className='flex items-center gap-1'>
           <LanguageToggle />
           <ThemeToggle />
         </div>
       </nav>
 
-      <section className='mx-auto grid max-w-6xl gap-12 px-6 pb-20 pt-10 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:gap-16 lg:pb-28 lg:pt-16'>
+      <section className='mx-auto grid max-w-6xl gap-12 px-6 pb-20 pt-16 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:gap-16 lg:pb-28'>
         <div className='home-reveal'>
-          <p className='mb-5 flex items-center gap-2 text-sm font-black uppercase tracking-[.18em] text-red-700 dark:text-red-400'>
+          <p className='mb-5 flex items-center gap-2 text-sm font-black uppercase tracking-[.18em] text-red-600'>
             <span className='relative flex h-2 w-2 items-center justify-center'>
               <span className='absolute h-2 w-2 rounded-full bg-red-600 animate-ping' />
               <span className='absolute h-2 w-2 rounded-full bg-red-600' />
@@ -258,35 +254,35 @@ export default function HomePage() {
           <h1 className='max-w-2xl font-display text-6xl font-black leading-[.9] tracking-tight sm:text-8xl'>
             {t('hero.titleLine1')}
             <br />
-            <em className='text-red-600 dark:text-red-400'>{t('hero.titleEm')}</em>
+            <em className='text-red-600'>{t('hero.titleEm')}</em>
           </h1>
-          <p className='mt-8 max-w-xl text-lg leading-8 text-stone-600 sm:text-xl dark:text-stone-400'>{t('hero.subtitle')}</p>
+          <p className='mt-8 max-w-xl text-lg leading-8 text-foreground/80 sm:text-xl'>{t('hero.subtitle')}</p>
           <a
             href='#start'
-            className='mt-8 inline-flex items-center gap-3 text-sm font-black uppercase tracking-[.14em] text-stone-950 underline decoration-2 underline-offset-8 dark:text-stone-100'
+            className='mt-8 inline-flex items-center gap-3 text-sm font-black uppercase tracking-[.14em] text-foreground underline decoration-2 underline-offset-8'
           >
             {t('hero.cta')} <ArrowRight size={18} />
           </a>
         </div>
 
         <div className='home-board relative mx-auto w-full max-w-lg' aria-label={t('preview.aria')}>
-          <div className='absolute -right-2 -top-5 z-10 grid h-20 w-20 rotate-12 place-items-center border-2 border-stone-900 bg-white shadow-[5px_5px_0_#1c1917] sm:-right-5 sm:h-24 sm:w-24 dark:border-stone-100 dark:bg-stone-900 dark:shadow-[5px_5px_0_#f4f0e7]'>
+          <div className='absolute z-100 -right-2 -top-5 grid h-20 w-20 rotate-12 place-items-center border-4 border-border bg-background-alternative shadow-card sm:-right-5 sm:h-24 sm:w-24'>
             <Dices size={38} strokeWidth={1.7} />
             <span className='absolute bottom-1 hidden text-[10px] font-black uppercase tracking-widest sm:block'>{t('preview.badge')}</span>
           </div>
           <PreviewBoard />
-          <p className='mt-5 text-center text-xs font-black uppercase tracking-[.16em] text-stone-500 dark:text-stone-500'>{t('preview.caption')}</p>
+          <p className='mt-5 text-center text-xs font-black uppercase tracking-[.16em] text-foreground/60'>{t('preview.caption')}</p>
         </div>
       </section>
 
-      <section id='start' className='border-y-2 border-stone-900 bg-[#e8dfcd] dark:border-stone-100 dark:bg-stone-900'>
+      <section id='start' className='border-y-2 border-border bg-background-alternative'>
         <div className='mx-auto grid min-w-0 max-w-6xl gap-10 px-6 py-14 lg:grid-cols-[.8fr_1.2fr] lg:items-center lg:py-20'>
           <div className='min-w-0'>
-            <p className='mb-3 text-sm font-black uppercase tracking-[.16em] text-red-700 dark:text-red-400'>{t('start.eyebrow')}</p>
+            <p className='mb-3 text-sm font-black uppercase tracking-[.16em] text-red-600'>{t('start.eyebrow')}</p>
             <h2 className='max-w-full wrap-break-word font-display text-4xl font-black leading-none sm:text-5xl'>{t('start.title')}</h2>
-            <p className='mt-4 max-w-md wrap-break-word leading-7 text-stone-600 dark:text-stone-400'>{t('start.subtitle')}</p>
+            <p className='mt-4 max-w-md wrap-break-word leading-7 text-foreground/70'>{t('start.subtitle')}</p>
           </div>
-          <section className='min-w-0 max-w-full border-2 border-stone-900 bg-white p-6 shadow-[8px_8px_0_#1c1917] sm:p-8 dark:border-stone-100 dark:bg-stone-950 dark:shadow-[8px_8px_0_#f4f0e7]'>
+          <section className='min-w-0 max-w-full border-4 border-border bg-background p-6 shadow-card sm:p-8'>
             <label className='mb-2 block text-sm font-bold' htmlFor='name'>
               {t('start.nameLabel')}
             </label>
@@ -296,13 +292,13 @@ export default function HomePage() {
               onChange={(event) => setName(event.target.value)}
               maxLength={24}
               placeholder={t('start.namePlaceholder')}
-              className='h-12 w-full rounded-md border border-stone-300 px-4 outline-none focus:border-stone-950 focus:ring-2 focus:ring-yellow-400 dark:border-stone-700 dark:bg-stone-900 dark:focus:border-stone-100'
+              className='h-12 w-full border-2 border-border bg-background-alternative px-4 outline-none focus:border-foreground focus:ring-2 focus:ring-amber-300'
             />
             <Button className='mt-5 w-full' onClick={() => enter('/room/new')}>
               <Plus size={18} /> {t('start.createRoom')}
             </Button>
-            <div className='my-7 flex items-center gap-3 text-xs font-bold uppercase text-stone-400'>
-              <span className='h-px flex-1 bg-stone-200 dark:bg-stone-700' /> {t('start.or')} <span className='h-px flex-1 bg-stone-200 dark:bg-stone-700' />
+            <div className='my-7 flex items-center gap-3 text-xs font-bold uppercase text-foreground/40'>
+              <span className='h-px flex-1 bg-border' /> {t('start.or')} <span className='h-px flex-1 bg-border' />
             </div>
             <label className='mb-2 block text-sm font-bold' htmlFor='room'>
               {t('start.roomLabel')}
@@ -314,7 +310,7 @@ export default function HomePage() {
                 onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
                 maxLength={6}
                 placeholder={t('start.roomPlaceholder')}
-                className='h-11 min-w-0 flex-1 rounded-md border border-stone-300 px-4 font-mono uppercase outline-none focus:border-stone-950 dark:border-stone-700 dark:bg-stone-900 dark:focus:border-stone-100'
+                className='h-11 min-w-0 flex-1 border-2 border-border bg-background-alternative px-4 font-mono uppercase outline-none focus:border-foreground'
               />
               <Button variant='outline' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6} onClick={() => enter(`/room/${roomCode}`)}>
                 <ArrowRight size={19} />
@@ -326,7 +322,7 @@ export default function HomePage() {
 
       <section id='how-it-works' className='mx-auto max-w-6xl px-6 py-20 sm:py-28'>
         <div className='max-w-xl'>
-          <p className='mb-3 text-sm font-black uppercase tracking-[.16em] text-red-700 dark:text-red-400'>{t('howItWorks.eyebrow')}</p>
+          <p className='mb-3 text-sm font-black uppercase tracking-[.16em] text-red-600'>{t('howItWorks.eyebrow')}</p>
           <h2 className='font-display text-4xl font-black leading-none sm:text-5xl'>{t('howItWorks.title')}</h2>
         </div>
         <div className='stagger-fade-in mt-12 grid gap-8 md:grid-cols-3'>
@@ -335,44 +331,44 @@ export default function HomePage() {
             return (
               <article
                 key={step.title}
-                className={`card-hover-lift ${index === 0 ? 'border-t-0 md:border-l-0 md:pl-0' : 'border-t-2 border-stone-900 md:border-l-2 md:border-t-0 md:border-stone-900 md:pl-8 dark:border-stone-100'} pt-5 md:pt-0`}
+                className={`card-hover-lift ${index === 0 ? 'border-t-0 md:border-l-0 md:pl-0' : 'border-t-2 border-border md:border-l-2 md:border-t-0 md:border-border md:pl-8'} pt-5 md:pt-0`}
               >
                 <div className='flex items-center justify-between'>
-                  <span className='font-mono text-sm font-bold text-red-700 dark:text-red-400'>{String(index + 1).padStart(2, '0')}</span>
+                  <span className='font-mono text-sm font-bold text-red-600'>{String(index + 1).padStart(2, '0')}</span>
                   <Icon size={23} />
                 </div>
                 <h3 className='mt-4 text-2xl font-black'>{step.title}</h3>
-                <p className='mt-2 leading-7 text-stone-600 dark:text-stone-400'>{step.text}</p>
+                <p className='mt-2 leading-7 text-foreground/70'>{step.text}</p>
               </article>
             );
           })}
         </div>
-        <div className='mt-10 grid gap-6 border-t-2 border-stone-900 pt-8 sm:grid-cols-3 dark:border-stone-100'>
+        <div className='mt-10 grid gap-6 border-t-2 border-border pt-8 sm:grid-cols-3'>
           <div className='flex gap-3'>
-            <Users className='shrink-0 text-red-600 dark:text-red-400' size={22} />
+            <Users className='shrink-0 text-red-600' size={22} />
             <p>
               <strong className='block'>{t('howItWorks.players.title')}</strong>
-              <span className='text-sm text-stone-600 dark:text-stone-400'>{t('howItWorks.players.text')}</span>
+              <span className='text-sm text-foreground/70'>{t('howItWorks.players.text')}</span>
             </p>
           </div>
           <div className='flex gap-3'>
-            <Sparkles className='shrink-0 text-red-600 dark:text-red-400' size={22} />
+            <Sparkles className='shrink-0 text-red-600' size={22} />
             <p>
               <strong className='block'>{t('howItWorks.sync.title')}</strong>
-              <span className='text-sm text-stone-600 dark:text-stone-400'>{t('howItWorks.sync.text')}</span>
+              <span className='text-sm text-foreground/70'>{t('howItWorks.sync.text')}</span>
             </p>
           </div>
           <div className='flex gap-3'>
-            <Dices className='shrink-0 text-red-600 dark:text-red-400' size={22} />
+            <Dices className='shrink-0 text-red-600' size={22} />
             <p>
               <strong className='block'>{t('howItWorks.fairDice.title')}</strong>
-              <span className='text-sm text-stone-600 dark:text-stone-400'>{t('howItWorks.fairDice.text')}</span>
+              <span className='text-sm text-foreground/70'>{t('howItWorks.fairDice.text')}</span>
             </p>
           </div>
         </div>
       </section>
 
-      <footer className='border-t-2 border-stone-900 bg-[#e8dfcd] px-6 py-7 text-center text-xs font-bold uppercase tracking-[.15em] dark:border-stone-100 dark:bg-stone-900'>
+      <footer className='border-t-2 border-border bg-background-alternative px-6 py-7 text-center text-xs font-bold uppercase tracking-[.15em]'>
         {t('footer')}
       </footer>
     </main>

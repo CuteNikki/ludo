@@ -4,12 +4,12 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import type { ButtonHTMLAttributes } from 'react';
 
 const buttonVariants = cva(
-  'inline-flex h-11 items-center justify-center gap-2 rounded-md px-5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-950 disabled:pointer-events-none disabled:opacity-45',
+  'inline-flex h-11 items-center justify-center gap-2 px-5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-950 disabled:pointer-events-none disabled:opacity-45',
   {
     variants: {
       variant: {
-        default: 'bg-stone-950 text-white hover:bg-stone-800',
-        outline: 'border border-stone-300 bg-white text-stone-950 hover:bg-stone-100',
+        default: 'bg-stone-950 text-white hover:bg-stone-700',
+        outline: 'border-2 border-border bg-white text-stone-950 hover:bg-stone-300',
       },
     },
     defaultVariants: { variant: 'default' },

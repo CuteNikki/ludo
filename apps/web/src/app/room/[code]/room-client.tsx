@@ -8,9 +8,9 @@ import { cn } from '@/lib/utils';
 import type { ClientEvent, GameState, MoveTimeSeconds, Player, PlayerColor, RoomErrorCode, RoomSettings, ServerEvent } from '@ludo/shared';
 import {
   Check,
-  CheckCheck,
   Clock3,
-  Copy,
+  CopyCheckIcon,
+  CopyIcon,
   Dices,
   DicesIcon,
   Home,
@@ -32,15 +32,15 @@ import { useTranslation } from 'react-i18next';
 const colorClasses: Record<PlayerColor, string> = {
   red: 'bg-red-500',
   blue: 'bg-blue-600',
-  green: 'bg-emerald-600',
-  yellow: 'bg-amber-400',
+  green: 'bg-green-600',
+  yellow: 'bg-yellow-400',
 };
 
 const activePlayerClasses: Record<PlayerColor, string> = {
   red: 'border-red-500 shadow-[inset_4px_0_0_#ef4444]',
   blue: 'border-blue-600 shadow-[inset_4px_0_0_#2563eb]',
-  green: 'border-emerald-600 shadow-[inset_4px_0_0_#059669]',
-  yellow: 'border-amber-400 shadow-[inset_4px_0_0_#fbbf24]',
+  green: 'border-green-600 shadow-[inset_4px_0_0_#059669]',
+  yellow: 'border-yellow-400 shadow-[inset_4px_0_0_#fbbf24]',
 };
 
 export function RoomClient({ requestedCode }: { requestedCode: string }) {
@@ -170,22 +170,26 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   }
 
   return (
-    <main className='room-enter room-shell mx-auto min-h-screen max-w-6xl px-5 py-6 sm:px-6 sm:py-10'>
-      <header className='room-header flex flex-wrap items-center justify-between gap-5 border-2 border-stone-900 bg-white p-4 shadow-[6px_6px_0_#1c1917] sm:p-5 dark:border-stone-100 dark:bg-stone-950 dark:shadow-[6px_6px_0_#f4f0e7]'>
-        <div className='flex items-center gap-4'>
+    <main className='room-shell mx-auto min-h-screen max-w-6xl px-3 py-2 sm:px-4 sm:py-6'>
+      <header className='room-header flex flex-wrap items-center justify-between gap-4 border-4 border-border bg-background-alternative p-4 shadow-card sm:p-5'>
+        <div className='flex items-center gap-2'>
           <a href='/' aria-label={t('room.message.toHomepage')}>
-            <DicesIcon className='size-10 shrink-0 rounded-lg bg-black p-1.5 text-white' />
+            <DicesIcon className='size-10 shrink-0 rounded-lg bg-foreground p-1.5 text-background' />
           </a>
           <div>
             <p className='text-xs font-black uppercase tracking-[.16em] text-red-700 dark:text-red-400'>{t('room.eyebrow')}</p>
             <h1 className='font-mono text-xl font-black tracking-widest'>{state.roomCode}</h1>
           </div>
         </div>
-        <div className='flex items-center gap-3'>
+        <div className='flex items-center gap-2'>
           <LanguageToggle />
           <ThemeToggle />
-          <Button variant='outline' onClick={copyRoomLink} aria-live='polite'>
-            {copied ? <CheckCheck size={17} /> : <Copy size={17} />} {copied ? t('room.copied') : t('room.copyLink')}
+          <Button
+            variant='outline'
+            className='h-10 px-2 bg-background-alternative text-foreground hover:bg-background hover:text-foreground'
+            onClick={copyRoomLink}
+          >
+            {copied ? <CopyCheckIcon /> : <CopyIcon />} {copied ? t('room.copied') : t('room.copyLink')}
           </Button>
         </div>
       </header>
@@ -195,16 +199,16 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
           <GameBoard state={state} playerId={playerId} onMove={(pieceId) => emit({ type: 'game:move', payload: { pieceId } })} />
         </section>
 
-        <aside className='room-sidebar border-2 border-stone-900 bg-white p-5 shadow-[6px_6px_0_#1c1917] dark:border-stone-100 dark:bg-stone-950 dark:shadow-[6px_6px_0_#f4f0e7]'>
+        <aside className='self-start border-4 border-border bg-background-alternative p-5 shadow-card'>
           {state.phase !== 'lobby' && (
-            <section className='turn-panel mb-6 flex h-56 flex-col border-b-2 border-stone-900 pb-6 dark:border-stone-100'>
+            <section className='turn-panel mb-6 flex h-56 flex-col border-b-2 border-border pb-6'>
               {state.phase === 'finished' ? (
                 <div className='grid flex-1 place-items-center text-center'>
                   <div className='w-full'>
                     <Trophy className='mx-auto mb-1 text-amber-500' size={27} />
-                    <p className='text-xs font-bold uppercase text-stone-500 dark:text-stone-400'>{t('room.won')}</p>
+                    <p className='text-xs font-bold uppercase text-foreground/60'>{t('room.won')}</p>
                     <p className='mt-1 text-2xl font-black'>{winner?.name}</p>
-                    <p className='mt-1 h-5 text-xs font-bold text-stone-500 dark:text-stone-400' aria-live='polite'>
+                    <p className='mt-1 h-5 text-xs font-bold text-foreground/60' aria-live='polite'>
                       {state.rematchDeadline === null
                         ? t('room.oneMoreRound')
                         : t('room.rematchStatus', {
@@ -228,7 +232,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                 <div className='flex min-h-0 flex-1 flex-col'>
                   <div className='flex min-h-12 items-center justify-between gap-3'>
                     <div>
-                      <p className='text-xs font-bold uppercase text-stone-500 dark:text-stone-400'>{t('room.yourTurn')}</p>
+                      <p className='text-xs font-bold uppercase text-foreground/60'>{t('room.yourTurn')}</p>
                       <p className='max-w-48 truncate text-xl font-black'>{currentPlayer?.name}</p>
                     </div>
                     <div className='flex h-8 w-16 shrink-0 items-center justify-end gap-2 font-mono text-2xl font-black'>
@@ -239,7 +243,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                       )}
                     </div>
                   </div>
-                  <div className={cn('mt-3 h-2 shrink-0 overflow-hidden', state.turnStage === 'move' && 'bg-stone-200 dark:bg-stone-800')}>
+                  <div className={cn('mt-3 h-2 shrink-0 overflow-hidden', state.turnStage === 'move' && 'bg-border/20')}>
                     {state.turnStage === 'move' && (
                       <div
                         className='h-full bg-red-500 transition-[width] duration-200'
@@ -247,15 +251,15 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                       />
                     )}
                   </div>
-                  <div key={`${state.revision}-${state.turnStage}`} className='status-swap grid min-h-0 flex-1 place-items-center text-center'>
+                  <div key={`${state.revision}-${state.turnStage}`} className='animate-status-swap grid min-h-0 flex-1 place-items-center text-center'>
                     {state.turnStage === 'rolling' ? (
                       <div>
-                        <Dices className='dice-rolling mx-auto' size={58} strokeWidth={2.2} />
+                        <Dices className='animate-dice-rolling mx-auto' size={58} strokeWidth={2.2} />
                         <p className='mt-2 text-sm font-bold'>{t('room.rollAnimating')}</p>
                       </div>
                     ) : (
                       <div>
-                        <p className='dice-result [font-family:var(--font-display)] text-6xl font-black leading-none'>{state.diceResult}</p>
+                        <p className='animate-dice-result font-display text-6xl font-black leading-none'>{state.diceResult}</p>
                         {state.turnStage === 'move' && (
                           <p className='mt-2 text-sm font-bold'>{isMyTurn ? t('room.chooseAPieceSelf') : t('room.chooseAPieceOther')}</p>
                         )}
@@ -283,26 +287,26 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
           <h2 className='mb-4 flex items-center gap-2 text-lg font-black'>
             <Users size={19} /> {t('room.players')} {state.players.length}/4
           </h2>
-          <div className='stagger-fade-in space-y-3'>
+          <div className='space-y-2'>
             {state.players.map((player) => (
               <div
                 key={player.id}
                 className={cn(
-                  'player-row card-hover-lift flex min-h-12 items-center gap-3 border bg-white p-3 transition-[border-color,box-shadow,background-color,transform] duration-300 dark:bg-stone-950',
-                  player.id === state.currentPlayerId ? activePlayerClasses[player.color] : 'border-stone-300 dark:border-stone-700',
+                  'relative flex min-h-12 items-center gap-3 border-2 bg-background p-3 transition-[border-color,box-shadow,background-color,transform] duration-300',
+                  player.id === state.currentPlayerId ? activePlayerClasses[player.color] : 'border-border',
                   !player.connected && 'opacity-55',
                 )}
               >
-                <span className={cn('h-4 w-4 rounded-full border-2 border-white shadow-sm dark:border-stone-950', colorClasses[player.color])} />
+                <span className={cn('h-4 w-4 rounded-full border-2 border-background-alternative shadow-sm', colorClasses[player.color])} />
                 <span className='min-w-0 flex-1 truncate font-bold'>
                   {player.name}
                   {player.id === playerId ? t('room.you') : ''}
                 </span>
                 {player.id === state.hostPlayerId && state.phase === 'lobby' && (
-                  <span className='text-[10px] font-bold uppercase text-stone-500 dark:text-stone-400'>{t('room.host')}</span>
+                  <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.host')}</span>
                 )}
                 {player.id === state.currentPlayerId && state.phase === 'playing' && (
-                  <span className='text-[10px] font-bold uppercase text-stone-500 dark:text-stone-400'>{t('room.yourTurn')}</span>
+                  <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.yourTurn')}</span>
                 )}
                 {player.ready && <Check size={18} className='text-emerald-700 dark:text-emerald-400' aria-label={t('room.imReady')} />}
                 {state.phase === 'lobby' && isHost && player.id !== playerId && (
@@ -311,7 +315,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                     onClick={() => emit({ type: 'room:kick', payload: { playerId: player.id } })}
                     aria-label={t('room.removePlayerAria', { name: player.name })}
                     title={t('room.removePlayerAria', { name: player.name })}
-                    className='btn-press grid h-8 w-8 shrink-0 place-items-center text-stone-500 transition-colors hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-stone-950 dark:text-stone-400 dark:hover:bg-red-950 dark:hover:text-red-400 dark:focus-visible:outline-stone-100'
+                    className='btn-press grid h-8 w-8 shrink-0 place-items-center text-foreground/60 transition-colors hover:bg-red-500/15 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
                   >
                     <UserMinus size={17} />
                   </button>
@@ -328,12 +332,9 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
               {me?.ready ? t('room.notReady') : t('room.imReady')}
             </Button>
           )}
-          {state.phase === 'lobby' && <p className='mt-4 text-sm font-medium leading-6 text-stone-700 dark:text-stone-300'>{t('room.startHint')}</p>}
+          {state.phase === 'lobby' && <p className='mt-4 text-sm font-medium leading-6 text-foreground/80'>{t('room.startHint')}</p>}
           {notice && (
-            <p
-              role='alert'
-              className='toast-enter mt-4 border border-red-300 bg-red-50 p-3 text-sm font-bold text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300'
-            >
+            <p role='alert' className='toast-enter mt-4 border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-600 dark:text-red-400'>
               {t(`room.errors.${notice}`, { defaultValue: t('room.errors.UNKNOWN') })}
             </p>
           )}
@@ -384,7 +385,7 @@ function PlayerProfile({
   }
 
   return (
-    <section className='mb-0 border-b-2 border-stone-900 pb-5 lg:mb-7 dark:border-stone-100'>
+    <section className='mb-0 border-b-2 border-border pb-5 lg:mb-7'>
       <h2 className='mb-4 flex items-center gap-2 text-lg font-black'>
         <UserRound size={19} /> {t('room.profile.title')}
       </h2>
@@ -397,7 +398,7 @@ function PlayerProfile({
         }}
         maxLength={24}
         aria-label={t('room.profile.nameAria')}
-        className='h-11 w-full rounded-md border border-stone-300 bg-white px-3 outline-none focus:border-stone-950 focus:ring-2 focus:ring-amber-300 dark:border-stone-700 dark:bg-stone-900 dark:focus:border-stone-100'
+        className='h-11 w-full border-2 border-border bg-background px-3 outline-none focus:border-foreground focus:ring-2 focus:ring-amber-300'
       />
 
       <div className='mt-4 flex items-center justify-between gap-4'>
@@ -418,9 +419,9 @@ function PlayerProfile({
                 aria-pressed={selected}
                 title={occupied ? `${colorNames[color]}${t('room.profile.occupiedSuffix')}` : colorNames[color]}
                 className={cn(
-                  'btn-press h-8 w-8 rounded-full border-2 border-white shadow-[0_0_0_1px_#a8a29e] transition-[transform,box-shadow,opacity] hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950 disabled:cursor-not-allowed disabled:opacity-25 dark:border-stone-950 dark:focus-visible:outline-stone-100',
+                  'h-8 w-8 rounded-full border-2 border-background-alternative shadow-[0_0_0_2px_var(--color-border)] transition-[transform,box-shadow,opacity] hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:cursor-not-allowed disabled:opacity-25',
                   colorClasses[color],
-                  selected && 'scale-105 shadow-[0_0_0_3px_#1c1917] dark:shadow-[0_0_0_3px_#f4f0e7]',
+                  selected && 'scale-105 shadow-[0_0_0_3px_var(--color-foreground)]',
                 )}
               />
             );
@@ -436,12 +437,12 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
   const moveTimes: MoveTimeSeconds[] = [15, 30, 45, 60];
 
   return (
-    <section className='mb-7 border-b-2 border-stone-900 py-5 sm:pt-0 dark:border-stone-100'>
+    <section className='mb-7 border-b-2 border-border py-5 sm:pt-0'>
       <div className='mb-4 flex items-center justify-between gap-3'>
         <h2 className='flex items-center gap-2 text-lg font-black'>
           <Settings2 size={19} /> {t('room.settings.title')}
         </h2>
-        {!isHost && <span className='text-[10px] font-bold uppercase text-stone-500 dark:text-stone-400'>{t('room.settings.hostOnly')}</span>}
+        {!isHost && <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.settings.hostOnly')}</span>}
       </div>
 
       <fieldset className='space-y-2'>
@@ -451,7 +452,7 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
             <InfoTooltip text={t('room.settings.moveTimeInfo')} />
           </legend>
           <div
-            className={cn('grid grid-cols-4 border border-stone-300 bg-white p-1 dark:border-stone-700 dark:bg-stone-900', !isHost && 'opacity-60')}
+            className={cn('grid grid-cols-4 border-2 border-border bg-background p-1', !isHost && 'opacity-60')}
             role='group'
             aria-label={t('room.settings.moveTimeGroupAria')}
           >
@@ -462,10 +463,8 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
                 disabled={!isHost}
                 onClick={() => onChange({ moveTimeSeconds: seconds })}
                 className={cn(
-                  'btn-press h-9 text-sm font-bold transition-colors disabled:cursor-not-allowed',
-                  settings.moveTimeSeconds === seconds
-                    ? 'bg-stone-950 text-white dark:bg-stone-100 dark:text-stone-950'
-                    : 'text-stone-600 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800',
+                  'h-9 text-sm font-bold transition-colors disabled:cursor-not-allowed',
+                  settings.moveTimeSeconds === seconds ? 'bg-foreground text-background' : 'text-foreground/70 hover:bg-background-alternative',
                 )}
                 aria-pressed={settings.moveTimeSeconds === seconds}
               >
@@ -528,13 +527,13 @@ function SettingToggle({
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(
-          'relative h-7 w-12 shrink-0 rounded-full border-2 border-stone-900 transition-colors disabled:cursor-not-allowed disabled:opacity-60 dark:border-stone-100',
-          checked ? 'bg-emerald-500' : 'bg-stone-200 dark:bg-stone-800',
+          'relative h-7 w-12 shrink-0 rounded-full border-2 border-border transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+          checked ? 'bg-green-500' : 'bg-background',
         )}
       >
         <span
           className={cn(
-            'absolute left-0.5 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border border-stone-900 bg-white transition-transform dark:border-stone-100 dark:bg-stone-200',
+            'absolute left-0.5 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border-2 border-border bg-background-alternative transition-transform',
             checked && 'translate-x-5',
           )}
         />
@@ -545,26 +544,47 @@ function SettingToggle({
 
 function InfoTooltip({ text }: { text: string }) {
   const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const tooltipId = `setting-info-${text.slice(0, 12).replaceAll(' ', '-').toLowerCase()}`;
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close tooltip when clicking outside
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  const showTooltip = isOpen || isHovered;
 
   return (
-    <span className='group relative ml-auto inline-flex shrink-0'>
+    <div ref={containerRef} className='relative ml-auto inline-flex shrink-0' onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
       <button
         type='button'
         aria-label={t('room.settings.title')}
         aria-describedby={tooltipId}
-        className='btn-press grid h-7 w-7 place-items-center rounded-full text-stone-500 transition-colors hover:bg-stone-200 hover:text-stone-950 focus-visible:bg-stone-200 focus-visible:text-stone-950 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-stone-950 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100 dark:focus-visible:bg-stone-800 dark:focus-visible:text-stone-100 dark:focus-visible:outline-stone-100'
+        aria-expanded={showTooltip}
+        onClick={() => setIsOpen((prev) => !prev)}
+        className='grid h-7 w-7 place-items-center rounded-full text-foreground/60 transition-colors hover:bg-background hover:text-foreground focus-visible:bg-background focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
       >
         <Info size={16} />
       </button>
-      <span
-        id={tooltipId}
-        role='tooltip'
-        className='pointer-events-none invisible absolute right-0 top-9 z-50 w-64 border border-stone-900 bg-stone-950 p-3 text-left text-xs font-medium leading-5 text-white opacity-0 shadow-[4px_4px_0_rgba(28,25,23,.2)] transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 dark:border-stone-100 dark:bg-stone-100 dark:text-stone-950'
-      >
-        {text}
-      </span>
-    </span>
+      {showTooltip && (
+        <span
+          id={tooltipId}
+          role='tooltip'
+          className='absolute right-0 top-8 z-50 w-64 border-2 border-border bg-background-alternative p-3 text-left text-xs font-medium leading-5 shadow-card'
+        >
+          {text}
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -576,9 +596,9 @@ function Message({ title, detail, showRoomChoices = false }: { title: string; de
   const { t } = useTranslation();
   return (
     <main className='grid min-h-screen place-items-center px-6 text-center'>
-      <div className='room-enter border-2 border-stone-900 bg-white p-8 shadow-[6px_6px_0_#1c1917] dark:border-stone-100 dark:bg-stone-950 dark:shadow-[6px_6px_0_#f4f0e7]'>
+      <div className='border-4 border-border bg-background-alternative p-8 shadow-card'>
         <h1 className='text-4xl font-bold'>{title}</h1>
-        <p className='mt-3 text-stone-600 dark:text-stone-400'>{detail}</p>
+        <p className='mt-3 text-foreground/70'>{detail}</p>
         {showRoomChoices && (
           <div className='mt-7 flex flex-col justify-center gap-3 sm:flex-row'>
             <Button asChild>
