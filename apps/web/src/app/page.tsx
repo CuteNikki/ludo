@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import type { GameState, PlayerColor } from '@ludo/shared';
 
 import { GameBoard } from '@/components/game-board';
+import { LanguageToggle } from '@/components/language-toggle';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 
@@ -240,6 +241,7 @@ export default function HomePage() {
           >
             {t('nav.howItWorks')} <ArrowDown size={16} />
           </a>
+          <LanguageToggle />
           <ThemeToggle />
         </div>
       </nav>
