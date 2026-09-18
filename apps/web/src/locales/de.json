@@ -59,6 +59,8 @@
   "toast": {
     "removedTitle": "Aus dem Raum entfernt",
     "removedText": "Der Host hat dich aus dem Raum entfernt.",
+    "rematchTimeoutTitle": "Revanche verpasst",
+    "rematchTimeoutText": "Du hast die Revanche nicht rechtzeitig bestätigt und wurdest daher nicht in den neuen Raum verschoben.",
     "close": "Meldung schließen"
   },
   "footer": "Ludo · Für Menschen, die noch eine Runde spielen",

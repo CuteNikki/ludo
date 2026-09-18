@@ -59,6 +59,8 @@
   "toast": {
     "removedTitle": "Removed from room",
     "removedText": "The host removed you from the room.",
+    "rematchTimeoutTitle": "Rematch missed",
+    "rematchTimeoutText": "You didn't confirm the rematch in time, so you weren't moved into the new room.",
     "close": "Dismiss notice"
   },
   "footer": "Ludo · For people who want one more round",

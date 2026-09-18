@@ -22,6 +22,15 @@ interface Room {
 
 type StateListener = (roomCode: string, state: GameState) => void;
 
+export interface RematchTransition {
+  oldRoomCode: string;
+  newRoomCode: string | null;
+  movedPlayerIds: string[];
+  newState: GameState | null;
+}
+
+type RematchListener = (transition: RematchTransition) => void;
+
 export class RoomManager {
   private readonly rooms = new Map<string, Room>();
   private readonly cleanupTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -35,8 +44,13 @@ export class RoomManager {
     private readonly rollAnimationMs = 900,
     private readonly noMoveDelayMs = 1_800,
     private readonly autoMoveDelayMs: number | null = 1_300,
-    private readonly rematchDurationMs = 10_000,
+    private readonly rematchDurationMs = 30_000,
+    private readonly onRematchResolved: RematchListener = () => undefined,
   ) {}
+
+  getRoomState(roomCode: string): GameState | null {
+    return this.rooms.get(roomCode)?.state ?? null;
+  }
 
   createRoom(playerName: string): { playerId: string; state: GameState } {
     let roomCode = this.generateRoomCode();
@@ -145,7 +159,11 @@ export class RoomManager {
     return this.removePlayer(roomCode, playerId);
   }
 
-  voteRematch(roomCode: string, playerId: string): GameState {
+  /**
+   * Returns the updated (still-live) state, or `null` once every player has voted and the room
+   * has already been torn down and replaced by a fresh one (see `resolveRematch`).
+   */
+  voteRematch(roomCode: string, playerId: string): GameState | null {
     const state = this.getState(roomCode);
     if (state.phase !== 'finished') throw new RoomError('REMATCH_NOT_AVAILABLE', 'The rematch vote is not available yet.');
     if (!state.players.some((player) => player.id === playerId)) throw new RoomError('PLAYER_NOT_FOUND', 'Player was not found.');
@@ -155,7 +173,10 @@ export class RoomManager {
       state.rematchDeadline = Date.now() + this.rematchDurationMs;
       this.scheduleRematchResolution(state);
     }
-    if (state.rematchPlayerIds.length === state.players.length) this.resolveRematch(state);
+    if (state.rematchPlayerIds.length === state.players.length) {
+      this.resolveRematch(state);
+      return null;
+    }
     state.revision += 1;
     return state;
   }
@@ -393,30 +414,64 @@ export class RoomManager {
     room.turnTimer = setTimeout(() => {
       if (state.phase !== 'finished' || state.rematchDeadline === null) return;
       this.resolveRematch(state);
-      state.revision += 1;
-      this.onStateChange(state.roomCode, state);
     }, this.rematchDurationMs);
   }
 
+  /**
+   * Ends the post-game vote: players who confirmed the rematch are moved into a brand-new room
+   * (reset to the lobby), while everyone else is dropped for inactivity. The old room is torn
+   * down entirely rather than reused, so a stale reference to it never resurfaces.
+   */
   private resolveRematch(state: GameState) {
-    this.clearTurnTimer(state.roomCode);
-    const accepted = new Set(state.rematchPlayerIds);
-    const removedPlayerIds = state.players.filter((player) => !accepted.has(player.id)).map((player) => player.id);
-    state.players = state.players.filter((player) => accepted.has(player.id));
-    state.pieces = state.pieces.filter((piece) => accepted.has(piece.playerId));
-    for (const playerId of removedPlayerIds) this.fairDice.removePlayer(playerId);
-    if (!state.players.some((player) => player.id === state.hostPlayerId)) state.hostPlayerId = state.players[0]?.id ?? null;
-    for (const player of state.players) player.ready = false;
-    for (const piece of state.pieces) piece.position = -1;
-    state.phase = 'lobby';
-    state.turnStage = 'rolling';
-    state.turnDeadline = null;
-    state.currentPlayerId = null;
-    state.diceResult = null;
-    state.movablePieceIds = [];
-    state.winnerId = null;
-    state.rematchDeadline = null;
-    state.rematchPlayerIds = [];
+    const oldRoomCode = state.roomCode;
+    this.clearTurnTimer(oldRoomCode);
+
+    const accepted = state.players.filter((player) => state.rematchPlayerIds.includes(player.id));
+    const declined = state.players.filter((player) => !state.rematchPlayerIds.includes(player.id));
+    for (const player of declined) this.fairDice.removePlayer(player.id);
+
+    this.rooms.delete(oldRoomCode);
+    const cleanupTimer = this.cleanupTimers.get(oldRoomCode);
+    if (cleanupTimer) clearTimeout(cleanupTimer);
+    this.cleanupTimers.delete(oldRoomCode);
+    for (const [key, timer] of this.playerCleanupTimers) {
+      if (key.startsWith(`${oldRoomCode}:`)) {
+        clearTimeout(timer);
+        this.playerCleanupTimers.delete(key);
+      }
+    }
+
+    if (accepted.length === 0) {
+      this.onRematchResolved({ oldRoomCode, newRoomCode: null, movedPlayerIds: [], newState: null });
+      return;
+    }
+
+    let newRoomCode = this.generateRoomCode();
+    while (this.rooms.has(newRoomCode)) newRoomCode = this.generateRoomCode();
+
+    for (const player of accepted) player.ready = false;
+    const newState: GameState = {
+      roomCode: newRoomCode,
+      hostPlayerId: accepted.some((player) => player.id === state.hostPlayerId) ? state.hostPlayerId : (accepted[0]?.id ?? null),
+      settings: { ...state.settings },
+      phase: 'lobby',
+      turnStage: 'rolling',
+      turnDeadline: null,
+      players: accepted,
+      pieces: accepted.flatMap((player) =>
+        Array.from({ length: 4 }, (_, index) => ({ id: `${player.id}-${index}`, playerId: player.id, position: -1 })),
+      ),
+      currentPlayerId: null,
+      diceResult: null,
+      movablePieceIds: [],
+      winnerId: null,
+      rematchDeadline: null,
+      rematchPlayerIds: [],
+      revision: 0,
+    };
+    this.rooms.set(newRoomCode, { state: newState });
+
+    this.onRematchResolved({ oldRoomCode, newRoomCode, movedPlayerIds: accepted.map((player) => player.id), newState });
   }
 
   private clearTurnTimer(roomCode: string) {

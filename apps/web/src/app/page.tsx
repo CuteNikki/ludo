@@ -106,7 +106,7 @@ export default function HomePage() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
-  const [wasRemoved, setWasRemoved] = useState(false);
+  const [notice, setNotice] = useState<'removed' | 'rematch-timeout' | null>(null);
 
   const stepIcons = [Link2, Dices, Flag];
   const steps = t('howItWorks.steps', { returnObjects: true }) as Array<{ title: string; text: string }>;
@@ -200,8 +200,9 @@ export default function HomePage() {
 
   useEffect(() => {
     const url = new URL(window.location.href);
-    if (url.searchParams.get('notice') === 'removed') {
-      setWasRemoved(true);
+    const noticeParam = url.searchParams.get('notice');
+    if (noticeParam === 'removed' || noticeParam === 'rematch-timeout') {
+      setNotice(noticeParam);
       url.searchParams.delete('notice');
       window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
     }
@@ -215,19 +216,19 @@ export default function HomePage() {
 
   return (
     <main className='min-h-screen overflow-hidden'>
-      {wasRemoved && (
+      {notice && (
         <div
           role='alert'
           className='toast-enter fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 border-2 border-border bg-background-alternative p-4 pr-3 shadow-card sm:right-6 sm:top-6'
         >
           <CircleAlert className='mt-0.5 shrink-0 text-red-600' size={19} />
           <div>
-            <p className='text-sm font-black'>{t('toast.removedTitle')}</p>
-            <p className='mt-0.5 text-xs text-foreground/70'>{t('toast.removedText')}</p>
+            <p className='text-sm font-black'>{t(notice === 'removed' ? 'toast.removedTitle' : 'toast.rematchTimeoutTitle')}</p>
+            <p className='mt-0.5 text-xs text-foreground/70'>{t(notice === 'removed' ? 'toast.removedText' : 'toast.rematchTimeoutText')}</p>
           </div>
           <button
             type='button'
-            onClick={() => setWasRemoved(false)}
+            onClick={() => setNotice(null)}
             aria-label={t('toast.close')}
             className='grid h-7 w-7 shrink-0 place-items-center text-foreground/60 hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-foreground'
           >

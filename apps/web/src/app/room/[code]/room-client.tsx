@@ -63,6 +63,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   useEffect(() => {
     let active = true;
     let joined = false;
+    let currentRoomCode = requestedCode === 'NEW' ? null : requestedCode;
     const playerName = sessionStorage.getItem('ludo-player-name')?.trim() ?? '';
     const socket = new WebSocket(process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:3001/ws');
     socketRef.current = socket;
@@ -87,6 +88,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
       const event = JSON.parse(String(message.data)) as ServerEvent;
       if (event.type === 'room:joined') {
         joined = true;
+        currentRoomCode = event.payload.state.roomCode;
         setPlayerId(event.payload.playerId);
         setState(event.payload.state);
         sessionStorage.setItem(`ludo-player:${event.payload.state.roomCode}`, event.payload.playerId);
@@ -105,6 +107,16 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
         const currentPlayer = event.payload.players.find((player) => player.id === storedPlayerId);
         if (currentPlayer) sessionStorage.setItem('ludo-player-name', currentPlayer.name);
         setState(event.payload);
+      } else if (event.type === 'room:rematch') {
+        const storedPlayerId = currentRoomCode ? sessionStorage.getItem(`ludo-player:${currentRoomCode}`) : null;
+        if (currentRoomCode) sessionStorage.removeItem(`ludo-player:${currentRoomCode}`);
+        if (event.payload.roomCode && storedPlayerId && event.payload.movedPlayerIds.includes(storedPlayerId)) {
+          sessionStorage.setItem(`ludo-player:${event.payload.roomCode}`, storedPlayerId);
+          window.location.assign(`/room/${event.payload.roomCode}`);
+        } else {
+          window.location.assign('/?notice=rematch-timeout');
+        }
+        return;
       } else if (event.type === 'room:error') {
         if (joined) setNotice(event.payload.code);
         else setError(event.payload);
@@ -149,7 +161,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   const settings = state.settings;
   const roomCode = state.roomCode;
   const secondsLeft = state.turnDeadline === null ? 0 : Math.min(settings.moveTimeSeconds, Math.max(0, Math.ceil((state.turnDeadline - now) / 1000)));
-  const rematchSecondsLeft = state.rematchDeadline === null ? 10 : Math.max(0, Math.ceil((state.rematchDeadline - now) / 1000));
+  const rematchSecondsLeft = state.rematchDeadline === null ? 30 : Math.max(0, Math.ceil((state.rematchDeadline - now) / 1000));
   const wantsRematch = state.rematchPlayerIds.includes(playerId);
   const shareUrl = typeof window === 'undefined' ? '' : `${window.location.origin}/room/${roomCode}`;
 

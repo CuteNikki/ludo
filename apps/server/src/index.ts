@@ -9,9 +9,23 @@ interface SocketData {
 }
 
 const port = Number(Bun.env.PORT ?? 3001);
-const rooms = new RoomManager((roomCode, state) => {
-  broadcast(roomCode, { type: 'game:state', payload: state });
-});
+const rooms = new RoomManager(
+  (roomCode, state) => {
+    broadcast(roomCode, { type: 'game:state', payload: state });
+  },
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  (transition) => {
+    broadcast(transition.oldRoomCode, {
+      type: 'room:rematch',
+      payload: { roomCode: transition.newRoomCode, movedPlayerIds: transition.movedPlayerIds },
+    });
+  },
+);
 
 const server = Bun.serve<SocketData>({
   hostname: '0.0.0.0',
@@ -70,7 +84,8 @@ const server = Bun.serve<SocketData>({
           delete socket.data.roomCode;
           delete socket.data.playerId;
         } else if (event.type === 'game:rematch') {
-          broadcast(roomCode, { type: 'game:state', payload: rooms.voteRematch(roomCode, playerId) });
+          const state = rooms.voteRematch(roomCode, playerId);
+          if (state) broadcast(roomCode, { type: 'game:state', payload: state });
         } else if (event.type === 'game:move') {
           broadcast(roomCode, { type: 'game:state', payload: rooms.move(roomCode, playerId, event.payload.pieceId) });
         }
@@ -94,6 +109,7 @@ const server = Bun.serve<SocketData>({
 });
 
 function joinSocket(socket: Bun.ServerWebSocket<SocketData>, roomCode: string, playerId: string) {
+  if (socket.data.roomCode && socket.data.roomCode !== roomCode) socket.unsubscribe(socket.data.roomCode);
   socket.data.roomCode = roomCode;
   socket.data.playerId = playerId;
   socket.subscribe(roomCode);

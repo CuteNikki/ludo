@@ -55,6 +55,7 @@ export type ServerEvent =
   | { type: 'room:joined'; payload: { playerId: string; state: GameState } }
   | { type: 'game:state'; payload: GameState }
   | { type: 'player:left'; payload: { playerId: string } }
+  | { type: 'room:rematch'; payload: { roomCode: string | null; movedPlayerIds: string[] } }
   | { type: 'room:error'; payload: { code: RoomErrorCode; message: string } };
 
 export type RoomErrorCode =

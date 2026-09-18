@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { RoomManager } from './room-manager';
+import { RoomManager, type RematchTransition } from './room-manager';
 
 function startGame(rolls: number[] = [6, 3]) {
   let rollIndex = 0;
@@ -91,35 +91,44 @@ describe('RoomManager game turns', () => {
     expect(updated.players.map((player) => player.id)).toEqual([host.playerId]);
   });
 
-  test('keeps only rematch voters and resets them to the lobby after timeout', async () => {
-    let resolveReset: (() => void) | undefined;
-    const reset = new Promise<void>((resolve) => {
-      resolveReset = resolve;
+  test('moves rematch voters into a brand-new room and drops inactive players after timeout', async () => {
+    let resolveTransition: ((transition: RematchTransition) => void) | undefined;
+    const transitionPromise = new Promise<RematchTransition>((resolve) => {
+      resolveTransition = resolve;
     });
     const manager = new RoomManager(
-      (_roomCode, state) => {
-        if (state.phase === 'lobby') resolveReset?.();
-      },
+      () => undefined,
       undefined,
       undefined,
       900,
       1_800,
       1_300,
       5,
+      (transition) => resolveTransition?.(transition),
     );
     const host = manager.createRoom('Ada');
-    manager.joinRoom(host.state.roomCode, 'Linus');
+    const oldRoomCode = host.state.roomCode;
+    manager.joinRoom(oldRoomCode, 'Linus');
     host.state.phase = 'finished';
     host.state.winnerId = host.playerId;
 
-    const voting = manager.voteRematch(host.state.roomCode, host.playerId);
-    expect(voting.rematchDeadline).not.toBeNull();
-    await reset;
-    expect(String(host.state.phase)).toBe('lobby');
-    expect(host.state.players.map((player) => player.id)).toEqual([host.playerId]);
-    expect(host.state.pieces).toHaveLength(4);
-    expect(host.state.pieces.every((piece) => piece.position === -1)).toBe(true);
-    expect(host.state.rematchPlayerIds).toEqual([]);
+    const voting = manager.voteRematch(oldRoomCode, host.playerId);
+    expect(voting?.rematchDeadline).not.toBeNull();
+    const transition = await transitionPromise;
+
+    expect(transition.oldRoomCode).toBe(oldRoomCode);
+    expect(transition.newRoomCode).not.toBeNull();
+    expect(transition.newRoomCode).not.toBe(oldRoomCode);
+    expect(transition.movedPlayerIds).toEqual([host.playerId]);
+
+    // The old room is gone entirely - only the rematch-confirming player carries over.
+    expect(manager.getRoomState(oldRoomCode)).toBeNull();
+    const newState = manager.getRoomState(transition.newRoomCode!);
+    expect(newState?.phase).toBe('lobby');
+    expect(newState?.players.map((player) => player.id)).toEqual([host.playerId]);
+    expect(newState?.pieces).toHaveLength(4);
+    expect(newState?.pieces.every((piece) => piece.position === -1)).toBe(true);
+    expect(newState?.rematchPlayerIds).toEqual([]);
   });
 
   test('uses a simple fallback and allows duplicate names', () => {
