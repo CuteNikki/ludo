@@ -59,7 +59,7 @@ The host can remove other players from the room while in the lobby. After the ga
 
 - [x] **Global Animations & Reveal Effects**: Add smooth fade-in and scroll-reveal animations across the home page and room page.
 - [x] **Shadcn/UI Redesign**: Overhaul the application's interface to incorporate more components from `shadcn/ui` for a cohesive and modern look.
-- [ ] **Mobile Responsiveness & Touch Support**:
+- [x] **Mobile Responsiveness & Touch Support**:
   - Fix touch interactions to ensure full feature parity for mobile users.
   - Adapt the movement preview to support tap/touch events on mobile devices (e.g., tap a figure once for a preview and again to confirm the move, replacing desktop `hover`).
 - [ ] **Language Selector Dropdown**: Refactor the language selector into a scalable dropdown component to easily accommodate more languages in the future.

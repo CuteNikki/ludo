@@ -170,16 +170,31 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
                   type='button'
                   disabled={!movable}
                   onClick={() => {
-                    setPreview(null);
-                    onMove(piece.id);
+                    if (!movable) return;
+                    const alreadyPreviewing = preview?.pieceId === piece.id && preview.revision === state.revision;
+                    if (alreadyPreviewing) {
+                      setPreview(null);
+                      onMove(piece.id);
+                    } else {
+                      // No real hover preceded this click - either a touch tap (pointerType checks
+                      // below skip touch on purpose) or a keyboard click without prior focus - so
+                      // show the preview first instead of moving immediately.
+                      setPreview({ pieceId: piece.id, revision: state.revision });
+                    }
                   }}
-                  onMouseEnter={() => movable && setPreview({ pieceId: piece.id, revision: state.revision })}
-                  onMouseLeave={() => setPreview(null)}
+                  onPointerEnter={(event) => {
+                    if (event.pointerType !== 'mouse' || !movable) return;
+                    setPreview({ pieceId: piece.id, revision: state.revision });
+                  }}
+                  onPointerLeave={(event) => {
+                    if (event.pointerType !== 'mouse') return;
+                    setPreview(null);
+                  }}
                   onFocus={() => movable && setPreview({ pieceId: piece.id, revision: state.revision })}
                   onBlur={() => setPreview(null)}
                   aria-label={t(movable ? 'board.pieceAriaMovable' : 'board.pieceAria', { name: owner.name })}
                   className={cn(
-                    'pointer-events-auto block w-[82%] h-auto aspect-square shrink-0 rounded-full border-2 shadow-[inset_0_2px_0_rgba(255,255,255,.35),0_2px_3px_rgba(0,0,0,.4)] transition-[transform,box-shadow] duration-200',
+                    'pointer-events-auto block w-[82%] h-auto aspect-square shrink-0 touch-manipulation rounded-full border-2 shadow-[inset_0_2px_0_rgba(255,255,255,.35),0_2px_3px_rgba(0,0,0,.4)] transition-[transform,box-shadow] duration-200',
                     colorStyles[displayColor].token,
                     movable && 'animate-movable-piece cursor-pointer outline-4 outline-amber-300 hover:scale-110',
                     isCaptureTarget && 'scale-90 ring-4 ring-amber-300',

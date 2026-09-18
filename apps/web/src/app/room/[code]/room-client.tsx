@@ -230,7 +230,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
               onClick={copyRoomCode}
               aria-label={copiedCode ? t('room.copied') : t('room.copyCodeAria')}
               title={copiedCode ? t('room.copied') : t('room.copyCodeAria')}
-              className='group flex items-center gap-1.5 font-mono text-xl font-black tracking-widest transition-colors hover:text-foreground/70'
+              className='group flex touch-manipulation items-center gap-1.5 font-mono text-xl font-black tracking-widest transition-colors hover:text-foreground/70'
             >
               {state.roomCode}
               {copiedCode ? (
@@ -411,7 +411,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                     onClick={() => emit({ type: 'room:kick', payload: { playerId: player.id } })}
                     aria-label={t('room.removePlayerAria', { name: player.name })}
                     title={t('room.removePlayerAria', { name: player.name })}
-                    className='btn-press grid h-8 w-8 shrink-0 place-items-center text-foreground/60 transition-colors hover:bg-red-500/15 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
+                    className='btn-press grid h-8 w-8 shrink-0 touch-manipulation place-items-center text-foreground/60 transition-colors hover:bg-red-500/15 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
                   >
                     <UserMinus size={17} />
                   </button>
@@ -526,7 +526,7 @@ function PlayerProfile({
                 aria-pressed={selected}
                 title={occupied ? `${colorNames[color]}${t('room.profile.occupiedSuffix')}` : colorNames[color]}
                 className={cn(
-                  'h-8 w-8 rounded-full border-2 border-background-alternative shadow-[0_0_0_2px_var(--color-border)] transition-[transform,box-shadow,opacity] hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:cursor-not-allowed disabled:opacity-25',
+                  'h-8 w-8 touch-manipulation rounded-full border-2 border-background-alternative shadow-[0_0_0_2px_var(--color-border)] transition-[transform,box-shadow,opacity] hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:cursor-not-allowed disabled:opacity-25',
                   colorClasses[color],
                   selected && 'scale-105 shadow-[0_0_0_3px_var(--color-foreground)]',
                 )}
@@ -570,7 +570,7 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
                 disabled={!isHost}
                 onClick={() => onChange({ moveTimeSeconds: seconds })}
                 className={cn(
-                  'h-9 text-sm font-bold transition-colors disabled:cursor-not-allowed',
+                  'h-9 touch-manipulation text-sm font-bold transition-colors disabled:cursor-not-allowed',
                   settings.moveTimeSeconds === seconds ? 'bg-foreground text-background' : 'text-foreground/70 hover:bg-background-alternative',
                 )}
                 aria-pressed={settings.moveTimeSeconds === seconds}
@@ -649,13 +649,27 @@ function SettingToggle({
 
 function InfoTooltip({ text }: { text: string }) {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  // Radix's Tooltip intentionally never opens from a touch pointer, and always closes on click -
+  // reasonable for a hover hint, but this info bubble is the only way touch users can read the
+  // description at all, so it needs its own tap-to-open/tap-to-close handling underneath.
+  const lastPointerTypeRef = useRef<string>('mouse');
 
   return (
-    <Tooltip>
+    <Tooltip open={open} onOpenChange={setOpen}>
       <TooltipTrigger asChild>
         <button
           type='button'
           aria-label={t('room.settings.title')}
+          onPointerDown={(event) => {
+            lastPointerTypeRef.current = event.pointerType;
+            if (event.pointerType === 'touch') event.preventDefault();
+          }}
+          onClick={(event) => {
+            if (lastPointerTypeRef.current !== 'touch') return;
+            event.preventDefault();
+            setOpen((prev) => !prev);
+          }}
           className='ml-auto grid h-7 w-7 shrink-0 place-items-center rounded-full text-foreground/60 transition-colors hover:bg-background hover:text-foreground focus-visible:bg-background focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
         >
           <Info size={16} />
