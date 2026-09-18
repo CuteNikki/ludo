@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Archivo, Fraunces } from 'next/font/google';
 
-import { detectLanguage } from '@/lib/i18n/server';
+import { fallbackLng } from '@/lib/i18n/settings';
 
 import { LanguageProvider } from '@/components/providers/i18n';
 import { ThemeProvider } from '@/components/providers/theme';
@@ -16,13 +16,15 @@ export const metadata: Metadata = {
   description: 'Real-time Ludo game',
 };
 
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const lng = await detectLanguage();
-
+// Intentionally reads no cookies/headers here: doing so in the root layout would opt every page
+// in the app into per-request dynamic rendering just to pick a language. The server always
+// renders the fallback language; `LanguageProvider` swaps in the visitor's saved language
+// client-side, after hydration, based on the `ludo_lng` cookie.
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang={lng} suppressHydrationWarning>
+    <html lang={fallbackLng} suppressHydrationWarning>
       <body className={`${archivo.variable} ${fraunces.variable}`}>
-        <LanguageProvider lng={lng}>
+        <LanguageProvider lng={fallbackLng}>
           <ThemeProvider>{children}</ThemeProvider>
         </LanguageProvider>
       </body>
