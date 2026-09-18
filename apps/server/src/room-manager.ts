@@ -299,7 +299,7 @@ export class RoomManager {
 
   private getPlayerName(rawName: string): string {
     const requestedName = rawName.trim().slice(0, 24);
-    return requestedName || 'Gast';
+    return requestedName || 'Guest';
   }
 
   private getState(roomCode: string): GameState {
@@ -313,11 +313,18 @@ export class RoomManager {
     if (!player) return [];
     const ownPieces = state.pieces.filter((piece) => piece.playerId === playerId);
 
-    return ownPieces.filter((piece) => {
+    const movable = ownPieces.filter((piece) => {
       const targetPosition = piece.position === -1 ? (diceResult === 6 ? 0 : -1) : piece.position + diceResult;
       if (targetPosition < 0 || targetPosition > 43) return false;
       return !ownPieces.some((other) => other.id !== piece.id && other.position === targetPosition);
     });
+
+    if (diceResult === 6 && movable.length > 1 && movable.every((piece) => piece.position === -1)) {
+      const randomIndex = Math.floor(Math.random() * movable.length);
+      return [movable[randomIndex]!];
+    }
+
+    return movable;
   }
 
   private beginTurn(state: GameState) {

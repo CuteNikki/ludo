@@ -41,7 +41,7 @@ describe('RoomManager game turns', () => {
 
     const updated = manager.updatePlayer(first.state.roomCode, first.playerId, 'Linus', 'green');
     expect(updated.players.find((player) => player.id === first.playerId)).toMatchObject({ name: 'Linus', color: 'green', ready: false });
-    expect(() => manager.updatePlayer(first.state.roomCode, second.playerId, 'Linus', 'green')).toThrow('bereits vergeben');
+    expect(() => manager.updatePlayer(first.state.roomCode, second.playerId, 'Linus', 'green')).toThrow('already taken');
   });
 
   test('only lets the host change settings in the lobby', () => {
@@ -51,7 +51,7 @@ describe('RoomManager game turns', () => {
     manager.setReady(host.state.roomCode, guest.playerId, true);
 
     const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: false };
-    expect(() => manager.setSettings(host.state.roomCode, guest.playerId, settings)).toThrow('Nur der Host');
+    expect(() => manager.setSettings(host.state.roomCode, guest.playerId, settings)).toThrow('Only the host');
     const updated = manager.setSettings(host.state.roomCode, host.playerId, settings);
     expect(updated.settings).toEqual(settings);
     expect(updated.players.every((player) => !player.ready)).toBe(true);
@@ -78,7 +78,7 @@ describe('RoomManager game turns', () => {
     const rolled = manager.roll(host.state.roomCode, host.playerId);
     expect(rolled.turnDeadline).toBeGreaterThanOrEqual(beforeRoll + 44_900);
     expect(rolled.turnDeadline).toBeLessThanOrEqual(beforeRoll + 45_100);
-    expect(() => manager.setSettings(host.state.roomCode, host.playerId, settings)).toThrow('nur in der Lobby');
+    expect(() => manager.setSettings(host.state.roomCode, host.playerId, settings)).toThrow('only be changed in the lobby');
   });
 
   test('only lets the host remove another player in the lobby', () => {
@@ -86,7 +86,7 @@ describe('RoomManager game turns', () => {
     const host = manager.createRoom('Ada');
     const guest = manager.joinRoom(host.state.roomCode, 'Linus');
 
-    expect(() => manager.kickPlayer(host.state.roomCode, guest.playerId, host.playerId)).toThrow('Nur der Host');
+    expect(() => manager.kickPlayer(host.state.roomCode, guest.playerId, host.playerId)).toThrow('Only the host');
     const updated = manager.kickPlayer(host.state.roomCode, host.playerId, guest.playerId);
     expect(updated.players.map((player) => player.id)).toEqual([host.playerId]);
   });
@@ -125,11 +125,11 @@ describe('RoomManager game turns', () => {
   test('uses a simple fallback and allows duplicate names', () => {
     const manager = new RoomManager();
     const first = manager.createRoom('');
-    const second = manager.joinRoom(first.state.roomCode, 'Gast');
+    const second = manager.joinRoom(first.state.roomCode, 'Guest');
     const third = manager.joinRoom(first.state.roomCode, 'Ada');
     const fourth = manager.joinRoom(first.state.roomCode, 'Ada');
 
-    expect(first.state.players.map((player) => player.name)).toEqual(['Gast', 'Gast', 'Ada', 'Ada']);
+    expect(first.state.players.map((player) => player.name)).toEqual(['Guest', 'Guest', 'Ada', 'Ada']);
     expect(second.state.roomCode).toBe(third.state.roomCode);
     expect(fourth.state.players).toHaveLength(4);
   });
@@ -138,7 +138,9 @@ describe('RoomManager game turns', () => {
     const { manager, first } = startGame();
     const rolled = manager.roll(first.state.roomCode, first.playerId);
     expect(rolled.turnStage).toBe('move');
-    expect(rolled.movablePieceIds).toHaveLength(4);
+    // Rolling a six with every piece still at home forces a single random piece out, rather than
+    // letting the player choose among all four.
+    expect(rolled.movablePieceIds).toHaveLength(1);
 
     const pieceId = rolled.movablePieceIds[0]!;
     const moved = manager.move(first.state.roomCode, first.playerId, pieceId);
@@ -163,13 +165,19 @@ describe('RoomManager game turns', () => {
     let rollIndex = 0;
     const rolls = [6, 3];
     let movedPieceId = '';
+    let resolveLeftYard: (() => void) | undefined;
     let resolveMove: (() => void) | undefined;
+    const leftYard = new Promise<void>((resolve) => {
+      resolveLeftYard = resolve;
+    });
     const moveCompleted = new Promise<void>((resolve) => {
       resolveMove = resolve;
     });
     const manager = new RoomManager(
       (_roomCode, state) => {
-        if (state.pieces.find((piece) => piece.id === movedPieceId)?.position === 3) resolveMove?.();
+        const piece = state.pieces.find((candidate) => candidate.id === movedPieceId);
+        if (piece?.position === 0) resolveLeftYard?.();
+        if (piece?.position === 3) resolveMove?.();
       },
       60_000,
       () => rolls[rollIndex++] ?? 1,
@@ -181,9 +189,14 @@ describe('RoomManager game turns', () => {
     const second = manager.joinRoom(first.state.roomCode, 'Linus');
     manager.setReady(first.state.roomCode, first.playerId, true);
     manager.setReady(first.state.roomCode, second.playerId, true);
+
+    // Rolling a six with every piece still at home now forces a single random piece out
+    // automatically, so the first roll already lands in 'auto-move' rather than waiting on
+    // an explicit move() call.
     const firstRoll = manager.roll(first.state.roomCode, first.playerId);
+    expect(firstRoll.turnStage).toBe('auto-move');
     movedPieceId = firstRoll.movablePieceIds[0]!;
-    manager.move(first.state.roomCode, first.playerId, movedPieceId);
+    await leftYard;
 
     const automaticRoll = manager.roll(first.state.roomCode, first.playerId);
     expect(automaticRoll.turnStage).toBe('auto-move');
@@ -219,7 +232,11 @@ describe('RoomManager game turns', () => {
     manager.move(first.state.roomCode, second.playerId, manager.roll(first.state.roomCode, second.playerId).movablePieceIds[0]!);
 
     const captureRoll = manager.roll(first.state.roomCode, first.playerId);
-    manager.move(first.state.roomCode, first.playerId, captureRoll.movablePieceIds[0]!);
+    // With a home piece forced out at random on prior sixes, `moveFirst` is the only piece
+    // guaranteed to be the one sitting on the shared track, so move it explicitly rather than
+    // trusting movablePieceIds[0], which may now point at a still-home piece instead.
+    expect(captureRoll.movablePieceIds).toContain(moveFirst);
+    manager.move(first.state.roomCode, first.playerId, moveFirst);
     expect(first.state.pieces.find((piece) => piece.id === moveSecond)?.position).toBe(-1);
   });
 

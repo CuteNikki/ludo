@@ -11,6 +11,7 @@
     "dev:web": "bun --filter @ludo/web dev",
     "dev:server": "bun --filter @ludo/server dev",
     "build": "bun --filter '*' build",
-    "typecheck": "bun --filter '*' typecheck"
+    "typecheck": "bun --filter '*' typecheck",
+    "test": "bun --filter '*' test"
   }
 }

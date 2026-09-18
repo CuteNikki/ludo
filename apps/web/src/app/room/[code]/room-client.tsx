@@ -195,7 +195,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
       </header>
 
       <div className='grid gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10'>
-        <section className='flex min-w-0 justify-center p-1 sm:p-3 lg:justify-start lg:p-0'>
+        <section className='flex min-w-0 self-start justify-center p-1 sm:p-3 lg:justify-start lg:p-0'>
           <GameBoard state={state} playerId={playerId} onMove={(pieceId) => emit({ type: 'game:move', payload: { pieceId } })} />
         </section>
 
@@ -370,7 +370,9 @@ function PlayerProfile({
   }, [player.name]);
 
   useEffect(() => {
-    if (draftName === player.name) return;
+    // Skip autosaving while the field is blank - the server would just fall back to a default name,
+    // and that fallback echoing back mid-edit would overwrite whatever the player is about to type.
+    if (draftName === player.name || draftName.trim() === '') return;
     saveTimerRef.current = window.setTimeout(() => {
       onChangeRef.current({ name: draftName, color: player.color });
     }, 500);
@@ -381,6 +383,10 @@ function PlayerProfile({
 
   function commitName() {
     if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current);
+    if (draftName.trim() === '') {
+      setDraftName(player.name);
+      return;
+    }
     if (draftName !== player.name) onChangeRef.current({ name: draftName, color: player.color });
   }
 

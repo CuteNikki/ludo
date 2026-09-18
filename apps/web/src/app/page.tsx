@@ -2,7 +2,7 @@
 
 import { ArrowRight, CircleAlert, Dices, DicesIcon, Flag, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { GameState, PlayerColor } from '@ludo/shared';
@@ -57,12 +57,16 @@ const demoPath: Array<readonly [number, number]> = [
 
 const demoOffsets = [0, 10, 20, 30];
 
-const previewPlayers: Array<{ id: string; name: string; color: PlayerColor }> = [
-  { id: 'preview-red', name: 'Rot', color: 'red' },
-  { id: 'preview-blue', name: 'Blau', color: 'blue' },
-  { id: 'preview-green', name: 'Grün', color: 'green' },
-  { id: 'preview-yellow', name: 'Gelb', color: 'yellow' },
-];
+type PreviewPlayer = { id: string; name: string; color: PlayerColor };
+
+function createPreviewPlayers(t: (key: string) => string): PreviewPlayer[] {
+  return [
+    { id: 'preview-red', name: t('room.colors.red'), color: 'red' },
+    { id: 'preview-blue', name: t('room.colors.blue'), color: 'blue' },
+    { id: 'preview-green', name: t('room.colors.green'), color: 'green' },
+    { id: 'preview-yellow', name: t('room.colors.yellow'), color: 'yellow' },
+  ];
+}
 
 const previewStartPositions = [
   [3, -1, 25, 40],
@@ -71,7 +75,7 @@ const previewStartPositions = [
   [-1, 12, 25, 40],
 ];
 
-function createPreviewState(): GameState {
+function createPreviewState(previewPlayers: PreviewPlayer[]): GameState {
   return {
     roomCode: 'DEMO',
     hostPlayerId: 'preview-red',
@@ -108,7 +112,8 @@ export default function HomePage() {
   const steps = t('howItWorks.steps', { returnObjects: true }) as Array<{ title: string; text: string }>;
 
   function PreviewBoard() {
-    const [state, setState] = useState<GameState>(createPreviewState);
+    const previewPlayers = useMemo(() => createPreviewPlayers(t), [t]);
+    const [state, setState] = useState<GameState>(() => createPreviewState(previewPlayers));
     const roundFinished = useRef(false);
 
     useEffect(() => {
@@ -172,7 +177,7 @@ export default function HomePage() {
           timer = window.setTimeout(() => {
             if (active) {
               roundFinished.current = false;
-              setState(createPreviewState());
+              setState(createPreviewState(previewPlayers));
               playerIndex = 0;
               timer = window.setTimeout(nextTurn, 1_000);
             }
