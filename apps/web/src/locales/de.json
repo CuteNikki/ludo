@@ -108,6 +108,8 @@
     "removePlayerAria": "{{name}} entfernen",
     "won": "Gewonnen",
     "oneMoreRound": "Noch eine Runde?",
+    "rematchVoteInProgress": "Revanche-Abstimmung läuft",
+    "rematchVotedAria": "{{name}} hat für eine weitere Runde gestimmt",
     "rematchStatus": "{{accepted}}/{{total}} dafür · {{seconds}}s",
     "rematchAccepted": "Zugesagt",
     "rematchCta": "Nochmal",

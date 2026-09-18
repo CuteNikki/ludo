@@ -108,6 +108,8 @@
     "removePlayerAria": "Remove {{name}}",
     "won": "Won",
     "oneMoreRound": "One more round?",
+    "rematchVoteInProgress": "Rematch vote in progress",
+    "rematchVotedAria": "{{name}} voted to play again",
     "rematchStatus": "{{accepted}}/{{total}} in favor · {{seconds}}s",
     "rematchAccepted": "Confirmed",
     "rematchCta": "Play again",

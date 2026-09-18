@@ -25,6 +25,7 @@ import {
   UserMinus,
   UserRound,
   Users,
+  Vote,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -213,31 +214,64 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
 
         <aside className='self-start border-4 border-border bg-background-alternative p-5 shadow-card'>
           {state.phase !== 'lobby' && (
-            <section className='turn-panel mb-6 flex h-56 flex-col border-b-2 border-border pb-6'>
+            <section className={cn('turn-panel mb-6 flex flex-col border-b-2 border-border pb-6', state.phase === 'finished' ? 'min-h-56' : 'h-56')}>
               {state.phase === 'finished' ? (
                 <div className='grid flex-1 place-items-center text-center'>
                   <div className='w-full'>
                     <Trophy className='mx-auto mb-1 text-amber-500' size={27} />
                     <p className='text-xs font-bold uppercase text-foreground/60'>{t('room.won')}</p>
                     <p className='mt-1 text-2xl font-black'>{winner?.name}</p>
-                    <p className='mt-1 h-5 text-xs font-bold text-foreground/60' aria-live='polite'>
-                      {state.rematchDeadline === null
-                        ? t('room.oneMoreRound')
-                        : t('room.rematchStatus', {
+
+                    {state.rematchDeadline === null ? (
+                      <>
+                        <p className='mt-1 h-5 text-xs font-bold text-foreground/60'>{t('room.oneMoreRound')}</p>
+                        <div className='mt-3 grid grid-cols-2 gap-2'>
+                          <Button className='h-10 px-3 text-xs' disabled={wantsRematch} onClick={() => emit({ type: 'game:rematch', payload: {} })}>
+                            {wantsRematch ? <Check size={16} /> : <RotateCcw size={16} />}
+                            {wantsRematch ? t('room.rematchAccepted') : t('room.rematchCta')}
+                          </Button>
+                          <Button className='h-10 px-3 text-xs' variant='outline' onClick={leaveRoom}>
+                            <LogOut size={16} /> {t('room.mainMenu')}
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <div
+                        role='status'
+                        aria-live='assertive'
+                        className='mt-3 border-2 border-amber-500 bg-amber-500/10 p-3 dark:border-amber-400 dark:bg-amber-400/10'
+                      >
+                        <p className='flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wide text-amber-700 dark:text-amber-400'>
+                          <span className='relative flex h-2 w-2 items-center justify-center'>
+                            <span className='absolute h-2 w-2 rounded-full bg-amber-500 animate-ping dark:bg-amber-400' />
+                            <span className='absolute h-2 w-2 rounded-full bg-amber-500 dark:bg-amber-400' />
+                          </span>
+                          {t('room.rematchVoteInProgress')}
+                        </p>
+                        <p className='mt-1.5 text-xs font-bold text-foreground/70'>
+                          {t('room.rematchStatus', {
                             accepted: state.rematchPlayerIds.length,
                             total: state.players.length,
                             seconds: rematchSecondsLeft,
                           })}
-                    </p>
-                    <div className='mt-3 grid grid-cols-2 gap-2'>
-                      <Button className='h-10 px-3 text-xs' disabled={wantsRematch} onClick={() => emit({ type: 'game:rematch', payload: {} })}>
-                        {wantsRematch ? <Check size={16} /> : <RotateCcw size={16} />}
-                        {wantsRematch ? t('room.rematchAccepted') : t('room.rematchCta')}
-                      </Button>
-                      <Button className='h-10 px-3 text-xs' variant='outline' onClick={leaveRoom}>
-                        <LogOut size={16} /> {t('room.mainMenu')}
-                      </Button>
-                    </div>
+                        </p>
+                        <div className='mt-2 h-1.5 overflow-hidden bg-amber-500/20 dark:bg-amber-400/20'>
+                          <div
+                            className='h-full bg-amber-500 transition-[width] duration-200 dark:bg-amber-400'
+                            style={{ width: `${(rematchSecondsLeft / 30) * 100}%` }}
+                          />
+                        </div>
+                        <div className='mt-3 grid grid-cols-2 gap-2'>
+                          <Button className='h-10 px-3 text-xs' disabled={wantsRematch} onClick={() => emit({ type: 'game:rematch', payload: {} })}>
+                            {wantsRematch ? <Check size={16} /> : <RotateCcw size={16} />}
+                            {wantsRematch ? t('room.rematchAccepted') : t('room.rematchCta')}
+                          </Button>
+                          <Button className='h-10 px-3 text-xs' variant='outline' onClick={leaveRoom}>
+                            <LogOut size={16} /> {t('room.mainMenu')}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -321,6 +355,9 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                   <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.yourTurn')}</span>
                 )}
                 {player.ready && <Check size={18} className='text-emerald-700 dark:text-emerald-400' aria-label={t('room.imReady')} />}
+                {state.phase === 'finished' && state.rematchPlayerIds.includes(player.id) && (
+                  <Vote size={16} className='text-amber-600 dark:text-amber-400' aria-label={t('room.rematchVotedAria', { name: player.name })} />
+                )}
                 {state.phase === 'lobby' && isHost && player.id !== playerId && (
                   <button
                     type='button'

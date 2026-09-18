@@ -41,7 +41,7 @@ The host can remove other players from the room while in the lobby. After the ga
   - Implement a 30-second post-game countdown timer when a match finishes.
   - Provide clear voting options for players to either play again (rematch) or return to the home screen.
   - Handle room cleanup on timeout: kick out inactive players, and automatically transition rematching players into a brand-new room.
-- [ ] **Clear Rematch Voting UX**: Redesign the rematch prompt and UI on the end screen so it is explicitly and unmistakably clear to all participants that a rematch vote is currently taking place.
+- [x] **Clear Rematch Voting UX**: Redesign the rematch prompt and UI on the end screen so it is explicitly and unmistakably clear to all participants that a rematch vote is currently taking place.
 - [ ] **Public Rooms & Discovery Page**: Add a visibility toggle to rooms (public vs. private) and build a discovery page that lists active public rooms so players can easily browse and join open games.
 - [ ] **Lobby Leave Notifications**: Implement real-time notifications alerting remaining players in the lobby whenever someone leaves the room.
 - [ ] **Accurate Leave/Kick Notifications**: Fix inaccurate notification messages (e.g., displaying "Kicked by the Host" when it wasn't the case). Update the notification system to properly reflect the actual reason for leaving or being removed.
