@@ -19,6 +19,10 @@ services:
       args:
         - NEXT_PUBLIC_WS_URL=wss://ludo.niso.moe/ws
         - NEXT_PUBLIC_SITE_URL=https://ludo.niso.moe
+        - NEXT_PUBLIC_LEGAL_NAME=${LEGAL_NAME:-}
+        - NEXT_PUBLIC_LEGAL_ADDRESS=${LEGAL_ADDRESS:-}
+        - NEXT_PUBLIC_LEGAL_EMAIL=${LEGAL_EMAIL:-}
+        - NEXT_PUBLIC_LEGAL_PHONE=${LEGAL_PHONE:-}
     restart: unless-stopped
     depends_on:
       - server

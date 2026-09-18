@@ -17,6 +17,10 @@ bun run dev
 
 The frontend then runs on `http://localhost:3000` and the WebSocket server on `ws://localhost:3001/ws`. For different hosts, `NEXT_PUBLIC_WS_URL` can be set in the frontend. For a real deployment, also set `NEXT_PUBLIC_SITE_URL` to the site's public URL so social sharing previews (Open Graph/Twitter cards) link to the right images.
 
+### Legal pages
+
+The site has an Imprint (`/imprint`), Privacy Policy (`/privacy`) and Terms of Service (`/terms`), in English and German, linked from the footer of every page. The operator's name, address and contact details are not stored in this public repository: set `NEXT_PUBLIC_LEGAL_NAME`, `NEXT_PUBLIC_LEGAL_ADDRESS` (lines separated by `;`), `NEXT_PUBLIC_LEGAL_EMAIL` and optionally `NEXT_PUBLIC_LEGAL_PHONE` when building the frontend. With Docker Compose, copy `.env.example` to `.env` and fill in `LEGAL_NAME`, `LEGAL_ADDRESS`, `LEGAL_EMAIL` and `LEGAL_PHONE`; they are passed on as build args. Without them the imprint shows a "not configured" notice. The policy text describes what the app actually stores, so update it (`legal.*` in the locale files) whenever that changes.
+
 ## Protocol
 
 Clients only ever send actions such as `room:create`, `room:join`, `player:ready` and `game:move`. The server rolls the dice, mutates the state, increments its `revision`, and then broadcasts the full `GameState` to every connection in the room.
@@ -84,4 +88,4 @@ The host can remove other players from the room while in the lobby. After the ga
 
 ## 5. Legal & Compliance
 
-- [ ] **Legal Pages & Footer Links**: Create and add standard legal pages (Imprint/Impressum, Privacy Policy, Terms of Service) and include a direct link back to the [GitHub repository](https://github.com/CuteNikki/ludo).
+- [x] **Legal Pages & Footer Links**: Create and add standard legal pages (Imprint/Impressum, Privacy Policy, Terms of Service) and include a direct link back to the [GitHub repository](https://github.com/CuteNikki/ludo).

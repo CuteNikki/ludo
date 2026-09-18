@@ -255,5 +255,204 @@
     "pieceAria": "Piece of {{name}}",
     "pieceAriaMovable": "Piece of {{name}}, move it",
     "captureAria": "Piece is about to be captured"
+  },
+  "legal": {
+    "eyebrow": "Ludo · Legal",
+    "lastUpdated": "Last updated: September 18, 2026",
+    "nav": {
+      "aria": "Legal",
+      "imprint": "Imprint",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "github": "GitHub"
+    },
+    "imprint": {
+      "title": "Imprint",
+      "address": "Address",
+      "email": "Email",
+      "phone": "Phone",
+      "notConfigured": "The operator details for this deployment have not been configured yet.",
+      "sections": [
+        {
+          "title": "Operator",
+          "paragraphs": [
+            "This website and the game server behind it are operated by the person named above. Contact them using the details above."
+          ]
+        },
+        {
+          "title": "Responsible for content",
+          "paragraphs": [
+            "The person named above is responsible for the content of this website pursuant to § 18 (2) MStV."
+          ]
+        },
+        {
+          "title": "Liability for content",
+          "paragraphs": [
+            "As a service provider we are responsible for our own content on these pages under general law. Under §§ 8 to 10 DDG we are not obliged to monitor transmitted or stored third-party information, such as the player names other people enter. If we become aware of a violation of the law, we will remove the content promptly."
+          ]
+        },
+        {
+          "title": "External links",
+          "paragraphs": [
+            "This site links to external websites, such as the project repository on GitHub. We have no influence over their content and accept no liability for it. The respective provider is always responsible. If we learn of a violation, we will remove the link promptly."
+          ]
+        },
+        {
+          "title": "Trademarks and independence",
+          "paragraphs": [
+            "Names such as \"Mensch ärgere Dich nicht\" and \"Ludo\" are used to describe the kind of game this is and may be trademarks of their respective owners. This is an independent hobby project and is not affiliated with, endorsed by, or connected to any of them."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "sections": [
+        {
+          "title": "Who is responsible",
+          "paragraphs": [
+            "The controller within the meaning of the GDPR is the operator named in the Imprint. You can reach them with the contact details given there, including for any privacy question."
+          ]
+        },
+        {
+          "title": "The short version",
+          "paragraphs": [
+            "Ludo has no accounts, no ads and no analytics or tracking. You only enter a name that you choose yourself. We do not sell personal data and we do not build profiles."
+          ]
+        },
+        {
+          "title": "What we process, and why",
+          "items": [
+            "Player name: the name you type (or \"Guest\") is sent to the game server when you create or join a room. Everyone in the room sees it, and if the room is public, the host's name is shown on the discovery page. Please do not use your real name or other personal data if you would rather not share it.",
+            "Game data: room code, seat and color, ready status, room settings, dice rolls and moves. This is needed to run the game and is kept in the server's memory only, not in a database. A room is deleted shortly after its last player leaves (after at most five minutes), and when a rematch replaces it.",
+            "Technical data: when you visit the site or connect to a game, your IP address and request data (such as browser and time of the request) are processed by the web server and the connection to the game server, in order to deliver pages, keep the real-time connection running, and protect against abuse. Such data may appear temporarily in server logs."
+          ],
+          "paragraphs": [
+            "The legal basis is Art. 6 (1) (b) GDPR, as far as it is needed to provide the game you asked to play, and otherwise Art. 6 (1) (f) GDPR, our legitimate interest in operating and securing the service."
+          ]
+        },
+        {
+          "title": "Cookies and browser storage",
+          "paragraphs": [
+            "Ludo stores the following in your browser. It is only used to provide the features you asked for, and contains no tracking identifiers:"
+          ],
+          "items": [
+            "Cookie ludo_lng (up to one year): remembers the language you picked.",
+            "Local storage ludo-theme: remembers your light, dark or system theme choice.",
+            "Session storage ludo-player-name: pre-fills your name. It is cleared when you close the tab.",
+            "Session storage ludo-player:<room code>: lets you reclaim your seat after a reload. It is cleared when you leave the room or close the tab."
+          ]
+        },
+        {
+          "title": "Why there is no cookie banner",
+          "paragraphs": [
+            "The storage above is strictly necessary to provide functions you explicitly use, such as switching the language or theme, or rejoining a room after a reload (§ 25 (2) no. 2 TDDDG). We use no advertising, analytics or other tracking technologies, so there is nothing to ask consent for."
+          ]
+        },
+        {
+          "title": "Fonts and third parties",
+          "paragraphs": [
+            "Fonts are downloaded when the site is built and served from our own domain, so your browser does not contact Google when you visit. We do not embed third-party scripts, trackers or social media widgets. The GitHub link leaves this site; GitHub's own privacy policy applies once you follow it."
+          ]
+        },
+        {
+          "title": "Sharing and hosting",
+          "paragraphs": [
+            "The site and game server run on infrastructure operated by the operator. We do not sell or otherwise pass on personal data. Data is only disclosed where the law requires it, for example to authorities."
+          ]
+        },
+        {
+          "title": "Retention",
+          "paragraphs": [
+            "Game data lives in memory and disappears with the room or when the server restarts. Log data, if any, is kept only as long as needed for security and troubleshooting. Browser storage stays on your device until it expires or you clear it."
+          ]
+        },
+        {
+          "title": "Your rights",
+          "paragraphs": [
+            "Under the GDPR you have the right of access (Art. 15), rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18), data portability (Art. 20) and objection (Art. 21). You can clear your browser storage at any time. Because games are not tied to an account, we may not be able to identify data about you without extra information from you.",
+            "You also have the right to lodge a complaint with a data protection supervisory authority."
+          ]
+        },
+        {
+          "title": "Children",
+          "paragraphs": [
+            "Ludo is not aimed at children and we do not knowingly collect data from them. Please do not enter personal data of others as a player name."
+          ]
+        },
+        {
+          "title": "Changes",
+          "paragraphs": [
+            "We may update this policy when the service changes. The date at the top shows when it was last updated."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "sections": [
+        {
+          "title": "Scope",
+          "paragraphs": [
+            "These terms apply to your use of Ludo, a free online version of the board game, operated by the person named in the Imprint. By using the site you agree to them."
+          ]
+        },
+        {
+          "title": "The service",
+          "paragraphs": [
+            "Ludo is free and needs no account. You can create or join a room, play with others in real time, and add computer opponents. It is a hobby project that keeps changing: features may be added, changed or removed at any time."
+          ]
+        },
+        {
+          "title": "Fair use",
+          "paragraphs": [
+            "Please play nicely. You agree not to:"
+          ],
+          "items": [
+            "use names that are offensive, hateful, unlawful, or that impersonate or identify other people;",
+            "harass other players or deliberately disrupt games;",
+            "cheat, or use bots, scripts or other automation to play, or to bypass the rules or timers;",
+            "attack, overload, probe or scrape the site or the game server, or try to get around technical limits;",
+            "use the service for anything unlawful."
+          ]
+        },
+        {
+          "title": "Names and public rooms",
+          "paragraphs": [
+            "You are responsible for the name you enter. Names and room hosts are visible to other people, and to anyone browsing public rooms. Hosts can remove players from their lobby, and we may remove rooms or block access if these terms are broken."
+          ]
+        },
+        {
+          "title": "Availability",
+          "paragraphs": [
+            "The service is provided \"as is\" and \"as available\". We do not promise it will be uninterrupted or error-free. Games run in server memory, so a restart or update can end running games and rooms without notice."
+          ]
+        },
+        {
+          "title": "Liability",
+          "paragraphs": [
+            "We are fully liable for intent and gross negligence, for injury to life, body or health, and where mandatory law requires it. For slight negligence we are only liable for breach of essential contractual obligations, and then limited to the foreseeable damage typical for this kind of service. Any further liability is excluded, which also applies to the personal liability of employees and agents."
+          ]
+        },
+        {
+          "title": "Open source",
+          "paragraphs": [
+            "The source code is available in the project repository on GitHub, linked in the footer."
+          ]
+        },
+        {
+          "title": "Changes to these terms",
+          "paragraphs": [
+            "We may update these terms when the service changes. Continuing to use Ludo after an update means you accept the new version."
+          ]
+        },
+        {
+          "title": "Governing law",
+          "paragraphs": [
+            "German law applies, excluding the UN Convention on Contracts for the International Sale of Goods. If you are a consumer, mandatory consumer protection rules of the country where you live remain unaffected."
+          ]
+        }
+      ]
+    }
   }
 }

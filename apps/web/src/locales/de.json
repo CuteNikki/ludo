@@ -255,5 +255,204 @@
     "pieceAria": "Figur von {{name}}",
     "pieceAriaMovable": "Figur von {{name}} bewegen",
     "captureAria": "Figur wird geschlagen"
+  },
+  "legal": {
+    "eyebrow": "Ludo · Rechtliches",
+    "lastUpdated": "Zuletzt aktualisiert: 18. September 2026",
+    "nav": {
+      "aria": "Rechtliches",
+      "imprint": "Impressum",
+      "privacy": "Datenschutz",
+      "terms": "Nutzungsbedingungen",
+      "github": "GitHub"
+    },
+    "imprint": {
+      "title": "Impressum",
+      "address": "Anschrift",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "notConfigured": "Die Betreiberangaben für diese Installation wurden noch nicht konfiguriert.",
+      "sections": [
+        {
+          "title": "Betreiber",
+          "paragraphs": [
+            "Diese Website und der dahinterliegende Spielserver werden von der oben genannten Person betrieben. Kontakt über die oben genannten Angaben."
+          ]
+        },
+        {
+          "title": "Verantwortlich für den Inhalt",
+          "paragraphs": [
+            "Für den Inhalt dieser Website ist die oben genannte Person nach § 18 Abs. 2 MStV verantwortlich."
+          ]
+        },
+        {
+          "title": "Haftung für Inhalte",
+          "paragraphs": [
+            "Als Diensteanbieter sind wir für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG sind wir jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen, etwa die von anderen eingegebenen Spielernamen, zu überwachen. Bei Kenntnis von Rechtsverletzungen entfernen wir entsprechende Inhalte umgehend."
+          ]
+        },
+        {
+          "title": "Externe Links",
+          "paragraphs": [
+            "Diese Seite verlinkt auf externe Websites, etwa das Projekt-Repository auf GitHub. Auf deren Inhalte haben wir keinen Einfluss und übernehmen dafür keine Gewähr. Verantwortlich ist stets der jeweilige Anbieter. Bei Kenntnis von Rechtsverletzungen entfernen wir solche Links umgehend."
+          ]
+        },
+        {
+          "title": "Marken und Unabhängigkeit",
+          "paragraphs": [
+            "Bezeichnungen wie \"Mensch ärgere Dich nicht\" und \"Ludo\" werden verwendet, um die Art des Spiels zu beschreiben, und können Marken der jeweiligen Inhaber sein. Dies ist ein unabhängiges Hobbyprojekt und steht in keiner Verbindung zu diesen, wird nicht von ihnen unterstützt und ist nicht mit ihnen verbunden."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Datenschutzerklärung",
+      "sections": [
+        {
+          "title": "Verantwortlicher",
+          "paragraphs": [
+            "Verantwortlicher im Sinne der DSGVO ist der im Impressum genannte Betreiber. Über die dortigen Kontaktdaten erreichst du ihn auch bei allen Datenschutzfragen."
+          ]
+        },
+        {
+          "title": "Kurz gesagt",
+          "paragraphs": [
+            "Ludo hat keine Konten, keine Werbung und keine Analyse- oder Tracking-Werkzeuge. Du gibst nur einen Namen ein, den du selbst wählst. Wir verkaufen keine personenbezogenen Daten und erstellen keine Profile."
+          ]
+        },
+        {
+          "title": "Was wir verarbeiten und warum",
+          "items": [
+            "Spielername: Der eingegebene Name (oder \"Guest\") wird beim Erstellen oder Beitreten eines Raums an den Spielserver gesendet. Alle im Raum sehen ihn, und bei öffentlichen Räumen wird der Name des Hosts auf der Entdecken-Seite angezeigt. Verwende bitte nicht deinen echten Namen oder andere persönliche Daten, wenn du sie nicht teilen möchtest.",
+            "Spieldaten: Raumcode, Platz und Farbe, Bereit-Status, Raumeinstellungen, Würfe und Züge. Sie werden zum Betrieb des Spiels benötigt und nur im Arbeitsspeicher des Servers gehalten, nicht in einer Datenbank. Ein Raum wird kurz nach dem Verlassen des letzten Spielers gelöscht (spätestens nach fünf Minuten) sowie wenn eine Revanche ihn ersetzt.",
+            "Technische Daten: Beim Besuch der Seite oder dem Verbinden zu einem Spiel werden deine IP-Adresse und Anfragedaten (etwa Browser und Zeitpunkt der Anfrage) vom Webserver und bei der Verbindung zum Spielserver verarbeitet, um Seiten auszuliefern, die Echtzeitverbindung aufrechtzuerhalten und Missbrauch abzuwehren. Solche Daten können vorübergehend in Server-Logs auftauchen."
+          ],
+          "paragraphs": [
+            "Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, soweit es zur Bereitstellung des gewünschten Spiels erforderlich ist, und sonst Art. 6 Abs. 1 lit. f DSGVO, unser berechtigtes Interesse am Betrieb und der Sicherheit des Dienstes."
+          ]
+        },
+        {
+          "title": "Cookies und Browser-Speicher",
+          "paragraphs": [
+            "Ludo speichert Folgendes in deinem Browser. Es dient nur den von dir gewünschten Funktionen und enthält keine Tracking-Kennungen:"
+          ],
+          "items": [
+            "Cookie ludo_lng (bis zu einem Jahr): merkt sich die gewählte Sprache.",
+            "Local Storage ludo-theme: merkt sich deine Wahl von hellem, dunklem oder System-Farbschema.",
+            "Session Storage ludo-player-name: füllt deinen Namen vor. Er wird beim Schließen des Tabs gelöscht.",
+            "Session Storage ludo-player:<Raumcode>: ermöglicht dir, deinen Platz nach einem Neuladen wieder einzunehmen. Er wird beim Verlassen des Raums oder Schließen des Tabs gelöscht."
+          ]
+        },
+        {
+          "title": "Warum es kein Cookie-Banner gibt",
+          "paragraphs": [
+            "Die genannten Speicherungen sind unbedingt erforderlich, um Funktionen bereitzustellen, die du ausdrücklich nutzt, etwa den Wechsel von Sprache oder Farbschema oder den erneuten Beitritt zu einem Raum nach dem Neuladen (§ 25 Abs. 2 Nr. 2 TDDDG). Wir setzen keine Werbe-, Analyse- oder sonstigen Tracking-Technologien ein, daher gibt es nichts, wofür eine Einwilligung nötig wäre."
+          ]
+        },
+        {
+          "title": "Schriftarten und Dritte",
+          "paragraphs": [
+            "Schriftarten werden beim Erstellen der Seite heruntergeladen und von unserer eigenen Domain ausgeliefert, dein Browser kontaktiert Google daher beim Besuch nicht. Wir binden keine Skripte, Tracker oder Social-Media-Widgets von Dritten ein. Der GitHub-Link verlässt diese Seite; danach gilt die Datenschutzerklärung von GitHub."
+          ]
+        },
+        {
+          "title": "Weitergabe und Hosting",
+          "paragraphs": [
+            "Die Seite und der Spielserver laufen auf Infrastruktur, die vom Betreiber betrieben wird. Wir verkaufen personenbezogene Daten nicht und geben sie auch sonst nicht weiter. Eine Offenlegung erfolgt nur, wenn das Gesetz sie verlangt, etwa gegenüber Behörden."
+          ]
+        },
+        {
+          "title": "Speicherdauer",
+          "paragraphs": [
+            "Spieldaten liegen im Arbeitsspeicher und verschwinden mit dem Raum oder bei einem Neustart des Servers. Log-Daten, falls vorhanden, werden nur so lange gespeichert, wie es für Sicherheit und Fehlersuche nötig ist. Browser-Speicher bleibt auf deinem Gerät, bis er abläuft oder du ihn löschst."
+          ]
+        },
+        {
+          "title": "Deine Rechte",
+          "paragraphs": [
+            "Nach der DSGVO hast du das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21). Du kannst deinen Browser-Speicher jederzeit löschen. Da Spiele nicht an ein Konto gebunden sind, können wir Daten über dich unter Umständen nicht ohne zusätzliche Angaben von dir zuordnen.",
+            "Außerdem hast du das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren."
+          ]
+        },
+        {
+          "title": "Kinder",
+          "paragraphs": [
+            "Ludo richtet sich nicht an Kinder, und wir erheben wissentlich keine Daten von ihnen. Bitte gib keine personenbezogenen Daten anderer als Spielernamen ein."
+          ]
+        },
+        {
+          "title": "Änderungen",
+          "paragraphs": [
+            "Wir können diese Erklärung anpassen, wenn sich der Dienst ändert. Das Datum oben zeigt, wann sie zuletzt aktualisiert wurde."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Nutzungsbedingungen",
+      "sections": [
+        {
+          "title": "Geltungsbereich",
+          "paragraphs": [
+            "Diese Bedingungen gelten für die Nutzung von Ludo, einer kostenlosen Online-Version des Brettspiels, betrieben von der im Impressum genannten Person. Mit der Nutzung der Seite stimmst du ihnen zu."
+          ]
+        },
+        {
+          "title": "Der Dienst",
+          "paragraphs": [
+            "Ludo ist kostenlos und braucht kein Konto. Du kannst Räume erstellen oder beitreten, in Echtzeit mit anderen spielen und Computergegner hinzufügen. Es ist ein Hobbyprojekt, das sich ständig weiterentwickelt: Funktionen können jederzeit hinzukommen, sich ändern oder entfallen."
+          ]
+        },
+        {
+          "title": "Faire Nutzung",
+          "paragraphs": [
+            "Bitte spiel fair. Du verpflichtest dich, nicht:"
+          ],
+          "items": [
+            "Namen zu verwenden, die beleidigend, hasserfüllt oder rechtswidrig sind oder andere Personen nachahmen oder identifizieren;",
+            "andere Spieler zu belästigen oder Spiele absichtlich zu stören;",
+            "zu schummeln oder Bots, Skripte oder andere Automatisierung zum Spielen oder zum Umgehen von Regeln oder Zeitlimits zu nutzen;",
+            "die Seite oder den Spielserver anzugreifen, zu überlasten, auszuspähen oder abzugreifen oder technische Beschränkungen zu umgehen;",
+            "den Dienst für etwas Rechtswidriges zu nutzen."
+          ]
+        },
+        {
+          "title": "Namen und öffentliche Räume",
+          "paragraphs": [
+            "Du bist für den von dir eingegebenen Namen verantwortlich. Namen und Raum-Hosts sind für andere sichtbar, auch für alle, die öffentliche Räume durchsuchen. Hosts können Spieler aus ihrer Lobby entfernen, und wir können Räume entfernen oder den Zugang sperren, wenn gegen diese Bedingungen verstoßen wird."
+          ]
+        },
+        {
+          "title": "Verfügbarkeit",
+          "paragraphs": [
+            "Der Dienst wird \"wie besehen\" und \"wie verfügbar\" bereitgestellt. Wir versprechen keinen unterbrechungs- oder fehlerfreien Betrieb. Spiele laufen im Arbeitsspeicher des Servers, daher kann ein Neustart oder Update laufende Spiele und Räume ohne Vorwarnung beenden."
+          ]
+        },
+        {
+          "title": "Haftung",
+          "paragraphs": [
+            "Wir haften unbeschränkt für Vorsatz und grobe Fahrlässigkeit, bei Verletzung von Leben, Körper oder Gesundheit sowie soweit zwingendes Recht es vorsieht. Bei leichter Fahrlässigkeit haften wir nur bei der Verletzung wesentlicher Vertragspflichten und dann begrenzt auf den vorhersehbaren, für diese Art von Dienst typischen Schaden. Eine weitergehende Haftung ist ausgeschlossen; das gilt auch für die persönliche Haftung von Mitarbeitern und Erfüllungsgehilfen."
+          ]
+        },
+        {
+          "title": "Open Source",
+          "paragraphs": [
+            "Der Quellcode ist im Projekt-Repository auf GitHub verfügbar, verlinkt in der Fußzeile."
+          ]
+        },
+        {
+          "title": "Änderungen dieser Bedingungen",
+          "paragraphs": [
+            "Wir können diese Bedingungen anpassen, wenn sich der Dienst ändert. Wenn du Ludo nach einer Änderung weiter nutzt, gilt die neue Fassung als akzeptiert."
+          ]
+        },
+        {
+          "title": "Anwendbares Recht",
+          "paragraphs": [
+            "Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts. Bist du Verbraucher, bleiben zwingende Verbraucherschutzvorschriften des Landes, in dem du lebst, unberührt."
+          ]
+        }
+      ]
+    }
   }
 }

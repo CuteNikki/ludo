@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LanguageToggle } from '@/components/language-toggle';
+import { SiteFooter } from '@/components/site-footer';
 import { TapTooltip } from '@/components/tap-tooltip';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
@@ -60,85 +61,88 @@ export default function DiscoverPage() {
   }
 
   return (
-    <main className='mx-auto min-h-screen max-w-4xl px-3 py-2 sm:px-4 sm:py-6'>
-      <header className='flex flex-wrap items-center justify-between gap-4 border-4 border-border bg-background-alternative p-4 shadow-card sm:p-5'>
-        <a href='/' className='flex items-center gap-2' aria-label={t('room.message.toHomepage')}>
-          <DicesIcon className='size-10 shrink-0 rounded-lg bg-foreground p-1.5 text-background' />
-          <div>
-            <p className='text-xs font-black uppercase tracking-[.16em] text-red-700 dark:text-red-400'>{t('discover.eyebrow')}</p>
-            <h1 className='font-mono text-xl font-black tracking-widest'>{t('discover.title')}</h1>
+    <>
+      <main className='mx-auto min-h-screen max-w-4xl px-3 py-2 sm:px-4 sm:py-6'>
+        <header className='flex flex-wrap items-center justify-between gap-4 border-4 border-border bg-background-alternative p-4 shadow-card sm:p-5'>
+          <a href='/' className='flex items-center gap-2' aria-label={t('room.message.toHomepage')}>
+            <DicesIcon className='size-10 shrink-0 rounded-lg bg-foreground p-1.5 text-background' />
+            <div>
+              <p className='text-xs font-black uppercase tracking-[.16em] text-red-700 dark:text-red-400'>{t('discover.eyebrow')}</p>
+              <h1 className='font-mono text-xl font-black tracking-widest'>{t('discover.title')}</h1>
+            </div>
+          </a>
+          <div className='flex items-center gap-2'>
+            <LanguageToggle />
+            <ThemeToggle />
+            <Button variant='outline' asChild className='h-10 px-3 bg-background-alternative text-foreground hover:bg-background hover:text-foreground'>
+              <a href='/'>
+                <Home size={17} /> {t('room.message.toHomepage')}
+              </a>
+            </Button>
           </div>
-        </a>
-        <div className='flex items-center gap-2'>
-          <LanguageToggle />
-          <ThemeToggle />
-          <Button variant='outline' asChild className='h-10 px-3 bg-background-alternative text-foreground hover:bg-background hover:text-foreground'>
-            <a href='/'>
-              <Home size={17} /> {t('room.message.toHomepage')}
-            </a>
-          </Button>
-        </div>
-      </header>
+        </header>
 
-      <section className='mt-8 border-4 border-border bg-background-alternative p-5 shadow-card sm:p-8'>
-        <Label htmlFor='discover-name' className='mb-2'>
-          {t('start.nameLabel')}
-        </Label>
-        <Input
-          id='discover-name'
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          maxLength={24}
-          placeholder={t('start.namePlaceholder')}
-          className='mb-6 h-12 max-w-sm bg-background'
-        />
+        <section className='mt-8 border-4 border-border bg-background-alternative p-5 shadow-card sm:p-8'>
+          <Label htmlFor='discover-name' className='mb-2'>
+            {t('start.nameLabel')}
+          </Label>
+          <Input
+            id='discover-name'
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            maxLength={24}
+            placeholder={t('start.namePlaceholder')}
+            className='mb-6 h-12 max-w-sm bg-background'
+          />
 
-        <div className='mb-4 flex items-center justify-between gap-3'>
-          <h2 className='flex items-center gap-2 text-lg font-black'>
-            <Users size={19} /> {t('discover.listTitle')}
-          </h2>
-          <span className={cn('flex items-center gap-1.5 text-[10px] font-bold uppercase text-foreground/60', loading && 'animate-pulse')}>
-            <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> {t('discover.autoRefresh')}
-          </span>
-        </div>
+          <div className='mb-4 flex items-center justify-between gap-3'>
+            <h2 className='flex items-center gap-2 text-lg font-black'>
+              <Users size={19} /> {t('discover.listTitle')}
+            </h2>
+            <span className={cn('flex items-center gap-1.5 text-[10px] font-bold uppercase text-foreground/60', loading && 'animate-pulse')}>
+              <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> {t('discover.autoRefresh')}
+            </span>
+          </div>
 
-        {!loading && rooms.length === 0 && <p className='py-10 text-center text-sm font-medium text-foreground/70'>{t('discover.empty')}</p>}
+          {!loading && rooms.length === 0 && <p className='py-10 text-center text-sm font-medium text-foreground/70'>{t('discover.empty')}</p>}
 
-        <div className='space-y-2'>
-          {rooms.map((room) => {
-            const joinable = room.phase === 'lobby' && room.playerCount < room.maxPlayers;
-            return (
-              <div
-                key={room.roomCode}
-                className='flex flex-wrap items-center justify-between gap-3 border-2 border-border bg-background p-3 transition-colors duration-300'
-              >
-                <div className='min-w-0'>
-                  <p className='truncate font-mono text-lg font-black tracking-widest'>{room.roomCode}</p>
-                  <p className='truncate text-xs font-bold text-foreground/60'>{t('discover.hostedBy', { name: room.hostName })}</p>
-                  <RoomSettingIcons settings={room.settings} />
+          <div className='space-y-2'>
+            {rooms.map((room) => {
+              const joinable = room.phase === 'lobby' && room.playerCount < room.maxPlayers;
+              return (
+                <div
+                  key={room.roomCode}
+                  className='flex flex-wrap items-center justify-between gap-3 border-2 border-border bg-background p-3 transition-colors duration-300'
+                >
+                  <div className='min-w-0'>
+                    <p className='truncate font-mono text-lg font-black tracking-widest'>{room.roomCode}</p>
+                    <p className='truncate text-xs font-bold text-foreground/60'>{t('discover.hostedBy', { name: room.hostName })}</p>
+                    <RoomSettingIcons settings={room.settings} />
+                  </div>
+                  <div className='flex items-center gap-3'>
+                    <span className='text-sm font-bold'>
+                      {room.playerCount}/{room.maxPlayers}
+                    </span>
+                    <span
+                      className={cn(
+                        'text-[10px] font-bold uppercase',
+                        room.phase === 'lobby' ? 'text-emerald-700 dark:text-emerald-400' : 'text-foreground/50',
+                      )}
+                    >
+                      {t(`discover.phase.${room.phase}`)}
+                    </span>
+                    <Button className='h-10 px-3 text-xs' disabled={!joinable} onClick={() => joinRoom(room.roomCode)}>
+                      {t('discover.join')} <ArrowRight size={15} />
+                    </Button>
+                  </div>
                 </div>
-                <div className='flex items-center gap-3'>
-                  <span className='text-sm font-bold'>
-                    {room.playerCount}/{room.maxPlayers}
-                  </span>
-                  <span
-                    className={cn(
-                      'text-[10px] font-bold uppercase',
-                      room.phase === 'lobby' ? 'text-emerald-700 dark:text-emerald-400' : 'text-foreground/50',
-                    )}
-                  >
-                    {t(`discover.phase.${room.phase}`)}
-                  </span>
-                  <Button className='h-10 px-3 text-xs' disabled={!joinable} onClick={() => joinRoom(room.roomCode)}>
-                    {t('discover.join')} <ArrowRight size={15} />
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-    </main>
+              );
+            })}
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
+    </>
   );
 }
 

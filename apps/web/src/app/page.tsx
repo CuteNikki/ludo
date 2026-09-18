@@ -10,6 +10,7 @@ import type { GameState, PlayerColor } from '@ludo/shared';
 import { GameBoard } from '@/components/game-board';
 import { LanguageToggle } from '@/components/language-toggle';
 import { Reveal } from '@/components/scroll-reveal';
+import { SiteFooter } from '@/components/site-footer';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
@@ -410,9 +411,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      <footer className='border-t-2 border-border bg-background-alternative px-6 py-7 text-center text-xs font-bold uppercase tracking-[.15em]'>
-        {t('footer')}
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

@@ -2,6 +2,7 @@
 
 import { GameBoard } from '@/components/game-board';
 import { LanguageToggle } from '@/components/language-toggle';
+import { SiteFooter } from '@/components/site-footer';
 import { TapTooltip } from '@/components/tap-tooltip';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toast } from '@/components/toast';
@@ -221,267 +222,270 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   }
 
   return (
-    <main className='room-shell mx-auto min-h-screen max-w-6xl px-3 py-2 sm:px-4 sm:py-6'>
-      <header className='room-header flex flex-wrap items-center justify-between gap-4 border-4 border-border bg-background-alternative p-4 shadow-card sm:p-5'>
-        <div className='flex items-center gap-2'>
-          <a href='/' aria-label={t('room.message.toHomepage')}>
-            <DicesIcon className='size-10 shrink-0 rounded-lg bg-foreground p-1.5 text-background' />
-          </a>
-          <div>
-            <p className='text-xs font-black uppercase tracking-[.16em] text-red-700 dark:text-red-400'>{t('room.eyebrow')}</p>
-            <button
-              type='button'
-              onClick={copyRoomCode}
-              aria-label={copiedCode ? t('room.copied') : t('room.copyCodeAria')}
-              title={copiedCode ? t('room.copied') : t('room.copyCodeAria')}
-              className='group flex touch-manipulation items-center gap-1.5 font-mono text-xl font-black tracking-widest transition-colors hover:text-foreground/70'
-            >
-              {state.roomCode}
-              {copiedCode ? (
-                <CopyCheckIcon size={16} className='shrink-0' />
-              ) : (
-                <CopyIcon size={16} className='shrink-0 opacity-0 transition-opacity group-hover:opacity-60' />
-              )}
-            </button>
-          </div>
-        </div>
-        <div className='flex items-center gap-2'>
-          <LanguageToggle />
-          <ThemeToggle />
-          <Button
-            variant='outline'
-            asChild
-            className='hidden h-10 px-2 bg-background-alternative text-foreground hover:bg-background hover:text-foreground sm:inline-flex'
-          >
-            <a href='/rules' target='_blank' rel='noreferrer'>
-              <BookOpen size={17} /> {t('room.rules')}
+    <>
+      <main className='room-shell mx-auto min-h-screen max-w-6xl px-3 py-2 sm:px-4 sm:py-6'>
+        <header className='room-header flex flex-wrap items-center justify-between gap-4 border-4 border-border bg-background-alternative p-4 shadow-card sm:p-5'>
+          <div className='flex items-center gap-2'>
+            <a href='/' aria-label={t('room.message.toHomepage')}>
+              <DicesIcon className='size-10 shrink-0 rounded-lg bg-foreground p-1.5 text-background' />
             </a>
-          </Button>
-          <Button
-            variant='outline'
-            className='h-10 px-2 bg-background-alternative text-foreground hover:bg-background hover:text-foreground'
-            onClick={copyRoomLink}
-          >
-            {copiedLink ? <CopyCheckIcon /> : <CopyIcon />} {copiedLink ? t('room.copied') : t('room.copyLink')}
-          </Button>
-        </div>
-      </header>
+            <div>
+              <p className='text-xs font-black uppercase tracking-[.16em] text-red-700 dark:text-red-400'>{t('room.eyebrow')}</p>
+              <button
+                type='button'
+                onClick={copyRoomCode}
+                aria-label={copiedCode ? t('room.copied') : t('room.copyCodeAria')}
+                title={copiedCode ? t('room.copied') : t('room.copyCodeAria')}
+                className='group flex touch-manipulation items-center gap-1.5 font-mono text-xl font-black tracking-widest transition-colors hover:text-foreground/70'
+              >
+                {state.roomCode}
+                {copiedCode ? (
+                  <CopyCheckIcon size={16} className='shrink-0' />
+                ) : (
+                  <CopyIcon size={16} className='shrink-0 opacity-0 transition-opacity group-hover:opacity-60' />
+                )}
+              </button>
+            </div>
+          </div>
+          <div className='flex items-center gap-2'>
+            <LanguageToggle />
+            <ThemeToggle />
+            <Button
+              variant='outline'
+              asChild
+              className='hidden h-10 px-2 bg-background-alternative text-foreground hover:bg-background hover:text-foreground sm:inline-flex'
+            >
+              <a href='/rules' target='_blank' rel='noreferrer'>
+                <BookOpen size={17} /> {t('room.rules')}
+              </a>
+            </Button>
+            <Button
+              variant='outline'
+              className='h-10 px-2 bg-background-alternative text-foreground hover:bg-background hover:text-foreground'
+              onClick={copyRoomLink}
+            >
+              {copiedLink ? <CopyCheckIcon /> : <CopyIcon />} {copiedLink ? t('room.copied') : t('room.copyLink')}
+            </Button>
+          </div>
+        </header>
 
-      <div className='grid gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10'>
-        <section className='animate-board-enter flex min-w-0 self-start justify-center p-1 sm:p-3 lg:justify-start lg:p-0'>
-          <GameBoard state={state} playerId={playerId} onMove={(pieceId) => emit({ type: 'game:move', payload: { pieceId } })} />
-        </section>
+        <div className='grid gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10'>
+          <section className='animate-board-enter flex min-w-0 self-start justify-center p-1 sm:p-3 lg:justify-start lg:p-0'>
+            <GameBoard state={state} playerId={playerId} onMove={(pieceId) => emit({ type: 'game:move', payload: { pieceId } })} />
+          </section>
 
-        <aside className='self-start border-4 border-border bg-background-alternative p-5 shadow-card'>
-          {state.phase !== 'lobby' && (
-            <section className={cn('turn-panel mb-6 flex flex-col border-b-2 border-border pb-6', state.phase === 'finished' ? 'min-h-56' : 'h-56')}>
-              {state.phase === 'finished' ? (
-                <div className='grid flex-1 place-items-center text-center'>
-                  <div className='w-full'>
-                    <Trophy className='mx-auto mb-1 text-amber-500' size={27} />
-                    <p className='text-xs font-bold uppercase text-foreground/60'>{t('room.won')}</p>
-                    <p className='mt-1 text-2xl font-black'>{winner?.name}</p>
+          <aside className='self-start border-4 border-border bg-background-alternative p-5 shadow-card'>
+            {state.phase !== 'lobby' && (
+              <section className={cn('turn-panel mb-6 flex flex-col border-b-2 border-border pb-6', state.phase === 'finished' ? 'min-h-56' : 'h-56')}>
+                {state.phase === 'finished' ? (
+                  <div className='grid flex-1 place-items-center text-center'>
+                    <div className='w-full'>
+                      <Trophy className='mx-auto mb-1 text-amber-500' size={27} />
+                      <p className='text-xs font-bold uppercase text-foreground/60'>{t('room.won')}</p>
+                      <p className='mt-1 text-2xl font-black'>{winner?.name}</p>
 
-                    {state.rematchDeadline === null ? (
-                      <>
-                        <p className='mt-1 h-5 text-xs font-bold text-foreground/60'>{t('room.oneMoreRound')}</p>
-                        <div className='mt-3 grid grid-cols-2 gap-2'>
-                          <Button className='h-10 px-3 text-xs' disabled={wantsRematch} onClick={() => emit({ type: 'game:rematch', payload: {} })}>
-                            {wantsRematch ? <Check size={16} /> : <RotateCcw size={16} />}
-                            {wantsRematch ? t('room.rematchAccepted') : t('room.rematchCta')}
-                          </Button>
-                          <Button className='h-10 px-3 text-xs' variant='outline' onClick={leaveRoom}>
-                            <LogOut size={16} /> {t('room.mainMenu')}
-                          </Button>
-                        </div>
-                      </>
-                    ) : (
-                      <div
-                        role='status'
-                        aria-live='assertive'
-                        className='mt-3 border-2 border-amber-500 bg-amber-500/10 p-3 dark:border-amber-400 dark:bg-amber-400/10'
-                      >
-                        <p className='flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wide text-amber-700 dark:text-amber-400'>
-                          <span className='relative flex h-2 w-2 items-center justify-center'>
-                            <span className='absolute h-2 w-2 rounded-full bg-amber-500 animate-ping dark:bg-amber-400' />
-                            <span className='absolute h-2 w-2 rounded-full bg-amber-500 dark:bg-amber-400' />
-                          </span>
-                          {t('room.rematchVoteInProgress')}
-                        </p>
-                        <p className='mt-1.5 text-xs font-bold text-foreground/70'>
-                          {t('room.rematchStatus', {
-                            accepted: state.rematchPlayerIds.length,
-                            // Bots don't vote, they follow whoever does.
-                            total: state.players.filter((player) => !player.isBot).length,
-                            seconds: rematchSecondsLeft,
-                          })}
-                        </p>
-                        <div className='mt-2 h-1.5 overflow-hidden bg-amber-500/20 dark:bg-amber-400/20'>
-                          <div
-                            className='h-full bg-amber-500 transition-[width] duration-200 dark:bg-amber-400'
-                            style={{ width: `${(rematchSecondsLeft / 30) * 100}%` }}
-                          />
-                        </div>
-                        <div className='mt-3 grid grid-cols-2 gap-2'>
-                          <Button className='h-10 px-3 text-xs' disabled={wantsRematch} onClick={() => emit({ type: 'game:rematch', payload: {} })}>
-                            {wantsRematch ? <Check size={16} /> : <RotateCcw size={16} />}
-                            {wantsRematch ? t('room.rematchAccepted') : t('room.rematchCta')}
-                          </Button>
-                          <Button className='h-10 px-3 text-xs' variant='outline' onClick={leaveRoom}>
-                            <LogOut size={16} /> {t('room.mainMenu')}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className='flex min-h-0 flex-1 flex-col'>
-                  <div className='flex min-h-12 items-center justify-between gap-3'>
-                    <div>
-                      <p className='text-xs font-bold uppercase text-foreground/60'>{t('room.yourTurn')}</p>
-                      <p className='max-w-48 truncate text-xl font-black'>{currentPlayer?.name}</p>
-                    </div>
-                    <div className='flex h-8 w-16 shrink-0 items-center justify-end gap-2 font-mono text-2xl font-black'>
-                      {showCountdown && (
+                      {state.rematchDeadline === null ? (
                         <>
-                          <Clock3 size={20} /> {secondsLeft}
+                          <p className='mt-1 h-5 text-xs font-bold text-foreground/60'>{t('room.oneMoreRound')}</p>
+                          <div className='mt-3 grid grid-cols-2 gap-2'>
+                            <Button className='h-10 px-3 text-xs' disabled={wantsRematch} onClick={() => emit({ type: 'game:rematch', payload: {} })}>
+                              {wantsRematch ? <Check size={16} /> : <RotateCcw size={16} />}
+                              {wantsRematch ? t('room.rematchAccepted') : t('room.rematchCta')}
+                            </Button>
+                            <Button className='h-10 px-3 text-xs' variant='outline' onClick={leaveRoom}>
+                              <LogOut size={16} /> {t('room.mainMenu')}
+                            </Button>
+                          </div>
                         </>
+                      ) : (
+                        <div
+                          role='status'
+                          aria-live='assertive'
+                          className='mt-3 border-2 border-amber-500 bg-amber-500/10 p-3 dark:border-amber-400 dark:bg-amber-400/10'
+                        >
+                          <p className='flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wide text-amber-700 dark:text-amber-400'>
+                            <span className='relative flex h-2 w-2 items-center justify-center'>
+                              <span className='absolute h-2 w-2 rounded-full bg-amber-500 animate-ping dark:bg-amber-400' />
+                              <span className='absolute h-2 w-2 rounded-full bg-amber-500 dark:bg-amber-400' />
+                            </span>
+                            {t('room.rematchVoteInProgress')}
+                          </p>
+                          <p className='mt-1.5 text-xs font-bold text-foreground/70'>
+                            {t('room.rematchStatus', {
+                              accepted: state.rematchPlayerIds.length,
+                              // Bots don't vote, they follow whoever does.
+                              total: state.players.filter((player) => !player.isBot).length,
+                              seconds: rematchSecondsLeft,
+                            })}
+                          </p>
+                          <div className='mt-2 h-1.5 overflow-hidden bg-amber-500/20 dark:bg-amber-400/20'>
+                            <div
+                              className='h-full bg-amber-500 transition-[width] duration-200 dark:bg-amber-400'
+                              style={{ width: `${(rematchSecondsLeft / 30) * 100}%` }}
+                            />
+                          </div>
+                          <div className='mt-3 grid grid-cols-2 gap-2'>
+                            <Button className='h-10 px-3 text-xs' disabled={wantsRematch} onClick={() => emit({ type: 'game:rematch', payload: {} })}>
+                              {wantsRematch ? <Check size={16} /> : <RotateCcw size={16} />}
+                              {wantsRematch ? t('room.rematchAccepted') : t('room.rematchCta')}
+                            </Button>
+                            <Button className='h-10 px-3 text-xs' variant='outline' onClick={leaveRoom}>
+                              <LogOut size={16} /> {t('room.mainMenu')}
+                            </Button>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
-                  <div className={cn('mt-3 h-2 shrink-0 overflow-hidden', showCountdown && 'bg-border/20')}>
-                    {showCountdown && (
-                      <div
-                        className='h-full bg-red-500 transition-[width] duration-200'
-                        style={{ width: `${(secondsLeft / state.settings.moveTimeSeconds) * 100}%` }}
-                      />
-                    )}
-                  </div>
-                  <div key={`${state.revision}-${state.turnStage}`} className='animate-status-swap grid min-h-0 flex-1 place-items-center text-center'>
-                    {state.turnStage === 'rolling' ? (
+                ) : (
+                  <div className='flex min-h-0 flex-1 flex-col'>
+                    <div className='flex min-h-12 items-center justify-between gap-3'>
                       <div>
-                        <Dices className='animate-dice-rolling mx-auto' size={58} strokeWidth={2.2} />
-                        <p className='mt-2 text-sm font-bold'>{t('room.rollAnimating')}</p>
+                        <p className='text-xs font-bold uppercase text-foreground/60'>{t('room.yourTurn')}</p>
+                        <p className='max-w-48 truncate text-xl font-black'>{currentPlayer?.name}</p>
                       </div>
-                    ) : (
-                      <div>
-                        <p className='animate-dice-result font-display text-6xl font-black leading-none'>{state.diceResult}</p>
-                        {state.turnStage === 'move' && (
-                          <p className='mt-2 text-sm font-bold'>
-                            {currentPlayer?.isBot
-                              ? t('room.botThinking', { name: currentPlayer.name })
-                              : isMyTurn
-                                ? t('room.chooseAPieceSelf')
-                                : t('room.chooseAPieceOther')}
-                          </p>
+                      <div className='flex h-8 w-16 shrink-0 items-center justify-end gap-2 font-mono text-2xl font-black'>
+                        {showCountdown && (
+                          <>
+                            <Clock3 size={20} /> {secondsLeft}
+                          </>
                         )}
-                        {state.turnStage === 'auto-move' && <p className='mt-2 text-sm font-bold'>{t('room.autoMoving')}</p>}
-                        {state.turnStage === 'no-move' && <p className='mt-2 text-sm font-bold text-red-700 dark:text-red-400'>{t('room.noValidMove')}</p>}
                       </div>
-                    )}
+                    </div>
+                    <div className={cn('mt-3 h-2 shrink-0 overflow-hidden', showCountdown && 'bg-border/20')}>
+                      {showCountdown && (
+                        <div
+                          className='h-full bg-red-500 transition-[width] duration-200'
+                          style={{ width: `${(secondsLeft / state.settings.moveTimeSeconds) * 100}%` }}
+                        />
+                      )}
+                    </div>
+                    <div key={`${state.revision}-${state.turnStage}`} className='animate-status-swap grid min-h-0 flex-1 place-items-center text-center'>
+                      {state.turnStage === 'rolling' ? (
+                        <div>
+                          <Dices className='animate-dice-rolling mx-auto' size={58} strokeWidth={2.2} />
+                          <p className='mt-2 text-sm font-bold'>{t('room.rollAnimating')}</p>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className='animate-dice-result font-display text-6xl font-black leading-none'>{state.diceResult}</p>
+                          {state.turnStage === 'move' && (
+                            <p className='mt-2 text-sm font-bold'>
+                              {currentPlayer?.isBot
+                                ? t('room.botThinking', { name: currentPlayer.name })
+                                : isMyTurn
+                                  ? t('room.chooseAPieceSelf')
+                                  : t('room.chooseAPieceOther')}
+                            </p>
+                          )}
+                          {state.turnStage === 'auto-move' && <p className='mt-2 text-sm font-bold'>{t('room.autoMoving')}</p>}
+                          {state.turnStage === 'no-move' && <p className='mt-2 text-sm font-bold text-red-700 dark:text-red-400'>{t('room.noValidMove')}</p>}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-            </section>
-          )}
-
-          {state.phase === 'lobby' && me && (
-            <PlayerProfile
-              player={me}
-              players={state.players}
-              colorNames={colorNames}
-              onChange={(profile) => emit({ type: 'player:update', payload: profile })}
-            />
-          )}
-
-          {state.phase === 'lobby' && <LobbySettings settings={state.settings} isHost={isHost} onChange={updateSettings} />}
-
-          <h2 className='mb-4 flex items-center gap-2 text-lg font-black'>
-            <Users size={19} /> {t('room.players')} {state.players.length}/4
-          </h2>
-          <div className='space-y-2'>
-            {state.players.map((player) => (
-              <div
-                key={player.id}
-                className={cn(
-                  'relative flex min-h-12 items-center gap-3 border-2 bg-background p-3 transition-[border-color,box-shadow,background-color,transform] duration-300',
-                  player.id === state.currentPlayerId ? activePlayerClasses[player.color] : 'border-border',
-                  !player.connected && 'opacity-55',
                 )}
-              >
-                <span className={cn('h-4 w-4 rounded-full border-2 border-background-alternative shadow-sm', colorClasses[player.color])} />
-                <span className='flex min-w-0 flex-1 items-center gap-1.5 font-bold'>
-                  <span className='truncate'>
-                    {player.name}
-                    {player.id === playerId ? t('room.you') : ''}
+              </section>
+            )}
+
+            {state.phase === 'lobby' && me && (
+              <PlayerProfile
+                player={me}
+                players={state.players}
+                colorNames={colorNames}
+                onChange={(profile) => emit({ type: 'player:update', payload: profile })}
+              />
+            )}
+
+            {state.phase === 'lobby' && <LobbySettings settings={state.settings} isHost={isHost} onChange={updateSettings} />}
+
+            <h2 className='mb-4 flex items-center gap-2 text-lg font-black'>
+              <Users size={19} /> {t('room.players')} {state.players.length}/4
+            </h2>
+            <div className='space-y-2'>
+              {state.players.map((player) => (
+                <div
+                  key={player.id}
+                  className={cn(
+                    'relative flex min-h-12 items-center gap-3 border-2 bg-background p-3 transition-[border-color,box-shadow,background-color,transform] duration-300',
+                    player.id === state.currentPlayerId ? activePlayerClasses[player.color] : 'border-border',
+                    !player.connected && 'opacity-55',
+                  )}
+                >
+                  <span className={cn('h-4 w-4 rounded-full border-2 border-background-alternative shadow-sm', colorClasses[player.color])} />
+                  <span className='flex min-w-0 flex-1 items-center gap-1.5 font-bold'>
+                    <span className='truncate'>
+                      {player.name}
+                      {player.id === playerId ? t('room.you') : ''}
+                    </span>
+                    {player.isBot && <Bot size={15} className='shrink-0 text-foreground/60' aria-label={t('room.bot')} />}
                   </span>
-                  {player.isBot && <Bot size={15} className='shrink-0 text-foreground/60' aria-label={t('room.bot')} />}
-                </span>
-                {player.id === state.hostPlayerId && state.phase === 'lobby' && (
-                  <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.host')}</span>
-                )}
-                {player.id === state.currentPlayerId && state.phase === 'playing' && (
-                  <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.yourTurn')}</span>
-                )}
-                {player.ready && <Check size={18} className='text-emerald-700 dark:text-emerald-400' aria-label={t('room.imReady')} />}
-                {state.phase === 'finished' && state.rematchPlayerIds.includes(player.id) && (
-                  <Vote size={16} className='text-amber-600 dark:text-amber-400' aria-label={t('room.rematchVotedAria', { name: player.name })} />
-                )}
-                {state.phase === 'lobby' && isHost && player.id !== playerId && (
-                  <button
-                    type='button'
-                    onClick={() => emit({ type: 'room:kick', payload: { playerId: player.id } })}
-                    aria-label={t('room.removePlayerAria', { name: player.name })}
-                    title={t('room.removePlayerAria', { name: player.name })}
-                    className='btn-press grid h-8 w-8 shrink-0 touch-manipulation place-items-center text-foreground/60 transition-colors hover:bg-red-500/15 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
-                  >
-                    <UserMinus size={17} />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-          {state.phase === 'lobby' && isHost && state.players.length < 4 && (
-            <Button variant='outline' className='mt-3 w-full' onClick={() => emit({ type: 'room:addBot', payload: {} })}>
-              <Bot size={17} /> {t('room.addBot')}
-            </Button>
-          )}
-          {state.phase === 'lobby' && (
-            <Button
-              className='mt-5 w-full'
-              variant={me?.ready ? 'outline' : 'default'}
-              onClick={() => emit({ type: 'player:ready', payload: { ready: !me?.ready } })}
-            >
-              {me?.ready ? t('room.notReady') : t('room.imReady')}
-            </Button>
-          )}
-          {state.phase === 'lobby' && <p className='mt-4 text-sm font-medium leading-6 text-foreground/80'>{t('room.startHint')}</p>}
-          {state.phase === 'lobby' && leaveNotice && (
-            <Toast
-              key={leaveNotice.id}
-              role='status'
-              aria-live='polite'
-              duration={5_000}
-              onDismiss={() => setLeaveNotice(null)}
-              className='mt-4 border border-border bg-background p-3 text-sm font-bold text-foreground/80'
-            >
-              {t(`room.leaveNotice.${leaveNotice.reason}`, { name: leaveNotice.playerName })}
-            </Toast>
-          )}
-          {notice && (
-            <Toast
-              key={notice.id}
-              role='alert'
-              onDismiss={() => setNotice(null)}
-              className='mt-4 border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-600 dark:text-red-400'
-            >
-              {t(`room.errors.${notice.code}`, { defaultValue: t('room.errors.UNKNOWN') })}
-            </Toast>
-          )}
-        </aside>
-      </div>
-    </main>
+                  {player.id === state.hostPlayerId && state.phase === 'lobby' && (
+                    <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.host')}</span>
+                  )}
+                  {player.id === state.currentPlayerId && state.phase === 'playing' && (
+                    <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.yourTurn')}</span>
+                  )}
+                  {player.ready && <Check size={18} className='text-emerald-700 dark:text-emerald-400' aria-label={t('room.imReady')} />}
+                  {state.phase === 'finished' && state.rematchPlayerIds.includes(player.id) && (
+                    <Vote size={16} className='text-amber-600 dark:text-amber-400' aria-label={t('room.rematchVotedAria', { name: player.name })} />
+                  )}
+                  {state.phase === 'lobby' && isHost && player.id !== playerId && (
+                    <button
+                      type='button'
+                      onClick={() => emit({ type: 'room:kick', payload: { playerId: player.id } })}
+                      aria-label={t('room.removePlayerAria', { name: player.name })}
+                      title={t('room.removePlayerAria', { name: player.name })}
+                      className='btn-press grid h-8 w-8 shrink-0 touch-manipulation place-items-center text-foreground/60 transition-colors hover:bg-red-500/15 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
+                    >
+                      <UserMinus size={17} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            {state.phase === 'lobby' && isHost && state.players.length < 4 && (
+              <Button variant='outline' className='mt-3 w-full' onClick={() => emit({ type: 'room:addBot', payload: {} })}>
+                <Bot size={17} /> {t('room.addBot')}
+              </Button>
+            )}
+            {state.phase === 'lobby' && (
+              <Button
+                className='mt-5 w-full'
+                variant={me?.ready ? 'outline' : 'default'}
+                onClick={() => emit({ type: 'player:ready', payload: { ready: !me?.ready } })}
+              >
+                {me?.ready ? t('room.notReady') : t('room.imReady')}
+              </Button>
+            )}
+            {state.phase === 'lobby' && <p className='mt-4 text-sm font-medium leading-6 text-foreground/80'>{t('room.startHint')}</p>}
+            {state.phase === 'lobby' && leaveNotice && (
+              <Toast
+                key={leaveNotice.id}
+                role='status'
+                aria-live='polite'
+                duration={5_000}
+                onDismiss={() => setLeaveNotice(null)}
+                className='mt-4 border border-border bg-background p-3 text-sm font-bold text-foreground/80'
+              >
+                {t(`room.leaveNotice.${leaveNotice.reason}`, { name: leaveNotice.playerName })}
+              </Toast>
+            )}
+            {notice && (
+              <Toast
+                key={notice.id}
+                role='alert'
+                onDismiss={() => setNotice(null)}
+                className='mt-4 border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-600 dark:text-red-400'
+              >
+                {t(`room.errors.${notice.code}`, { defaultValue: t('room.errors.UNKNOWN') })}
+              </Toast>
+            )}
+          </aside>
+        </div>
+      </main>
+      <SiteFooter />
+    </>
   );
 }
 
