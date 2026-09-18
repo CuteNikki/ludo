@@ -9,6 +9,7 @@ import type { GameState, PlayerColor } from '@ludo/shared';
 
 import { GameBoard } from '@/components/game-board';
 import { LanguageToggle } from '@/components/language-toggle';
+import { Reveal } from '@/components/scroll-reveal';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 
@@ -225,7 +226,7 @@ export default function HomePage() {
       {notice && (
         <div
           role='alert'
-          className='toast-enter fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 border-2 border-border bg-background-alternative p-4 pr-3 shadow-card sm:right-6 sm:top-6'
+          className='animate-toast-enter fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 border-2 border-border bg-background-alternative p-4 pr-3 shadow-card sm:right-6 sm:top-6'
         >
           <CircleAlert className='mt-0.5 shrink-0 text-red-600' size={19} />
           <div>
@@ -288,7 +289,7 @@ export default function HomePage() {
       </section>
 
       <section id='start' className='border-y-2 border-border bg-background-alternative'>
-        <div className='mx-auto grid min-w-0 max-w-6xl gap-10 px-6 py-14 lg:grid-cols-[.8fr_1.2fr] lg:items-center lg:py-20'>
+        <Reveal className='scroll-reveal mx-auto grid min-w-0 max-w-6xl gap-10 px-6 py-14 lg:grid-cols-[.8fr_1.2fr] lg:items-center lg:py-20'>
           <div className='min-w-0'>
             <p className='mb-3 text-sm font-black uppercase tracking-[.16em] text-red-600'>{t('start.eyebrow')}</p>
             <h2 className='max-w-full wrap-break-word font-display text-4xl font-black leading-none sm:text-5xl'>{t('start.title')}</h2>
@@ -343,7 +344,7 @@ export default function HomePage() {
               <Users size={15} /> {t('start.browsePublicRooms')}
             </a>
           </section>
-        </div>
+        </Reveal>
       </section>
 
       <section id='how-it-works' className='mx-auto max-w-6xl px-6 py-20 sm:py-28'>
@@ -351,7 +352,7 @@ export default function HomePage() {
           <p className='mb-3 text-sm font-black uppercase tracking-[.16em] text-red-600'>{t('howItWorks.eyebrow')}</p>
           <h2 className='font-display text-4xl font-black leading-none sm:text-5xl'>{t('howItWorks.title')}</h2>
         </div>
-        <div className='stagger-fade-in mt-12 grid gap-8 md:grid-cols-3'>
+        <Reveal className='stagger-fade-in mt-12 grid gap-8 md:grid-cols-3'>
           {steps.map((step, index) => {
             const Icon = stepIcons[index]!;
             return (
@@ -368,8 +369,8 @@ export default function HomePage() {
               </article>
             );
           })}
-        </div>
-        <div className='mt-10 grid gap-6 border-t-2 border-border pt-8 sm:grid-cols-3'>
+        </Reveal>
+        <Reveal className='scroll-reveal mt-10 grid gap-6 border-t-2 border-border pt-8 sm:grid-cols-3'>
           <div className='flex gap-3'>
             <Users className='shrink-0 text-red-600' size={22} />
             <p>
@@ -391,7 +392,7 @@ export default function HomePage() {
               <span className='text-sm text-foreground/70'>{t('howItWorks.fairDice.text')}</span>
             </p>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <footer className='border-t-2 border-border bg-background-alternative px-6 py-7 text-center text-xs font-bold uppercase tracking-[.15em]'>

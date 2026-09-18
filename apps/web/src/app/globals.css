@@ -44,6 +44,7 @@
   --animate-toast-enter: toast-enter 0.25s ease-out both;
   --animate-piece-capture-flight: piece-capture-flight 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-piece-spawn-flight: piece-spawn-flight 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 * {
@@ -241,6 +242,104 @@ body {
   }
 }
 
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    translate: 0 20px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 @utility link-underline {
   @apply relative after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-current after:transition-[width] after:duration-250 after:ease-in-out hover:after:w-full;
+}
+
+/* One-shot entrance animations, played as soon as the element mounts - used above the fold (hero,
+   room shell/header) where there's nothing to scroll past before it's visible. */
+@utility home-reveal {
+  animation: var(--animate-fade-up);
+}
+
+@utility home-board {
+  animation: var(--animate-fade-up);
+  animation-delay: 0.15s;
+}
+
+@utility room-shell {
+  animation: fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility room-header {
+  animation: fade-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility card-hover-lift {
+  transition:
+    translate 0.25s ease-out,
+    box-shadow 0.25s ease-out;
+
+  &:hover {
+    translate: 0 -4px;
+  }
+}
+
+/* Scroll-triggered reveal: hidden until the `Reveal` component (scroll-reveal.tsx) marks the
+   element `data-in-view` via IntersectionObserver. `stagger-fade-in` additionally staggers its
+   direct children so a row of cards reveals left-to-right instead of all at once. */
+@utility scroll-reveal {
+  opacity: 0;
+  translate: 0 24px;
+  transition:
+    opacity 0.6s ease-out,
+    translate 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &[data-in-view] {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@utility stagger-fade-in {
+  & > * {
+    opacity: 0;
+    translate: 0 20px;
+    transition:
+      opacity 0.6s ease-out,
+      translate 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  &[data-in-view] > * {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  &[data-in-view] > *:nth-child(1) {
+    transition-delay: 0ms;
+  }
+  &[data-in-view] > *:nth-child(2) {
+    transition-delay: 100ms;
+  }
+  &[data-in-view] > *:nth-child(3) {
+    transition-delay: 200ms;
+  }
+  &[data-in-view] > *:nth-child(4) {
+    transition-delay: 300ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-reveal,
+  .home-board,
+  .room-shell,
+  .room-header,
+  .scroll-reveal,
+  .stagger-fade-in > * {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    translate: 0 !important;
+  }
 }

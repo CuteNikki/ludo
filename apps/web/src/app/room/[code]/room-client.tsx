@@ -252,7 +252,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
       </header>
 
       <div className='grid gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10'>
-        <section className='flex min-w-0 self-start justify-center p-1 sm:p-3 lg:justify-start lg:p-0'>
+        <section className='animate-board-enter flex min-w-0 self-start justify-center p-1 sm:p-3 lg:justify-start lg:p-0'>
           <GameBoard state={state} playerId={playerId} onMove={(pieceId) => emit({ type: 'game:move', payload: { pieceId } })} />
         </section>
 
@@ -427,12 +427,12 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
           )}
           {state.phase === 'lobby' && <p className='mt-4 text-sm font-medium leading-6 text-foreground/80'>{t('room.startHint')}</p>}
           {state.phase === 'lobby' && leaveNotice && (
-            <p role='status' aria-live='polite' className='toast-enter mt-4 border border-border bg-background p-3 text-sm font-bold text-foreground/80'>
+            <p role='status' aria-live='polite' className='animate-toast-enter mt-4 border border-border bg-background p-3 text-sm font-bold text-foreground/80'>
               {t(`room.leaveNotice.${leaveNotice.reason}`, { name: leaveNotice.playerName })}
             </p>
           )}
           {notice && (
-            <p role='alert' className='toast-enter mt-4 border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-600 dark:text-red-400'>
+            <p role='alert' className='animate-toast-enter mt-4 border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-600 dark:text-red-400'>
               {t(`room.errors.${notice}`, { defaultValue: t('room.errors.UNKNOWN') })}
             </p>
           )}
