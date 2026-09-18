@@ -27,7 +27,7 @@ The "Fair Dice" option ensures that every number is rolled regularly so no one h
 
 ## Room Settings
 
-The creator of a room is the host and can configure the turn timer (15, 30, 45 or 60 seconds), automatic moves, the fair dice option and the room's public/private visibility in the lobby. Settings are synchronized to all players and locked once the game starts. Any change made in the lobby resets every player's ready status. Public rooms show up, while still in the lobby, on the `/discover` page for anyone to browse and join.
+The creator of a room is the host and can configure the turn timer (15, 30, 45 or 60 seconds), automatic moves, the fair dice option and the room's public/private visibility in the lobby. Settings are synchronized to all players and locked once the game starts. Any change made in the lobby resets every player's ready status. Public rooms show up, while still in the lobby, on the `/discover` page for anyone to browse and join, along with a per-setting overview (on/off and move time) of how the room is configured.
 
 Every player can change their name and pick a still-available player color in the lobby. Names may be duplicated, taken colors are locked, and the chosen profile persists across a reload. If no name is entered, "Guest" is used.
 
@@ -49,6 +49,7 @@ The host can remove other players from the room while in the lobby. After the ga
 - [x] **Better Invite UI/UX**: When the room was not found, there should be an input to submit a room code. The room code should also be copyable in the room rather than only the link being available. Additionally the invite form on the home page is not submittable by pressing enter in the invite code field.
   - Consider adding visual feedback for successful or failed room code submissions.
   - Ensure the invite input is accessible and user-friendly on both desktop and mobile devices.
+- [x] **Room Settings in Discovery**: Show an icon for each room setting on the discovery page, green when enabled and red when disabled, with a hover/tap tooltip explaining what is currently set in that room.
 
 ## 2. Core Game Logic & Rules
 
@@ -63,6 +64,9 @@ The host can remove other players from the room while in the lobby. After the ga
   - Fix touch interactions to ensure full feature parity for mobile users.
   - Adapt the movement preview to support tap/touch events on mobile devices (e.g., tap a figure once for a preview and again to confirm the move, replacing desktop `hover`).
 - [x] **Language Selector Dropdown**: Refactor the language selector into a scalable dropdown component to easily accommodate more languages in the future.
+- [x] **Theme Dropdown with System Option**: Turn the theme button into a dropdown like the language selector so a "system" theme can be supported alongside light and dark. Selected entries show their checkmark on the far right in both dropdowns.
+- [x] **Toast Auto-Dismiss & Exit Animation**: Toasts and in-room notices did not disappear by themselves and had no remove animation. They now dismiss automatically and fade out.
+- [x] **"How It Works" Scroll Reveal**: The section's title stayed visible at all times instead of revealing on scroll. The heading now fades in with the rest of the section.
 - [x] **Lighthouse Performance Optimization**: Run Lighthouse audits and optimize the application for performance, accessibility, best practices, and SEO based on the audit results. Verified against a production build: 100/100/100/100 (desktop) and 97/100/100/100 (mobile, default throttling - only Performance dips slightly under simulated slow 4G/4x CPU).
 - [x] **Favicon & Metadata**: Add a favicon to the website and ensure all relevant metadata (title, description, social sharing tags) are properly configured for better SEO and user experience.
 

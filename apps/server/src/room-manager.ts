@@ -72,6 +72,7 @@ export class RoomManager {
         playerCount: room.state.players.length,
         maxPlayers: COLORS.length,
         phase: room.state.phase,
+        settings: room.state.settings,
       });
     }
     return summaries;

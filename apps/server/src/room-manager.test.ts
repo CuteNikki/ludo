@@ -85,18 +85,19 @@ describe('RoomManager game turns', () => {
     const manager = new RoomManager();
     const publicRoom = manager.createRoom('Ada');
     manager.joinRoom(publicRoom.state.roomCode, 'Linus');
-    manager.setSettings(publicRoom.state.roomCode, publicRoom.playerId, {
-      moveTimeSeconds: 30,
+    const settings = {
+      moveTimeSeconds: 30 as const,
       automaticSingleMove: true,
       fairDice: true,
       isPublic: true,
       mustSpawnOnSix: false,
-    });
+    };
+    manager.setSettings(publicRoom.state.roomCode, publicRoom.playerId, settings);
     manager.createRoom('Mika'); // stays private by default
 
     const listed = manager.listPublicRooms();
     expect(listed).toEqual([
-      { roomCode: publicRoom.state.roomCode, hostName: 'Ada', playerCount: 2, maxPlayers: 4, phase: 'lobby' },
+      { roomCode: publicRoom.state.roomCode, hostName: 'Ada', playerCount: 2, maxPlayers: 4, phase: 'lobby', settings },
     ]);
   });
 

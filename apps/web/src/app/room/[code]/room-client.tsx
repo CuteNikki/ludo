@@ -2,11 +2,12 @@
 
 import { GameBoard } from '@/components/game-board';
 import { LanguageToggle } from '@/components/language-toggle';
+import { TapTooltip } from '@/components/tap-tooltip';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { Toast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { ClientEvent, GameState, MoveTimeSeconds, Player, PlayerColor, PlayerLeftReason, RoomErrorCode, RoomSettings, ServerEvent } from '@ludo/shared';
 import {
@@ -58,8 +59,10 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   const [state, setState] = useState<GameState | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [error, setError] = useState<{ code: RoomErrorCode; message: string } | null>(null);
-  const [notice, setNotice] = useState<RoomErrorCode | null>(null);
-  const [leaveNotice, setLeaveNotice] = useState<{ playerName: string; reason: PlayerLeftReason } | null>(null);
+  // `id` keys each notice's <Toast>, so a repeat of the same notice restarts its timer.
+  const noticeIdRef = useRef(0);
+  const [notice, setNotice] = useState<{ id: number; code: RoomErrorCode } | null>(null);
+  const [leaveNotice, setLeaveNotice] = useState<{ id: number; playerName: string; reason: PlayerLeftReason } | null>(null);
   const [now, setNow] = useState(Date.now());
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -130,7 +133,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
           }
           return;
         }
-        setLeaveNotice({ playerName: event.payload.playerName, reason: event.payload.reason });
+        setLeaveNotice({ id: ++noticeIdRef.current, playerName: event.payload.playerName, reason: event.payload.reason });
       } else if (event.type === 'room:rematch') {
         const storedPlayerId = currentRoomCode ? sessionStorage.getItem(`ludo-player:${currentRoomCode}`) : null;
         if (currentRoomCode) sessionStorage.removeItem(`ludo-player:${currentRoomCode}`);
@@ -142,7 +145,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
         }
         return;
       } else if (event.type === 'room:error') {
-        if (joined) setNotice(event.payload.code);
+        if (joined) setNotice({ id: ++noticeIdRef.current, code: event.payload.code });
         else setError(event.payload);
       }
     });
@@ -159,12 +162,6 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
     const interval = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (!leaveNotice) return;
-    const timer = window.setTimeout(() => setLeaveNotice(null), 5_000);
-    return () => window.clearTimeout(timer);
-  }, [leaveNotice]);
 
   function emit(event: ClientEvent) {
     if (socketRef.current?.readyState === WebSocket.OPEN) send(socketRef.current, event);
@@ -440,14 +437,26 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
           )}
           {state.phase === 'lobby' && <p className='mt-4 text-sm font-medium leading-6 text-foreground/80'>{t('room.startHint')}</p>}
           {state.phase === 'lobby' && leaveNotice && (
-            <p role='status' aria-live='polite' className='animate-toast-enter mt-4 border border-border bg-background p-3 text-sm font-bold text-foreground/80'>
+            <Toast
+              key={leaveNotice.id}
+              role='status'
+              aria-live='polite'
+              duration={5_000}
+              onDismiss={() => setLeaveNotice(null)}
+              className='mt-4 border border-border bg-background p-3 text-sm font-bold text-foreground/80'
+            >
               {t(`room.leaveNotice.${leaveNotice.reason}`, { name: leaveNotice.playerName })}
-            </p>
+            </Toast>
           )}
           {notice && (
-            <p role='alert' className='animate-toast-enter mt-4 border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-600 dark:text-red-400'>
-              {t(`room.errors.${notice}`, { defaultValue: t('room.errors.UNKNOWN') })}
-            </p>
+            <Toast
+              key={notice.id}
+              role='alert'
+              onDismiss={() => setNotice(null)}
+              className='mt-4 border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-600 dark:text-red-400'
+            >
+              {t(`room.errors.${notice.code}`, { defaultValue: t('room.errors.UNKNOWN') })}
+            </Toast>
           )}
         </aside>
       </div>
@@ -659,34 +668,16 @@ function SettingToggle({
 
 function InfoTooltip({ text }: { text: string }) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  // Radix's Tooltip intentionally never opens from a touch pointer, and always closes on click -
-  // reasonable for a hover hint, but this info bubble is the only way touch users can read the
-  // description at all, so it needs its own tap-to-open/tap-to-close handling underneath.
-  const lastPointerTypeRef = useRef<string>('mouse');
 
   return (
-    <Tooltip open={open} onOpenChange={setOpen}>
-      <TooltipTrigger asChild>
-        <button
-          type='button'
-          aria-label={t('room.settings.title')}
-          onPointerDown={(event) => {
-            lastPointerTypeRef.current = event.pointerType;
-            if (event.pointerType === 'touch') event.preventDefault();
-          }}
-          onClick={(event) => {
-            if (lastPointerTypeRef.current !== 'touch') return;
-            event.preventDefault();
-            setOpen((prev) => !prev);
-          }}
-          className='ml-auto grid h-7 w-7 shrink-0 place-items-center rounded-full text-foreground/60 transition-colors hover:bg-background hover:text-foreground focus-visible:bg-background focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
-        >
-          <Info size={16} />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent className='w-64'>{text}</TooltipContent>
-    </Tooltip>
+    <TapTooltip
+      content={text}
+      label={t('room.settings.title')}
+      contentClassName='w-64'
+      className='ml-auto grid h-7 w-7 shrink-0 place-items-center rounded-full text-foreground/60 transition-colors hover:bg-background hover:text-foreground focus-visible:bg-background focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
+    >
+      <Info size={16} />
+    </TapTooltip>
   );
 }
 

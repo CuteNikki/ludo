@@ -36,8 +36,8 @@ export function LanguageToggle() {
           const active = lng === current;
           return (
             <DropdownMenuItem key={lng} onSelect={() => change(lng)} aria-pressed={active}>
-              <span className='grid h-4 w-4 shrink-0 place-items-center'>{active && <Check size={14} />}</span>
               {languageNames[lng]}
+              <span className='ml-auto grid h-4 w-4 shrink-0 place-items-center px-2 box-content'>{active && <Check size={14} />}</span>
             </DropdownMenuItem>
           );
         })}

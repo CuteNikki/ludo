@@ -35,6 +35,8 @@
     "empty": "No public rooms right now. Create one and toggle \"Public room\" in the lobby settings.",
     "hostedBy": "Hosted by {{name}}",
     "join": "Join",
+    "settingOn": "On",
+    "settingOff": "Off",
     "phase": {
       "lobby": "Open",
       "playing": "In progress",
@@ -133,8 +135,10 @@
   },
   "footer": "Ludo · For people who want one more round",
   "theme": {
-    "toLight": "Switch to light theme",
-    "toDark": "Switch to dark theme"
+    "aria": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   },
   "language": {
     "aria": "Language"

@@ -30,6 +30,7 @@ export interface PublicRoomSummary {
   playerCount: number;
   maxPlayers: number;
   phase: GameState['phase'];
+  settings: RoomSettings;
 }
 
 export interface GameState {

@@ -42,6 +42,7 @@
   --animate-board-enter: board-enter 0.35s ease-out both;
   --animate-destination-enter: destination-enter 0.16s ease-out both;
   --animate-toast-enter: toast-enter 0.25s ease-out both;
+  --animate-toast-exit: toast-exit 0.2s ease-in both;
   --animate-piece-capture-flight: piece-capture-flight 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-piece-spawn-flight: piece-spawn-flight 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -239,6 +240,17 @@ body {
   to {
     opacity: 1;
     translate: 0 0;
+  }
+}
+
+@keyframes toast-exit {
+  from {
+    opacity: 1;
+    translate: 0 0;
+  }
+  to {
+    opacity: 0;
+    translate: 0 -8px;
   }
 }
 

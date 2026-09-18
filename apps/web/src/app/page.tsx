@@ -11,6 +11,7 @@ import { GameBoard } from '@/components/game-board';
 import { LanguageToggle } from '@/components/language-toggle';
 import { Reveal } from '@/components/scroll-reveal';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { Toast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -226,24 +227,30 @@ export default function HomePage() {
   return (
     <main className='min-h-screen overflow-hidden'>
       {notice && (
-        <div
+        <Toast
           role='alert'
-          className='animate-toast-enter fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 border-2 border-border bg-background-alternative p-4 pr-3 shadow-card sm:right-6 sm:top-6'
+          onDismiss={() => setNotice(null)}
+          duration={8_000}
+          className='fixed right-4 top-4 z-50 flex max-w-[calc(100vw-2rem)] items-start gap-3 border-2 border-border bg-background-alternative p-4 pr-3 shadow-card sm:right-6 sm:top-6'
         >
-          <CircleAlert className='mt-0.5 shrink-0 text-red-600' size={19} />
-          <div>
-            <p className='text-sm font-black'>{t(NOTICE_COPY[notice].titleKey)}</p>
-            <p className='mt-0.5 text-xs text-foreground/70'>{t(NOTICE_COPY[notice].textKey)}</p>
-          </div>
-          <button
-            type='button'
-            onClick={() => setNotice(null)}
-            aria-label={t('toast.close')}
-            className='grid h-7 w-7 shrink-0 place-items-center text-foreground/60 hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-foreground'
-          >
-            <X size={16} />
-          </button>
-        </div>
+          {(dismiss) => (
+            <>
+              <CircleAlert className='mt-0.5 shrink-0 text-red-600' size={19} />
+              <div>
+                <p className='text-sm font-black'>{t(NOTICE_COPY[notice].titleKey)}</p>
+                <p className='mt-0.5 text-xs text-foreground/70'>{t(NOTICE_COPY[notice].textKey)}</p>
+              </div>
+              <button
+                type='button'
+                onClick={dismiss}
+                aria-label={t('toast.close')}
+                className='grid h-7 w-7 shrink-0 place-items-center text-foreground/60 hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-foreground'
+              >
+                <X size={16} />
+              </button>
+            </>
+          )}
+        </Toast>
       )}
 
       <nav className='mx-auto mt-2 sm:mt-4 flex w-[calc(100%-1.5rem)] max-w-6xl items-center justify-between gap-2 p-4 bg-background-alternative z-120 border-4 shadow-card border-border'>
@@ -350,13 +357,13 @@ export default function HomePage() {
       </section>
 
       <section id='how-it-works' className='mx-auto max-w-6xl px-6 py-20 sm:py-28'>
-        <div className='max-w-xl'>
+        <Reveal className='scroll-reveal max-w-xl'>
           <p className='mb-3 text-sm font-black uppercase tracking-[.16em] text-red-600'>{t('howItWorks.eyebrow')}</p>
           <h2 className='font-display text-4xl font-black leading-none sm:text-5xl'>{t('howItWorks.title')}</h2>
           <a href='/rules' className='link-underline mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-foreground/80 hover:text-foreground'>
             <BookOpen size={15} /> {t('howItWorks.readFullRules')}
           </a>
-        </div>
+        </Reveal>
         <Reveal className='stagger-fade-in mt-12 grid gap-8 md:grid-cols-3'>
           {steps.map((step, index) => {
             const Icon = stepIcons[index]!;

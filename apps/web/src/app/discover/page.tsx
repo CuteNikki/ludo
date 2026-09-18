@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LanguageToggle } from '@/components/language-toggle';
+import { TapTooltip } from '@/components/tap-tooltip';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
-import type { ClientEvent, PublicRoomSummary, ServerEvent } from '@ludo/shared';
-import { ArrowRight, DicesIcon, Home, RefreshCw, Users } from 'lucide-react';
+import type { ClientEvent, PublicRoomSummary, RoomSettings, ServerEvent } from '@ludo/shared';
+import { ArrowRight, Clock3, Dice6, Dices, DicesIcon, Home, RefreshCw, Sparkles, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -114,6 +115,7 @@ export default function DiscoverPage() {
                 <div className='min-w-0'>
                   <p className='truncate font-mono text-lg font-black tracking-widest'>{room.roomCode}</p>
                   <p className='truncate text-xs font-bold text-foreground/60'>{t('discover.hostedBy', { name: room.hostName })}</p>
+                  <RoomSettingIcons settings={room.settings} />
                 </div>
                 <div className='flex items-center gap-3'>
                   <span className='text-sm font-bold'>
@@ -137,6 +139,58 @@ export default function DiscoverPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+const BOOLEAN_SETTINGS = [
+  { key: 'automaticSingleMove', icon: Sparkles, labelKey: 'room.settings.autoMoves', infoKey: 'room.settings.autoMovesInfo' },
+  { key: 'fairDice', icon: Dices, labelKey: 'room.settings.fairDice', infoKey: 'room.settings.fairDiceInfo' },
+  { key: 'mustSpawnOnSix', icon: Dice6, labelKey: 'room.settings.mustSpawnOnSix', infoKey: 'room.settings.mustSpawnOnSixInfo' },
+] as const;
+
+/** One icon per setting, green when on and red when off, with the current value on hover/tap. */
+function RoomSettingIcons({ settings }: { settings: RoomSettings }) {
+  const { t } = useTranslation();
+
+  return (
+    <div className='mt-2 flex flex-wrap items-center gap-1'>
+      <TapTooltip
+        label={`${t('room.settings.moveTime')}: ${settings.moveTimeSeconds}s`}
+        content={<SettingTooltipBody title={t('room.settings.moveTime')} value={`${settings.moveTimeSeconds}s`} info={t('room.settings.moveTimeInfo')} />}
+        className={cn(SETTING_BADGE_CLASS, 'gap-1 px-1.5 text-xs font-bold text-foreground/70')}
+      >
+        <Clock3 size={15} /> {settings.moveTimeSeconds}s
+      </TapTooltip>
+      {BOOLEAN_SETTINGS.map(({ key, icon: Icon, labelKey, infoKey }) => {
+        const on = settings[key];
+        const state = t(on ? 'discover.settingOn' : 'discover.settingOff');
+        return (
+          <TapTooltip
+            key={key}
+            label={`${t(labelKey)}: ${state}`}
+            content={<SettingTooltipBody title={t(labelKey)} value={state} valueOn={on} info={t(infoKey)} />}
+            className={cn(SETTING_BADGE_CLASS, 'w-7', on ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400')}
+          >
+            <Icon size={16} />
+          </TapTooltip>
+        );
+      })}
+    </div>
+  );
+}
+
+const SETTING_BADGE_CLASS =
+  'inline-flex h-7 items-center justify-center rounded-full transition-colors hover:bg-background-alternative focus-visible:bg-background-alternative focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground';
+
+function SettingTooltipBody({ title, value, valueOn, info }: { title: string; value: string; valueOn?: boolean; info: string }) {
+  return (
+    <>
+      <p className='font-black'>
+        {title}:{' '}
+        <span className={cn(valueOn === undefined ? '' : valueOn ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400')}>{value}</span>
+      </p>
+      <p className='mt-0.5 text-foreground/70'>{info}</p>
+    </>
   );
 }
 

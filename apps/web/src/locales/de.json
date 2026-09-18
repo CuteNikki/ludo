@@ -35,6 +35,8 @@
     "empty": "Gerade keine öffentlichen Räume. Erstelle einen und aktiviere \"Öffentlicher Raum\" in den Lobby-Einstellungen.",
     "hostedBy": "Gehostet von {{name}}",
     "join": "Beitreten",
+    "settingOn": "An",
+    "settingOff": "Aus",
     "phase": {
       "lobby": "Offen",
       "playing": "Läuft",
@@ -133,8 +135,10 @@
   },
   "footer": "Ludo · Für Menschen, die noch eine Runde spielen",
   "theme": {
-    "toLight": "Zu hellem Farbschema wechseln",
-    "toDark": "Zu dunklem Farbschema wechseln"
+    "aria": "Farbschema",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
   },
   "language": {
     "aria": "Sprache"
