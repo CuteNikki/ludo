@@ -126,6 +126,10 @@
       {
         "title": "Computer opponents",
         "text": "The host can fill free seats with bots. They roll and move on their own, and a game against bots can start with just one human player."
+      },
+      {
+        "title": "Removing inactive players",
+        "text": "The host can remove a player who has gone quiet at any time, even mid-game, and the turn moves on to the next player. If only one player is left, they win. If the host is away for more than 30 seconds, the host role passes to another player."
       }
     ]
   },
@@ -168,7 +172,7 @@
       "PROFILE_ONLY_LOBBY": "The profile can only be changed in the lobby.",
       "INVALID_COLOR": "Invalid player color.",
       "COLOR_TAKEN": "This color is already taken.",
-      "PLAYERS_ONLY_LOBBY": "Players can only be removed in the lobby.",
+      "KICK_NOT_AVAILABLE": "Players can't be removed once the game is over.",
       "HOST_ONLY_KICK": "Only the host can remove players.",
       "HOST_CANNOT_KICK_SELF": "The host can't remove themselves.",
       "HOST_ONLY_BOTS": "Only the host can add bots.",
@@ -187,6 +191,8 @@
     "yourTurn": "Current turn",
     "you": " (you)",
     "removePlayerAria": "Remove {{name}}",
+    "removePlayerConfirmAria": "Click again to remove {{name}}",
+    "removeConfirm": "Remove?",
     "addBot": "Add bot",
     "bot": "Bot",
     "botThinking": "{{name}} is choosing a piece",

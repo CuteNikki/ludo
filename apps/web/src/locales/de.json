@@ -126,6 +126,10 @@
       {
         "title": "Computergegner",
         "text": "Der Host kann freie Plätze mit Bots füllen. Sie würfeln und ziehen selbstständig, und ein Spiel gegen Bots kann mit nur einem menschlichen Spieler starten."
+      },
+      {
+        "title": "Inaktive Spieler entfernen",
+        "text": "Der Host kann jederzeit einen Spieler entfernen, der nicht mehr reagiert, auch mitten im Spiel, und der Zug geht an den nächsten Spieler. Bleibt nur ein Spieler übrig, gewinnt er. Ist der Host länger als 30 Sekunden weg, geht die Host-Rolle an einen anderen Spieler."
       }
     ]
   },
@@ -168,7 +172,7 @@
       "PROFILE_ONLY_LOBBY": "Das Profil kann nur in der Lobby geändert werden.",
       "INVALID_COLOR": "Ungültige Spielerfarbe.",
       "COLOR_TAKEN": "Diese Farbe ist bereits vergeben.",
-      "PLAYERS_ONLY_LOBBY": "Spieler können nur in der Lobby entfernt werden.",
+      "KICK_NOT_AVAILABLE": "Spieler können nach Spielende nicht mehr entfernt werden.",
       "HOST_ONLY_KICK": "Nur der Host kann Spieler entfernen.",
       "HOST_CANNOT_KICK_SELF": "Der Host kann sich nicht selbst entfernen.",
       "HOST_ONLY_BOTS": "Nur der Host kann Bots hinzufügen.",
@@ -187,6 +191,8 @@
     "yourTurn": "Am Zug",
     "you": " (du)",
     "removePlayerAria": "{{name}} entfernen",
+    "removePlayerConfirmAria": "Erneut klicken, um {{name}} zu entfernen",
+    "removeConfirm": "Entfernen?",
     "addBot": "Bot hinzufügen",
     "bot": "Bot",
     "botThinking": "{{name}} wählt eine Figur",

@@ -19,6 +19,7 @@ import {
   Clock3,
   CopyCheckIcon,
   CopyIcon,
+  Crown,
   Dice6,
   Dices,
   DicesIcon,
@@ -68,6 +69,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   const [now, setNow] = useState(Date.now());
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [kickConfirmId, setKickConfirmId] = useState<string | null>(null);
 
   const colorNames: Record<PlayerColor, string> = {
     red: t('room.colors.red'),
@@ -168,6 +170,13 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
     return () => window.clearInterval(interval);
   }, []);
 
+  // Asking to confirm a removal expires again, so a stray first click doesn't linger.
+  useEffect(() => {
+    if (!kickConfirmId) return;
+    const timer = window.setTimeout(() => setKickConfirmId(null), 4_000);
+    return () => window.clearTimeout(timer);
+  }, [kickConfirmId]);
+
   function emit(event: ClientEvent) {
     if (socketRef.current?.readyState === WebSocket.OPEN) send(socketRef.current, event);
   }
@@ -209,6 +218,16 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
     await navigator.clipboard.writeText(roomCode);
     setCopiedCode(true);
     window.setTimeout(() => setCopiedCode(false), 1_600);
+  }
+
+  function removePlayer(target: Player) {
+    // Removing someone from a running game can't be undone, so it takes a second click.
+    if (state?.phase === 'playing' && kickConfirmId !== target.id) {
+      setKickConfirmId(target.id);
+      return;
+    }
+    setKickConfirmId(null);
+    emit({ type: 'room:kick', payload: { playerId: target.id } });
   }
 
   function updateSettings(update: Partial<RoomSettings>) {
@@ -420,9 +439,12 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                     </span>
                     {player.isBot && <Bot size={15} className='shrink-0 text-foreground/60' aria-label={t('room.bot')} />}
                   </span>
-                  {player.id === state.hostPlayerId && state.phase === 'lobby' && (
-                    <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.host')}</span>
-                  )}
+                  {player.id === state.hostPlayerId &&
+                    (state.phase === 'lobby' ? (
+                      <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.host')}</span>
+                    ) : (
+                      <Crown size={15} className='shrink-0 text-amber-600 dark:text-amber-400' aria-label={t('room.host')} />
+                    ))}
                   {player.id === state.currentPlayerId && state.phase === 'playing' && (
                     <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.yourTurn')}</span>
                   )}
@@ -430,15 +452,18 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                   {state.phase === 'finished' && state.rematchPlayerIds.includes(player.id) && (
                     <Vote size={16} className='text-amber-600 dark:text-amber-400' aria-label={t('room.rematchVotedAria', { name: player.name })} />
                   )}
-                  {state.phase === 'lobby' && isHost && player.id !== playerId && (
+                  {state.phase !== 'finished' && isHost && player.id !== playerId && (
                     <button
                       type='button'
-                      onClick={() => emit({ type: 'room:kick', payload: { playerId: player.id } })}
-                      aria-label={t('room.removePlayerAria', { name: player.name })}
-                      title={t('room.removePlayerAria', { name: player.name })}
-                      className='btn-press grid h-8 w-8 shrink-0 touch-manipulation place-items-center text-foreground/60 transition-colors hover:bg-red-500/15 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
+                      onClick={() => removePlayer(player)}
+                      aria-label={t(kickConfirmId === player.id ? 'room.removePlayerConfirmAria' : 'room.removePlayerAria', { name: player.name })}
+                      title={t(kickConfirmId === player.id ? 'room.removePlayerConfirmAria' : 'room.removePlayerAria', { name: player.name })}
+                      className={cn(
+                        'btn-press grid h-8 shrink-0 touch-manipulation place-items-center text-foreground/60 transition-colors hover:bg-red-500/15 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground',
+                        kickConfirmId === player.id ? 'bg-red-500/15 px-2 text-xs font-black uppercase text-red-600 dark:text-red-400' : 'w-8',
+                      )}
                     >
-                      <UserMinus size={17} />
+                      {kickConfirmId === player.id ? t('room.removeConfirm') : <UserMinus size={17} />}
                     </button>
                   )}
                 </div>
@@ -459,7 +484,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
               </Button>
             )}
             {state.phase === 'lobby' && <p className='mt-4 text-sm font-medium leading-6 text-foreground/80'>{t('room.startHint')}</p>}
-            {state.phase === 'lobby' && leaveNotice && (
+            {leaveNotice && (
               <Toast
                 key={leaveNotice.id}
                 role='status'

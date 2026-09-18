@@ -45,6 +45,7 @@ export class RoomManager {
   private readonly rooms = new Map<string, Room>();
   private readonly cleanupTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private readonly playerCleanupTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  private readonly hostTransferTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private readonly fairDice = new FairDice();
 
   constructor(
@@ -58,6 +59,7 @@ export class RoomManager {
     private readonly onRematchResolved: RematchListener = () => undefined,
     private readonly onPlayerLeft: PlayerLeftListener = () => undefined,
     private readonly botMoveDelayMs = 1_100,
+    private readonly hostAbsenceMs = 30_000,
   ) {}
 
   getRoomState(roomCode: string): GameState | null {
@@ -119,6 +121,7 @@ export class RoomManager {
       const playerCleanupTimer = this.playerCleanupTimers.get(playerCleanupKey);
       if (playerCleanupTimer) clearTimeout(playerCleanupTimer);
       this.playerCleanupTimers.delete(playerCleanupKey);
+      if (room.state.hostPlayerId === reconnectingPlayer.id) this.clearHostTransfer(normalizedCode);
       room.state.revision += 1;
       return { playerId: reconnectingPlayer.id, state: room.state };
     }
@@ -198,7 +201,7 @@ export class RoomManager {
 
   kickPlayer(roomCode: string, hostPlayerId: string, targetPlayerId: string): GameState {
     const state = this.getState(roomCode);
-    if (state.phase !== 'lobby') throw new RoomError('PLAYERS_ONLY_LOBBY', 'Players can only be removed in the lobby.');
+    if (state.phase === 'finished') throw new RoomError('KICK_NOT_AVAILABLE', 'Players cannot be removed once the game is over.');
     if (state.hostPlayerId !== hostPlayerId) throw new RoomError('HOST_ONLY_KICK', 'Only the host can kick players.');
     if (targetPlayerId === hostPlayerId) throw new RoomError('HOST_CANNOT_KICK_SELF', 'The host cannot kick themselves.');
     if (!state.players.some((player) => player.id === targetPlayerId)) throw new RoomError('PLAYER_NOT_FOUND', 'Player was not found.');
@@ -289,18 +292,22 @@ export class RoomManager {
     }
 
     if (state.pieces.filter((candidate) => candidate.playerId === playerId).every((candidate) => candidate.position >= 40)) {
-      state.phase = 'finished';
-      state.winnerId = playerId;
-      state.turnDeadline = null;
-      state.movablePieceIds = [];
-      state.rematchDeadline = null;
-      state.rematchPlayerIds = [];
-      this.clearTurnTimer(state.roomCode);
+      this.finishGame(state, playerId);
     } else {
       this.advanceTurn(state, state.diceResult === 6);
     }
     state.revision += 1;
     return state;
+  }
+
+  private finishGame(state: GameState, winnerId: string) {
+    state.phase = 'finished';
+    state.winnerId = winnerId;
+    state.turnDeadline = null;
+    state.movablePieceIds = [];
+    state.rematchDeadline = null;
+    state.rematchPlayerIds = [];
+    this.clearTurnTimer(state.roomCode);
   }
 
   disconnectPlayer(roomCode: string, playerId: string): GameState | null {
@@ -311,6 +318,7 @@ export class RoomManager {
 
     player.connected = false;
     room.state.revision += 1;
+    if (room.state.hostPlayerId === playerId) this.scheduleHostTransfer(roomCode);
     const playerCleanupKey = `${roomCode}:${playerId}`;
     const existingTimer = this.playerCleanupTimers.get(playerCleanupKey);
     if (existingTimer) clearTimeout(existingTimer);
@@ -334,6 +342,7 @@ export class RoomManager {
     const player = room.state.players.find((candidate) => candidate.id === playerId);
     if (!player) return room.state;
 
+    const removedIndex = room.state.players.findIndex((candidate) => candidate.id === playerId);
     room.state.players = room.state.players.filter((candidate) => candidate.id !== playerId);
     room.state.pieces = room.state.pieces.filter((piece) => piece.playerId !== playerId);
     room.state.rematchPlayerIds = room.state.rematchPlayerIds.filter((candidate) => candidate !== playerId);
@@ -342,6 +351,7 @@ export class RoomManager {
     // A room with only bots left has nobody to play for, so it winds down like an empty one.
     if (room.state.players.every((candidate) => candidate.isBot)) {
       this.clearTurnTimer(roomCode);
+      this.clearHostTransfer(roomCode);
       for (const bot of room.state.players) this.fairDice.removePlayer(bot.id);
       room.state.players = [];
       room.state.pieces = [];
@@ -356,13 +366,55 @@ export class RoomManager {
       this.cleanupTimers.set(roomCode, cleanupTimer);
       return null;
     }
-    if (room.state.currentPlayerId === playerId) {
-      room.state.currentPlayerId = room.state.players[0]?.id ?? null;
-      this.beginTurn(room.state);
+    if (room.state.hostPlayerId === playerId) {
+      this.clearHostTransfer(roomCode);
+      const humans = room.state.players.filter((candidate) => !candidate.isBot);
+      room.state.hostPlayerId = (humans.find((candidate) => candidate.connected) ?? humans[0])?.id ?? null;
     }
-    if (room.state.hostPlayerId === playerId) room.state.hostPlayerId = room.state.players.find((candidate) => !candidate.isBot)?.id ?? null;
+    // Only a running game needs its turn order repaired; in the lobby there is no turn, and in the
+    // finished phase `beginTurn` would cancel the pending rematch countdown.
+    if (room.state.phase === 'playing') {
+      if (room.state.players.length < 2) {
+        // Nobody left to play against: the last player standing wins by forfeit.
+        this.finishGame(room.state, room.state.players[0]!.id);
+      } else if (room.state.currentPlayerId === playerId) {
+        // Hand the turn to whoever was next in line, preferring someone who is actually connected.
+        const following = [...room.state.players.slice(removedIndex), ...room.state.players.slice(0, removedIndex)];
+        room.state.currentPlayerId = (following.find((candidate) => candidate.connected) ?? following[0])?.id ?? null;
+        this.beginTurn(room.state);
+      }
+    }
     room.state.revision += 1;
     return room.state;
+  }
+
+  /**
+   * If the host stays away for `hostAbsenceMs`, the host role moves to another connected human so
+   * the room isn't stuck without anyone who can moderate it. It never scraps the game, and if no
+   * one else is connected the role simply stays where it is.
+   */
+  private scheduleHostTransfer(roomCode: string) {
+    this.clearHostTransfer(roomCode);
+    this.hostTransferTimers.set(
+      roomCode,
+      setTimeout(() => {
+        this.hostTransferTimers.delete(roomCode);
+        const state = this.rooms.get(roomCode)?.state;
+        const host = state?.players.find((candidate) => candidate.id === state.hostPlayerId);
+        if (!state || !host || host.connected) return;
+        const successor = state.players.find((candidate) => !candidate.isBot && candidate.connected && candidate.id !== host.id);
+        if (!successor) return;
+        state.hostPlayerId = successor.id;
+        state.revision += 1;
+        this.onStateChange(roomCode, state);
+      }, this.hostAbsenceMs),
+    );
+  }
+
+  private clearHostTransfer(roomCode: string) {
+    const timer = this.hostTransferTimers.get(roomCode);
+    if (timer) clearTimeout(timer);
+    this.hostTransferTimers.delete(roomCode);
   }
 
   private addPlayer(state: GameState, rawName: string, isBot = false): { playerId: string; state: GameState } {
@@ -518,6 +570,7 @@ export class RoomManager {
     for (const player of declined) this.fairDice.removePlayer(player.id);
 
     this.rooms.delete(oldRoomCode);
+    this.clearHostTransfer(oldRoomCode);
     const cleanupTimer = this.cleanupTimers.get(oldRoomCode);
     if (cleanupTimer) clearTimeout(cleanupTimer);
     this.cleanupTimers.delete(oldRoomCode);

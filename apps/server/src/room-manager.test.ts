@@ -489,3 +489,137 @@ describe('RoomManager bots', () => {
     expect(newState?.hostPlayerId).toBe(host.playerId);
   });
 });
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function startThreePlayerGame() {
+  const manager = new RoomManager(() => undefined, 60_000, () => 1, 900, 1_800, null);
+  const host = manager.createRoom('Ada');
+  const second = manager.joinRoom(host.state.roomCode, 'Linus');
+  const third = manager.joinRoom(host.state.roomCode, 'Mika');
+  for (const player of [host, second, third]) manager.setReady(host.state.roomCode, player.playerId, true);
+  return { manager, host, second, third, state: host.state };
+}
+
+describe('RoomManager in-game moderation', () => {
+  test('lets the host remove a player mid-game and hands their turn to the next in line', () => {
+    const { manager, host, second, third, state } = startThreePlayerGame();
+    state.currentPlayerId = second.playerId;
+
+    const updated = manager.kickPlayer(state.roomCode, host.playerId, second.playerId);
+    expect(updated.phase).toBe('playing');
+    expect(updated.players.map((player) => player.id)).toEqual([host.playerId, third.playerId]);
+    expect(updated.pieces.some((piece) => piece.playerId === second.playerId)).toBe(false);
+    expect(updated.currentPlayerId).toBe(third.playerId);
+    expect(updated.turnStage).toBe('rolling');
+  });
+
+  test('skips a disconnected player when handing over the turn', () => {
+    const { manager, host, second, third, state } = startThreePlayerGame();
+    state.currentPlayerId = second.playerId;
+    manager.disconnectPlayer(state.roomCode, third.playerId);
+
+    const updated = manager.kickPlayer(state.roomCode, host.playerId, second.playerId);
+    expect(updated.currentPlayerId).toBe(host.playerId);
+  });
+
+  test('leaves the turn alone when someone else is removed', () => {
+    const { manager, host, second, third, state } = startThreePlayerGame();
+    state.currentPlayerId = host.playerId;
+
+    const updated = manager.kickPlayer(state.roomCode, host.playerId, third.playerId);
+    expect(updated.currentPlayerId).toBe(host.playerId);
+    expect(updated.players.map((player) => player.id)).toEqual([host.playerId, second.playerId]);
+  });
+
+  test('only lets the host do it, and not once the game is over', () => {
+    const { manager, host, second, third, state } = startThreePlayerGame();
+    expect(() => manager.kickPlayer(state.roomCode, second.playerId, third.playerId)).toThrow('Only the host');
+
+    state.phase = 'finished';
+    expect(() => manager.kickPlayer(state.roomCode, host.playerId, third.playerId)).toThrow('once the game is over');
+  });
+
+  test('awards the win to the last player standing, whether removed or leaving', () => {
+    const removed = startGame();
+    const afterKick = removed.manager.kickPlayer(removed.first.state.roomCode, removed.first.playerId, removed.second.playerId);
+    expect(afterKick.phase).toBe('finished');
+    expect(afterKick.winnerId).toBe(removed.first.playerId);
+    expect(afterKick.movablePieceIds).toEqual([]);
+
+    const left = startGame();
+    const afterLeave = left.manager.leaveRoom(left.first.state.roomCode, left.second.playerId);
+    expect(afterLeave?.phase).toBe('finished');
+    expect(afterLeave?.winnerId).toBe(left.first.playerId);
+  });
+
+  test('keeps a running rematch countdown when the last player to move leaves', async () => {
+    let resolveTransition: ((transition: RematchTransition) => void) | undefined;
+    const transitionPromise = new Promise<RematchTransition>((resolve) => {
+      resolveTransition = resolve;
+    });
+    const manager = new RoomManager(() => undefined, 60_000, () => 1, 900, 1_800, null, 20, (transition) => resolveTransition?.(transition));
+    const host = manager.createRoom('Ada');
+    const second = manager.joinRoom(host.state.roomCode, 'Linus');
+    const third = manager.joinRoom(host.state.roomCode, 'Mika');
+    host.state.phase = 'finished';
+    host.state.winnerId = host.playerId;
+    host.state.currentPlayerId = host.playerId;
+
+    manager.voteRematch(host.state.roomCode, second.playerId);
+    manager.leaveRoom(host.state.roomCode, host.playerId);
+
+    const transition = await transitionPromise;
+    expect(transition.movedPlayerIds).toEqual([second.playerId]);
+    expect(third.playerId).not.toBe(second.playerId);
+  });
+});
+
+describe('RoomManager host handover', () => {
+  function hostRoom(onChange: (roomCode: string) => void = () => undefined) {
+    const manager = new RoomManager(onChange, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 15);
+    const host = manager.createRoom('Ada');
+    const second = manager.joinRoom(host.state.roomCode, 'Linus');
+    const third = manager.joinRoom(host.state.roomCode, 'Mika');
+    return { manager, host, second, third, state: host.state };
+  }
+
+  test('passes the host role to a connected human after the host has been gone a while', async () => {
+    const changes: string[] = [];
+    const { manager, host, second, third, state } = hostRoom((roomCode) => changes.push(roomCode));
+    manager.disconnectPlayer(state.roomCode, second.playerId);
+    manager.disconnectPlayer(state.roomCode, host.playerId);
+    expect(state.hostPlayerId).toBe(host.playerId);
+
+    await sleep(60);
+    expect(state.hostPlayerId).toBe(third.playerId);
+    expect(changes).toEqual([state.roomCode]);
+  });
+
+  test('keeps the host if they come back in time', async () => {
+    const { manager, host, state } = hostRoom();
+    manager.disconnectPlayer(state.roomCode, host.playerId);
+    manager.joinRoom(state.roomCode, 'Ada', host.playerId);
+
+    await sleep(60);
+    expect(state.hostPlayerId).toBe(host.playerId);
+  });
+
+  test('never hands the role to a bot or to nobody', async () => {
+    const manager = new RoomManager(() => undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 15);
+    const host = manager.createRoom('Ada');
+    manager.addBot(host.state.roomCode, host.playerId);
+    manager.disconnectPlayer(host.state.roomCode, host.playerId);
+
+    await sleep(60);
+    expect(host.state.hostPlayerId).toBe(host.playerId);
+  });
+
+  test('picks a connected human when the host is removed', () => {
+    const { manager, host, second, third, state } = hostRoom();
+    manager.disconnectPlayer(state.roomCode, second.playerId);
+
+    const updated = manager.leaveRoom(state.roomCode, host.playerId);
+    expect(updated?.hostPlayerId).toBe(third.playerId);
+  });
+});

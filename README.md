@@ -41,7 +41,7 @@ The creator of a room is the host and can configure the turn timer (15, 30, 45 o
 
 Every player can change their name and pick a still-available player color in the lobby. Names may be duplicated, taken colors are locked, and the chosen profile persists across a reload. If no name is entered, "Guest" is used.
 
-The host can remove other players from the room while in the lobby. After the game ends, players can return to the main menu or vote for a rematch. The first rematch vote starts a 30-second countdown; players who don't confirm in time are dropped, and everyone who agreed is moved into a brand-new room, reset to the lobby with the same settings.
+The host can remove other players from the room, in the lobby and during a game (a running game asks for a second click to confirm). Removing the player whose turn it is hands the turn to the next player in line, and if only one player is left they win by forfeit. If the host is disconnected for 30 seconds, the host role moves to another connected human player; the game is never scrapped, and the original host doesn't get it back. After the game ends, players can return to the main menu or vote for a rematch. The first rematch vote starts a 30-second countdown; players who don't confirm in time are dropped, and everyone who agreed is moved into a brand-new room, reset to the lobby with the same settings.
 
 # Ludo Project To-Do List
 
@@ -59,6 +59,7 @@ The host can remove other players from the room while in the lobby. After the ga
 - [x] **Better Invite UI/UX**: When the room was not found, there should be an input to submit a room code. The room code should also be copyable in the room rather than only the link being available. Additionally the invite form on the home page is not submittable by pressing enter in the invite code field.
   - Consider adding visual feedback for successful or failed room code submissions.
   - Ensure the invite input is accessible and user-friendly on both desktop and mobile devices.
+- [x] **Host Moderation During Games**: Idle players cost everyone a full turn timer on each of their turns, so the host can now remove players mid-game (with a confirmation click). The turn passes on cleanly, the last player standing wins, and the host role is handed over if the host is gone for more than 30 seconds.
 - [x] **Room Settings in Discovery**: Show an icon for each room setting on the discovery page, green when enabled and red when disabled, with a hover/tap tooltip explaining what is currently set in that room.
 
 ## 2. Core Game Logic & Rules
