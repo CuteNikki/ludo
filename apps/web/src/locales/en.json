@@ -72,8 +72,10 @@
     }
   },
   "toast": {
-    "removedTitle": "Removed from room",
-    "removedText": "The host removed you from the room.",
+    "kickedTitle": "Removed from room",
+    "kickedText": "The host removed you from the room.",
+    "disconnectedTitle": "Connection lost",
+    "disconnectedText": "You were disconnected for too long and lost your seat in the room.",
     "rematchTimeoutTitle": "Rematch missed",
     "rematchTimeoutText": "You didn't confirm the rematch in time, so you weren't moved into the new room.",
     "close": "Dismiss notice"
@@ -137,6 +139,11 @@
     "imReady": "I'm ready",
     "notReady": "Not ready",
     "startHint": "The game starts automatically once all players are ready. At least two players are required.",
+    "leaveNotice": {
+      "left": "{{name}} left the room.",
+      "kicked": "{{name}} was removed by the host.",
+      "disconnected": "{{name}} disconnected."
+    },
     "profile": {
       "title": "Your profile",
       "nameAria": "Player name",

@@ -25,6 +25,9 @@ const rooms = new RoomManager(
       payload: { roomCode: transition.newRoomCode, movedPlayerIds: transition.movedPlayerIds },
     });
   },
+  (roomCode, event) => {
+    broadcast(roomCode, { type: 'player:left', payload: event });
+  },
 );
 
 const server = Bun.serve<SocketData>({

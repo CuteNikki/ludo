@@ -57,6 +57,12 @@ const demoPath: Array<readonly [number, number]> = [
 
 const demoOffsets = [0, 10, 20, 30];
 
+const NOTICE_COPY = {
+  kicked: { titleKey: 'toast.kickedTitle', textKey: 'toast.kickedText' },
+  disconnected: { titleKey: 'toast.disconnectedTitle', textKey: 'toast.disconnectedText' },
+  'rematch-timeout': { titleKey: 'toast.rematchTimeoutTitle', textKey: 'toast.rematchTimeoutText' },
+} as const;
+
 type PreviewPlayer = { id: string; name: string; color: PlayerColor };
 
 function createPreviewPlayers(t: (key: string) => string): PreviewPlayer[] {
@@ -106,7 +112,7 @@ export default function HomePage() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
-  const [notice, setNotice] = useState<'removed' | 'rematch-timeout' | null>(null);
+  const [notice, setNotice] = useState<'kicked' | 'disconnected' | 'rematch-timeout' | null>(null);
 
   const stepIcons = [Link2, Dices, Flag];
   const steps = t('howItWorks.steps', { returnObjects: true }) as Array<{ title: string; text: string }>;
@@ -201,7 +207,7 @@ export default function HomePage() {
   useEffect(() => {
     const url = new URL(window.location.href);
     const noticeParam = url.searchParams.get('notice');
-    if (noticeParam === 'removed' || noticeParam === 'rematch-timeout') {
+    if (noticeParam === 'kicked' || noticeParam === 'disconnected' || noticeParam === 'rematch-timeout') {
       setNotice(noticeParam);
       url.searchParams.delete('notice');
       window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
@@ -223,8 +229,8 @@ export default function HomePage() {
         >
           <CircleAlert className='mt-0.5 shrink-0 text-red-600' size={19} />
           <div>
-            <p className='text-sm font-black'>{t(notice === 'removed' ? 'toast.removedTitle' : 'toast.rematchTimeoutTitle')}</p>
-            <p className='mt-0.5 text-xs text-foreground/70'>{t(notice === 'removed' ? 'toast.removedText' : 'toast.rematchTimeoutText')}</p>
+            <p className='text-sm font-black'>{t(NOTICE_COPY[notice].titleKey)}</p>
+            <p className='mt-0.5 text-xs text-foreground/70'>{t(NOTICE_COPY[notice].textKey)}</p>
           </div>
           <button
             type='button'

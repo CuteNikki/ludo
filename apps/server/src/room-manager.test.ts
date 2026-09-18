@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { RoomManager, type RematchTransition } from './room-manager';
+import { RoomManager, type PlayerLeftEvent, type RematchTransition } from './room-manager';
 
 function startGame(rolls: number[] = [6, 3]) {
   let rollIndex = 0;
@@ -96,6 +96,25 @@ describe('RoomManager game turns', () => {
     const listed = manager.listPublicRooms();
     expect(listed).toEqual([
       { roomCode: publicRoom.state.roomCode, hostName: 'Ada', playerCount: 2, maxPlayers: 4, phase: 'lobby' },
+    ]);
+  });
+
+  test('reports an accurate reason for kicks, voluntary leaves and disconnect timeouts', async () => {
+    const leftEvents: PlayerLeftEvent[] = [];
+    const manager = new RoomManager(() => undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, (_roomCode, event) =>
+      leftEvents.push(event),
+    );
+    const host = manager.createRoom('Ada');
+    const kicked = manager.joinRoom(host.state.roomCode, 'Linus');
+    const leaver = manager.joinRoom(host.state.roomCode, 'Mika');
+    manager.joinRoom(host.state.roomCode, 'Otto');
+
+    manager.kickPlayer(host.state.roomCode, host.playerId, kicked.playerId);
+    manager.leaveRoom(host.state.roomCode, leaver.playerId);
+
+    expect(leftEvents).toEqual([
+      { playerId: kicked.playerId, playerName: 'Linus', reason: 'kicked' },
+      { playerId: leaver.playerId, playerName: 'Mika', reason: 'left' },
     ]);
   });
 

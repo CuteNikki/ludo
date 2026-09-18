@@ -1,4 +1,4 @@
-import type { GameState, MoveTimeSeconds, Player, PlayerColor, PublicRoomSummary, RoomErrorCode, RoomSettings } from '@ludo/shared';
+import type { GameState, MoveTimeSeconds, Player, PlayerColor, PlayerLeftReason, PublicRoomSummary, RoomErrorCode, RoomSettings } from '@ludo/shared';
 import { FairDice } from './fair-dice';
 
 export class RoomError extends Error {
@@ -31,6 +31,14 @@ export interface RematchTransition {
 
 type RematchListener = (transition: RematchTransition) => void;
 
+export interface PlayerLeftEvent {
+  playerId: string;
+  playerName: string;
+  reason: PlayerLeftReason;
+}
+
+type PlayerLeftListener = (roomCode: string, event: PlayerLeftEvent) => void;
+
 export class RoomManager {
   private readonly rooms = new Map<string, Room>();
   private readonly cleanupTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -46,6 +54,7 @@ export class RoomManager {
     private readonly autoMoveDelayMs: number | null = 1_300,
     private readonly rematchDurationMs = 30_000,
     private readonly onRematchResolved: RematchListener = () => undefined,
+    private readonly onPlayerLeft: PlayerLeftListener = () => undefined,
   ) {}
 
   getRoomState(roomCode: string): GameState | null {
@@ -168,11 +177,11 @@ export class RoomManager {
     if (state.hostPlayerId !== hostPlayerId) throw new RoomError('HOST_ONLY_KICK', 'Only the host can kick players.');
     if (targetPlayerId === hostPlayerId) throw new RoomError('HOST_CANNOT_KICK_SELF', 'The host cannot kick themselves.');
     if (!state.players.some((player) => player.id === targetPlayerId)) throw new RoomError('PLAYER_NOT_FOUND', 'Player was not found.');
-    return this.removePlayer(roomCode, targetPlayerId) ?? state;
+    return this.removePlayer(roomCode, targetPlayerId, 'kicked') ?? state;
   }
 
   leaveRoom(roomCode: string, playerId: string): GameState | null {
-    return this.removePlayer(roomCode, playerId);
+    return this.removePlayer(roomCode, playerId, 'left');
   }
 
   /**
@@ -278,7 +287,7 @@ export class RoomManager {
       setTimeout(
         () => {
           this.playerCleanupTimers.delete(playerCleanupKey);
-          const state = this.removePlayer(roomCode, playerId);
+          const state = this.removePlayer(roomCode, playerId, 'disconnected');
           if (state) this.onStateChange(roomCode, state);
         },
         5 * 60 * 1000,
@@ -287,14 +296,17 @@ export class RoomManager {
     return room.state;
   }
 
-  private removePlayer(roomCode: string, playerId: string): GameState | null {
+  private removePlayer(roomCode: string, playerId: string, reason: PlayerLeftReason): GameState | null {
     const room = this.rooms.get(roomCode);
     if (!room) return null;
+    const player = room.state.players.find((candidate) => candidate.id === playerId);
+    if (!player) return room.state;
 
-    room.state.players = room.state.players.filter((player) => player.id !== playerId);
+    room.state.players = room.state.players.filter((candidate) => candidate.id !== playerId);
     room.state.pieces = room.state.pieces.filter((piece) => piece.playerId !== playerId);
     room.state.rematchPlayerIds = room.state.rematchPlayerIds.filter((candidate) => candidate !== playerId);
     this.fairDice.removePlayer(playerId);
+    this.onPlayerLeft(roomCode, { playerId, playerName: player.name, reason });
     if (room.state.players.length === 0) {
       this.clearTurnTimer(roomCode);
       room.state.hostPlayerId = null;

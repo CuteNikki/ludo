@@ -5,7 +5,7 @@ import { LanguageToggle } from '@/components/language-toggle';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { ClientEvent, GameState, MoveTimeSeconds, Player, PlayerColor, RoomErrorCode, RoomSettings, ServerEvent } from '@ludo/shared';
+import type { ClientEvent, GameState, MoveTimeSeconds, Player, PlayerColor, PlayerLeftReason, RoomErrorCode, RoomSettings, ServerEvent } from '@ludo/shared';
 import {
   Check,
   Clock3,
@@ -52,6 +52,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [error, setError] = useState<{ code: RoomErrorCode; message: string } | null>(null);
   const [notice, setNotice] = useState<RoomErrorCode | null>(null);
+  const [leaveNotice, setLeaveNotice] = useState<{ playerName: string; reason: PlayerLeftReason } | null>(null);
   const [now, setNow] = useState(Date.now());
   const [copied, setCopied] = useState(false);
 
@@ -66,6 +67,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
     let active = true;
     let joined = false;
     let currentRoomCode = requestedCode === 'NEW' ? null : requestedCode;
+    let myPlayerId: string | null = null;
     const playerName = sessionStorage.getItem('ludo-player-name')?.trim() ?? '';
     const socket = new WebSocket(process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:3001/ws');
     socketRef.current = socket;
@@ -91,6 +93,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
       if (event.type === 'room:joined') {
         joined = true;
         currentRoomCode = event.payload.state.roomCode;
+        myPlayerId = event.payload.playerId;
         setPlayerId(event.payload.playerId);
         setState(event.payload.state);
         sessionStorage.setItem(`ludo-player:${event.payload.state.roomCode}`, event.payload.playerId);
@@ -101,14 +104,20 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
         }
       } else if (event.type === 'game:state') {
         const storedPlayerId = sessionStorage.getItem(`ludo-player:${event.payload.roomCode}`);
-        if (storedPlayerId && !event.payload.players.some((player) => player.id === storedPlayerId)) {
-          sessionStorage.removeItem(`ludo-player:${event.payload.roomCode}`);
-          window.location.assign('/?notice=removed');
-          return;
-        }
         const currentPlayer = event.payload.players.find((player) => player.id === storedPlayerId);
         if (currentPlayer) sessionStorage.setItem('ludo-player-name', currentPlayer.name);
         setState(event.payload);
+      } else if (event.type === 'player:left') {
+        if (event.payload.playerId === myPlayerId) {
+          // A voluntary leave already navigates itself via leaveRoom() below; only kicks and
+          // disconnect timeouts need to redirect home here, each with their own accurate reason.
+          if (event.payload.reason !== 'left') {
+            if (currentRoomCode) sessionStorage.removeItem(`ludo-player:${currentRoomCode}`);
+            window.location.assign(`/?notice=${event.payload.reason}`);
+          }
+          return;
+        }
+        setLeaveNotice({ playerName: event.payload.playerName, reason: event.payload.reason });
       } else if (event.type === 'room:rematch') {
         const storedPlayerId = currentRoomCode ? sessionStorage.getItem(`ludo-player:${currentRoomCode}`) : null;
         if (currentRoomCode) sessionStorage.removeItem(`ludo-player:${currentRoomCode}`);
@@ -137,6 +146,12 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
     const interval = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!leaveNotice) return;
+    const timer = window.setTimeout(() => setLeaveNotice(null), 5_000);
+    return () => window.clearTimeout(timer);
+  }, [leaveNotice]);
 
   function emit(event: ClientEvent) {
     if (socketRef.current?.readyState === WebSocket.OPEN) send(socketRef.current, event);
@@ -383,6 +398,11 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
             </Button>
           )}
           {state.phase === 'lobby' && <p className='mt-4 text-sm font-medium leading-6 text-foreground/80'>{t('room.startHint')}</p>}
+          {state.phase === 'lobby' && leaveNotice && (
+            <p role='status' aria-live='polite' className='toast-enter mt-4 border border-border bg-background p-3 text-sm font-bold text-foreground/80'>
+              {t(`room.leaveNotice.${leaveNotice.reason}`, { name: leaveNotice.playerName })}
+            </p>
+          )}
           {notice && (
             <p role='alert' className='toast-enter mt-4 border border-red-500/30 bg-red-500/10 p-3 text-sm font-bold text-red-600 dark:text-red-400'>
               {t(`room.errors.${notice}`, { defaultValue: t('room.errors.UNKNOWN') })}

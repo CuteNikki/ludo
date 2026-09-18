@@ -61,10 +61,12 @@ export type ClientEvent =
   | { type: 'game:move'; payload: { pieceId: string } }
   | { type: 'room:discover'; payload: Record<string, never> };
 
+export type PlayerLeftReason = 'left' | 'kicked' | 'disconnected';
+
 export type ServerEvent =
   | { type: 'room:joined'; payload: { playerId: string; state: GameState } }
   | { type: 'game:state'; payload: GameState }
-  | { type: 'player:left'; payload: { playerId: string } }
+  | { type: 'player:left'; payload: { playerId: string; playerName: string; reason: PlayerLeftReason } }
   | { type: 'room:rematch'; payload: { roomCode: string | null; movedPlayerIds: string[] } }
   | { type: 'room:list'; payload: { rooms: PublicRoomSummary[] } }
   | { type: 'room:error'; payload: { code: RoomErrorCode; message: string } };

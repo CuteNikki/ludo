@@ -72,8 +72,10 @@
     }
   },
   "toast": {
-    "removedTitle": "Aus dem Raum entfernt",
-    "removedText": "Der Host hat dich aus dem Raum entfernt.",
+    "kickedTitle": "Aus dem Raum entfernt",
+    "kickedText": "Der Host hat dich aus dem Raum entfernt.",
+    "disconnectedTitle": "Verbindung verloren",
+    "disconnectedText": "Du warst zu lange getrennt und hast deinen Platz im Raum verloren.",
     "rematchTimeoutTitle": "Revanche verpasst",
     "rematchTimeoutText": "Du hast die Revanche nicht rechtzeitig bestätigt und wurdest daher nicht in den neuen Raum verschoben.",
     "close": "Meldung schließen"
@@ -137,6 +139,11 @@
     "imReady": "Ich bin bereit",
     "notReady": "Nicht bereit",
     "startHint": "Das Spiel startet automatisch, sobald alle Spieler bereit sind. Mindestens zwei Spieler sind erforderlich.",
+    "leaveNotice": {
+      "left": "{{name}} hat den Raum verlassen.",
+      "kicked": "{{name}} wurde vom Host entfernt.",
+      "disconnected": "{{name}} hat die Verbindung verloren."
+    },
     "profile": {
       "title": "Dein Profil",
       "nameAria": "Spielername",
