@@ -29,6 +29,7 @@ import {
   Users,
   Vote,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -70,6 +71,11 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
     let joined = false;
     let currentRoomCode = requestedCode === 'NEW' ? null : requestedCode;
     let myPlayerId: string | null = null;
+    // Clears any error/state left over from a previous requestedCode (e.g. a failed room lookup)
+    // so a client-side retry shows "connecting" instead of getting stuck on the old result.
+    setError(null);
+    setState(null);
+    setPlayerId(null);
     const playerName = sessionStorage.getItem('ludo-player-name')?.trim() ?? '';
     const socket = new WebSocket(process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:3001/ws');
     socketRef.current = socket;
@@ -699,7 +705,10 @@ function send(socket: WebSocket, event: ClientEvent) {
 
 function Message({ title, detail, showRoomChoices = false }: { title: string; detail: string; showRoomChoices?: boolean }) {
   const { t } = useTranslation();
+  const router = useRouter();
   const [roomCode, setRoomCode] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
   return (
     <main className='grid min-h-screen place-items-center px-6 text-center'>
       <div className='border-4 border-border bg-background-alternative p-8 shadow-card'>
@@ -711,7 +720,11 @@ function Message({ title, detail, showRoomChoices = false }: { title: string; de
               className='mt-7 flex gap-2'
               onSubmit={(event) => {
                 event.preventDefault();
-                if (roomCode.length === 6) window.location.assign(`/room/${roomCode}`);
+                if (roomCode.length !== 6) return;
+                setSubmitting(true);
+                // A client-side transition (rather than a full reload) reuses this same screen, so a
+                // wrong code lands back here with a clear "not found" result instead of a blank retry.
+                router.push(`/room/${roomCode}`);
               }}
             >
               <input
@@ -720,13 +733,22 @@ function Message({ title, detail, showRoomChoices = false }: { title: string; de
                 maxLength={6}
                 placeholder={t('start.roomPlaceholder')}
                 aria-label={t('start.roomLabel')}
-                className='h-11 min-w-0 flex-1 border-2 border-border bg-background px-4 font-mono uppercase outline-none focus:border-foreground'
+                autoComplete='off'
+                autoCorrect='off'
+                autoCapitalize='characters'
+                spellCheck={false}
+                inputMode='text'
+                disabled={submitting}
+                className='h-11 min-w-0 flex-1 border-2 border-border bg-background px-4 font-mono uppercase outline-none focus:border-foreground disabled:opacity-60'
               />
-              <Button type='submit' variant='outline' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6}>
+              <Button type='submit' variant='outline' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6 || submitting}>
                 <ArrowRight size={19} />
               </Button>
             </form>
-            <div className='mt-4 flex items-center gap-3 text-xs font-bold uppercase text-foreground/40'>
+            <p className='mt-2 h-4 text-xs font-bold text-foreground/60' aria-live='polite'>
+              {submitting ? t('room.message.lookingUpRoom') : ''}
+            </p>
+            <div className='mt-2 flex items-center gap-3 text-xs font-bold uppercase text-foreground/40'>
               <span className='h-px flex-1 bg-border' /> {t('start.or')} <span className='h-px flex-1 bg-border' />
             </div>
             <div className='flex flex-col justify-center gap-3 sm:flex-row'>

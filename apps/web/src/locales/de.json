@@ -176,6 +176,7 @@
       "connectionFailed": "Verbindung fehlgeschlagen",
       "openingRoom": "Raum wird geöffnet",
       "connecting": "Verbindung zum Spielserver wird hergestellt ...",
+      "lookingUpRoom": "Raum wird gesucht ...",
       "noConnection": "Keine Verbindung zum Spielserver.",
       "newRoom": "Neuen Raum erstellen",
       "toHomepage": "Zur Homepage"

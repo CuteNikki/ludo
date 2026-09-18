@@ -176,6 +176,7 @@
       "connectionFailed": "Connection failed",
       "openingRoom": "Opening room",
       "connecting": "Connecting to the game server ...",
+      "lookingUpRoom": "Looking for that room ...",
       "noConnection": "No connection to the game server.",
       "newRoom": "Create new room",
       "toHomepage": "Go to homepage"

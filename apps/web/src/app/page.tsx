@@ -328,6 +328,11 @@ export default function HomePage() {
                 onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
                 maxLength={6}
                 placeholder={t('start.roomPlaceholder')}
+                autoComplete='off'
+                autoCorrect='off'
+                autoCapitalize='characters'
+                spellCheck={false}
+                inputMode='text'
                 className='h-11 min-w-0 flex-1 border-2 border-border bg-background-alternative px-4 font-mono uppercase outline-none focus:border-foreground'
               />
               <Button type='submit' variant='outline' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6}>
