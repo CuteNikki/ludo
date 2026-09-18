@@ -37,7 +37,7 @@ The host can remove other players from the room while in the lobby. After the ga
 
 ## 1. Game Flow, Rooms & Match Lifecycle
 
-- [ ] **End-Screen & Post-Game Timer**:
+- [x] **End-Screen & Post-Game Timer**:
   - Implement a 30-second post-game countdown timer when a match finishes.
   - Provide clear voting options for players to either play again (rematch) or return to the home screen.
   - Handle room cleanup on timeout: kick out inactive players, and automatically transition rematching players into a brand-new room.
