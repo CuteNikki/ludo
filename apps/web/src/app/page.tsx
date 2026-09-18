@@ -315,7 +315,13 @@ export default function HomePage() {
             <label className='mb-2 block text-sm font-bold' htmlFor='room'>
               {t('start.roomLabel')}
             </label>
-            <div className='flex gap-2'>
+            <form
+              className='flex gap-2'
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (roomCode.length === 6) enter(`/room/${roomCode}`);
+              }}
+            >
               <input
                 id='room'
                 value={roomCode}
@@ -324,10 +330,10 @@ export default function HomePage() {
                 placeholder={t('start.roomPlaceholder')}
                 className='h-11 min-w-0 flex-1 border-2 border-border bg-background-alternative px-4 font-mono uppercase outline-none focus:border-foreground'
               />
-              <Button variant='outline' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6} onClick={() => enter(`/room/${roomCode}`)}>
+              <Button type='submit' variant='outline' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6}>
                 <ArrowRight size={19} />
               </Button>
-            </div>
+            </form>
             <a href='/discover' className='mt-4 flex items-center justify-center gap-1.5 text-sm font-bold text-foreground/70 hover:text-foreground'>
               <Users size={15} /> {t('start.browsePublicRooms')}
             </a>

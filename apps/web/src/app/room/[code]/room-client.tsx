@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { ClientEvent, GameState, MoveTimeSeconds, Player, PlayerColor, PlayerLeftReason, RoomErrorCode, RoomSettings, ServerEvent } from '@ludo/shared';
 import {
+  ArrowRight,
   Check,
   Clock3,
   CopyCheckIcon,
@@ -54,7 +55,8 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   const [notice, setNotice] = useState<RoomErrorCode | null>(null);
   const [leaveNotice, setLeaveNotice] = useState<{ playerName: string; reason: PlayerLeftReason } | null>(null);
   const [now, setNow] = useState(Date.now());
-  const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   const colorNames: Record<PlayerColor, string> = {
     red: t('room.colors.red'),
@@ -184,8 +186,14 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
 
   async function copyRoomLink() {
     await navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1_600);
+    setCopiedLink(true);
+    window.setTimeout(() => setCopiedLink(false), 1_600);
+  }
+
+  async function copyRoomCode() {
+    await navigator.clipboard.writeText(roomCode);
+    setCopiedCode(true);
+    window.setTimeout(() => setCopiedCode(false), 1_600);
   }
 
   function updateSettings(update: Partial<RoomSettings>) {
@@ -207,7 +215,20 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
           </a>
           <div>
             <p className='text-xs font-black uppercase tracking-[.16em] text-red-700 dark:text-red-400'>{t('room.eyebrow')}</p>
-            <h1 className='font-mono text-xl font-black tracking-widest'>{state.roomCode}</h1>
+            <button
+              type='button'
+              onClick={copyRoomCode}
+              aria-label={copiedCode ? t('room.copied') : t('room.copyCodeAria')}
+              title={copiedCode ? t('room.copied') : t('room.copyCodeAria')}
+              className='group flex items-center gap-1.5 font-mono text-xl font-black tracking-widest transition-colors hover:text-foreground/70'
+            >
+              {state.roomCode}
+              {copiedCode ? (
+                <CopyCheckIcon size={16} className='shrink-0' />
+              ) : (
+                <CopyIcon size={16} className='shrink-0 opacity-0 transition-opacity group-hover:opacity-60' />
+              )}
+            </button>
           </div>
         </div>
         <div className='flex items-center gap-2'>
@@ -218,7 +239,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
             className='h-10 px-2 bg-background-alternative text-foreground hover:bg-background hover:text-foreground'
             onClick={copyRoomLink}
           >
-            {copied ? <CopyCheckIcon /> : <CopyIcon />} {copied ? t('room.copied') : t('room.copyLink')}
+            {copiedLink ? <CopyCheckIcon /> : <CopyIcon />} {copiedLink ? t('room.copied') : t('room.copyLink')}
           </Button>
         </div>
       </header>
@@ -678,24 +699,49 @@ function send(socket: WebSocket, event: ClientEvent) {
 
 function Message({ title, detail, showRoomChoices = false }: { title: string; detail: string; showRoomChoices?: boolean }) {
   const { t } = useTranslation();
+  const [roomCode, setRoomCode] = useState('');
   return (
     <main className='grid min-h-screen place-items-center px-6 text-center'>
       <div className='border-4 border-border bg-background-alternative p-8 shadow-card'>
         <h1 className='text-4xl font-bold'>{title}</h1>
         <p className='mt-3 text-foreground/70'>{detail}</p>
         {showRoomChoices && (
-          <div className='mt-7 flex flex-col justify-center gap-3 sm:flex-row'>
-            <Button asChild>
-              <a href='/room/new'>
-                <Plus size={17} /> {t('room.message.newRoom')}
-              </a>
-            </Button>
-            <Button variant='outline' asChild>
-              <a href='/'>
-                <Home size={17} /> {t('room.message.toHomepage')}
-              </a>
-            </Button>
-          </div>
+          <>
+            <form
+              className='mt-7 flex gap-2'
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (roomCode.length === 6) window.location.assign(`/room/${roomCode}`);
+              }}
+            >
+              <input
+                value={roomCode}
+                onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
+                maxLength={6}
+                placeholder={t('start.roomPlaceholder')}
+                aria-label={t('start.roomLabel')}
+                className='h-11 min-w-0 flex-1 border-2 border-border bg-background px-4 font-mono uppercase outline-none focus:border-foreground'
+              />
+              <Button type='submit' variant='outline' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6}>
+                <ArrowRight size={19} />
+              </Button>
+            </form>
+            <div className='mt-4 flex items-center gap-3 text-xs font-bold uppercase text-foreground/40'>
+              <span className='h-px flex-1 bg-border' /> {t('start.or')} <span className='h-px flex-1 bg-border' />
+            </div>
+            <div className='flex flex-col justify-center gap-3 sm:flex-row'>
+              <Button asChild>
+                <a href='/room/new'>
+                  <Plus size={17} /> {t('room.message.newRoom')}
+                </a>
+              </Button>
+              <Button variant='outline' asChild>
+                <a href='/'>
+                  <Home size={17} /> {t('room.message.toHomepage')}
+                </a>
+              </Button>
+            </div>
+          </>
         )}
       </div>
     </main>
