@@ -15,7 +15,7 @@ bun install
 bun run dev
 ```
 
-The frontend then runs on `http://localhost:3000` and the WebSocket server on `ws://localhost:3001/ws`. For different hosts, `NEXT_PUBLIC_WS_URL` can be set in the frontend.
+The frontend then runs on `http://localhost:3000` and the WebSocket server on `ws://localhost:3001/ws`. For different hosts, `NEXT_PUBLIC_WS_URL` can be set in the frontend. For a real deployment, also set `NEXT_PUBLIC_SITE_URL` to the site's public URL so social sharing previews (Open Graph/Twitter cards) link to the right images.
 
 ## Protocol
 
@@ -64,7 +64,7 @@ The host can remove other players from the room while in the lobby. After the ga
   - Adapt the movement preview to support tap/touch events on mobile devices (e.g., tap a figure once for a preview and again to confirm the move, replacing desktop `hover`).
 - [x] **Language Selector Dropdown**: Refactor the language selector into a scalable dropdown component to easily accommodate more languages in the future.
 - [ ] **Lighthouse Performance Optimization**: Run Lighthouse audits and optimize the application for performance, accessibility, best practices, and SEO based on the audit results. Currently all 100 scores besides Accessibility due to color contrast issues.
-- [ ] **Favicon & Metadata**: Add a favicon to the website and ensure all relevant metadata (title, description, social sharing tags) are properly configured for better SEO and user experience.
+- [x] **Favicon & Metadata**: Add a favicon to the website and ensure all relevant metadata (title, description, social sharing tags) are properly configured for better SEO and user experience.
 
 ## 4. Features & Content
 

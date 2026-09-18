@@ -13,9 +13,11 @@ RUN bun install --frozen-lockfile
 
 WORKDIR /app/apps/web
 
-# Accept the WebSocket URL as an argument during build time
+# Accept the WebSocket URL and public site URL as arguments during build time
 ARG NEXT_PUBLIC_WS_URL
 ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
+ARG NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
 # Build the Next.js app
 RUN bun run build
