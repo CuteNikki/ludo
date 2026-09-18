@@ -61,6 +61,7 @@ Der Host kann andere Spieler in der Lobby aus dem Raum entfernen. Nach Spielende
   - Adapt the movement preview to support tap/touch events on mobile devices (e.g., tap a figure once for a preview and again to confirm the move, replacing desktop `hover`).
 - [ ] **Language Selector Dropdown**: Refactor the language selector into a scalable dropdown component to easily accommodate more languages in the future.
 - [ ] **Lighthouse Performance Optimization**: Run Lighthouse audits and optimize the application for performance, accessibility, best practices, and SEO based on the audit results. Currently all 100 scores besides Accessibility due to color contrast issues.
+- [ ] **Favicon & Metadata**: Add a favicon to the website and ensure all relevant metadata (title, description, social sharing tags) are properly configured for better SEO and user experience.
 
 ## 4. Features & Content
 
