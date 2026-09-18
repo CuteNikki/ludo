@@ -162,6 +162,8 @@
       "autoMovesInfo": "Wenn es keinen anderen möglichen Zug gibt, wird die Figur automatisch bewegt.",
       "fairDice": "Fairer Würfel",
       "fairDiceInfo": "Alle Zahlen werden regelmäßig gewürfelt, damit niemand lange auf eine Sechs warten muss.",
+      "mustSpawnOnSix": "Muss bei Sechs einsetzen",
+      "mustSpawnOnSixInfo": "Bei einer gewürfelten Sechs muss eine wartende Figur eingesetzt werden, statt eine bereits im Spiel befindliche Figur 6 Felder zu ziehen.",
       "isPublic": "Öffentlicher Raum",
       "isPublicInfo": "Listet diesen Raum auf der öffentlichen Entdecken-Seite, solange er offen und noch in der Lobby ist."
     },

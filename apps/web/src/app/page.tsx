@@ -85,7 +85,7 @@ function createPreviewState(previewPlayers: PreviewPlayer[]): GameState {
   return {
     roomCode: 'DEMO',
     hostPlayerId: 'preview-red',
-    settings: { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false },
+    settings: { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false, mustSpawnOnSix: false },
     phase: 'playing',
     turnStage: 'rolling',
     turnDeadline: null,

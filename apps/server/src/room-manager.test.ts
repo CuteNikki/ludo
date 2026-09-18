@@ -50,7 +50,7 @@ describe('RoomManager game turns', () => {
     const guest = manager.joinRoom(host.state.roomCode, 'Linus');
     manager.setReady(host.state.roomCode, guest.playerId, true);
 
-    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: false, isPublic: true };
+    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: false, isPublic: true, mustSpawnOnSix: false };
     expect(() => manager.setSettings(host.state.roomCode, guest.playerId, settings)).toThrow('Only the host');
     const updated = manager.setSettings(host.state.roomCode, host.playerId, settings);
     expect(updated.settings).toEqual(settings);
@@ -69,7 +69,7 @@ describe('RoomManager game turns', () => {
     );
     const host = manager.createRoom('Ada');
     const guest = manager.joinRoom(host.state.roomCode, 'Linus');
-    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: true, isPublic: false };
+    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: true, isPublic: false, mustSpawnOnSix: false };
     manager.setSettings(host.state.roomCode, host.playerId, settings);
     manager.setReady(host.state.roomCode, host.playerId, true);
     manager.setReady(host.state.roomCode, guest.playerId, true);
@@ -90,6 +90,7 @@ describe('RoomManager game turns', () => {
       automaticSingleMove: true,
       fairDice: true,
       isPublic: true,
+      mustSpawnOnSix: false,
     });
     manager.createRoom('Mika'); // stays private by default
 
@@ -193,6 +194,31 @@ describe('RoomManager game turns', () => {
     expect(moved.pieces.find((piece) => piece.id === pieceId)?.position).toBe(0);
     expect(moved.currentPlayerId).toBe(first.playerId);
     expect(moved.turnStage).toBe('rolling');
+  });
+
+  test('forces a spawn on six over moving a board piece when "must spawn on six" is enabled', () => {
+    const manager = new RoomManager(() => undefined, 60_000, () => 6, 900, 1_800, null);
+    const host = manager.createRoom('Ada');
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+    manager.setSettings(host.state.roomCode, host.playerId, {
+      moveTimeSeconds: 30,
+      automaticSingleMove: true,
+      fairDice: false,
+      isPublic: false,
+      mustSpawnOnSix: true,
+    });
+    manager.setReady(host.state.roomCode, host.playerId, true);
+    manager.setReady(host.state.roomCode, guest.playerId, true);
+
+    // Give the host a piece already on the board, so a six would otherwise offer a real choice
+    // between moving it 6 tiles and spawning a new piece out of the yard.
+    const onBoardPiece = host.state.pieces.find((piece) => piece.playerId === host.playerId)!;
+    onBoardPiece.position = 5;
+
+    const rolled = manager.roll(host.state.roomCode, host.playerId);
+    expect(rolled.movablePieceIds).toHaveLength(1);
+    const forcedPiece = host.state.pieces.find((piece) => piece.id === rolled.movablePieceIds[0]);
+    expect(forcedPiece?.position).toBe(-1);
   });
 
   test('moves an active piece and hands over the turn', () => {

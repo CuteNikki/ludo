@@ -12,6 +12,7 @@ import {
   Clock3,
   CopyCheckIcon,
   CopyIcon,
+  Dice6,
   Dices,
   DicesIcon,
   Globe,
@@ -592,6 +593,14 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
           checked={settings.fairDice}
           disabled={!isHost}
           onChange={(checked) => onChange({ fairDice: checked })}
+        />
+        <SettingToggle
+          icon={<Dice6 size={17} />}
+          label={t('room.settings.mustSpawnOnSix')}
+          description={t('room.settings.mustSpawnOnSixInfo')}
+          checked={settings.mustSpawnOnSix}
+          disabled={!isHost}
+          onChange={(checked) => onChange({ mustSpawnOnSix: checked })}
         />
         <SettingToggle
           icon={<Globe size={17} />}

@@ -162,6 +162,8 @@
       "autoMovesInfo": "If there's no other possible move, the piece is moved automatically.",
       "fairDice": "Fair dice",
       "fairDiceInfo": "All numbers come up regularly, so no one waits forever for a six.",
+      "mustSpawnOnSix": "Must spawn on six",
+      "mustSpawnOnSixInfo": "Rolling a six forces a figure out of the yard if one is waiting there, instead of letting a figure already on the board move 6 tiles.",
       "isPublic": "Public room",
       "isPublicInfo": "Lists this room on the public discovery page while it's open and still in the lobby."
     },

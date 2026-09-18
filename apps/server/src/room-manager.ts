@@ -13,7 +13,7 @@ export class RoomError extends Error {
 
 const COLORS: PlayerColor[] = ['red', 'blue', 'green', 'yellow'];
 const MOVE_TIMES: MoveTimeSeconds[] = [15, 30, 45, 60];
-const DEFAULT_SETTINGS: RoomSettings = { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false };
+const DEFAULT_SETTINGS: RoomSettings = { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false, mustSpawnOnSix: false };
 
 interface Room {
   state: GameState;
@@ -146,7 +146,12 @@ export class RoomManager {
     if (state.phase !== 'lobby') throw new RoomError('SETTINGS_ONLY_LOBBY', 'Settings can only be changed in the lobby.');
     if (state.hostPlayerId !== playerId) throw new RoomError('HOST_ONLY_SETTINGS', 'Only the host can change the room settings.');
     if (!MOVE_TIMES.includes(settings.moveTimeSeconds)) throw new RoomError('INVALID_MOVE_TIME', 'Invalid move time.');
-    if (typeof settings.automaticSingleMove !== 'boolean' || typeof settings.fairDice !== 'boolean' || typeof settings.isPublic !== 'boolean')
+    if (
+      typeof settings.automaticSingleMove !== 'boolean' ||
+      typeof settings.fairDice !== 'boolean' ||
+      typeof settings.isPublic !== 'boolean' ||
+      typeof settings.mustSpawnOnSix !== 'boolean'
+    )
       throw new RoomError('INVALID_SETTINGS', 'Invalid room settings.');
 
     state.settings = { ...settings };
@@ -368,9 +373,17 @@ export class RoomManager {
       return !ownPieces.some((other) => other.id !== piece.id && other.position === targetPosition);
     });
 
-    if (diceResult === 6 && movable.length > 1 && movable.every((piece) => piece.position === -1)) {
-      const randomIndex = Math.floor(Math.random() * movable.length);
-      return [movable[randomIndex]!];
+    if (diceResult === 6) {
+      const homeMovable = movable.filter((piece) => piece.position === -1);
+      // With "must spawn on six" enabled, a free spawn slot takes priority over moving a piece
+      // already on the board - the player isn't offered a choice between the two.
+      const forceSpawn = state.settings.mustSpawnOnSix && homeMovable.length > 0;
+      const candidates = forceSpawn ? homeMovable : movable;
+      if (candidates.length > 1 && candidates.every((piece) => piece.position === -1)) {
+        const randomIndex = Math.floor(Math.random() * candidates.length);
+        return [candidates[randomIndex]!];
+      }
+      return candidates;
     }
 
     return movable;

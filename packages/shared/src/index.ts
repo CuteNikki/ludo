@@ -21,6 +21,7 @@ export interface RoomSettings {
   automaticSingleMove: boolean;
   fairDice: boolean;
   isPublic: boolean;
+  mustSpawnOnSix: boolean;
 }
 
 export interface PublicRoomSummary {
