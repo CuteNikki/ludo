@@ -4,6 +4,9 @@ import { GameBoard } from '@/components/game-board';
 import { LanguageToggle } from '@/components/language-toggle';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { ClientEvent, GameState, MoveTimeSeconds, Player, PlayerColor, PlayerLeftReason, RoomErrorCode, RoomSettings, ServerEvent } from '@ludo/shared';
 import {
@@ -493,7 +496,7 @@ function PlayerProfile({
       <h2 className='mb-4 flex items-center gap-2 text-lg font-black'>
         <UserRound size={19} /> {t('room.profile.title')}
       </h2>
-      <input
+      <Input
         value={draftName}
         onChange={(event) => setDraftName(event.target.value)}
         onBlur={commitName}
@@ -502,7 +505,7 @@ function PlayerProfile({
         }}
         maxLength={24}
         aria-label={t('room.profile.nameAria')}
-        className='h-11 w-full border-2 border-border bg-background px-3 outline-none focus:border-foreground focus:ring-2 focus:ring-amber-300'
+        className='bg-background px-3'
       />
 
       <div className='mt-4 flex items-center justify-between gap-4'>
@@ -639,72 +642,27 @@ function SettingToggle({
         </span>
         <InfoTooltip text={description} />
       </span>
-      <button
-        type='button'
-        role='switch'
-        aria-checked={checked}
-        aria-label={label}
-        disabled={disabled}
-        onClick={() => onChange(!checked)}
-        className={cn(
-          'relative h-7 w-12 shrink-0 rounded-full border-2 border-border transition-colors disabled:cursor-not-allowed disabled:opacity-60',
-          checked ? 'bg-green-500' : 'bg-background',
-        )}
-      >
-        <span
-          className={cn(
-            'absolute left-0.5 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border-2 border-border bg-background-alternative transition-transform',
-            checked && 'translate-x-5',
-          )}
-        />
-      </button>
+      <Switch checked={checked} disabled={disabled} onCheckedChange={onChange} aria-label={label} />
     </div>
   );
 }
 
 function InfoTooltip({ text }: { text: string }) {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const tooltipId = `setting-info-${text.slice(0, 12).replaceAll(' ', '-').toLowerCase()}`;
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Close tooltip when clicking outside
-  useEffect(() => {
-    if (!isOpen) return;
-    function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
-  const showTooltip = isOpen || isHovered;
 
   return (
-    <div ref={containerRef} className='relative ml-auto inline-flex shrink-0' onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-      <button
-        type='button'
-        aria-label={t('room.settings.title')}
-        aria-describedby={tooltipId}
-        aria-expanded={showTooltip}
-        onClick={() => setIsOpen((prev) => !prev)}
-        className='grid h-7 w-7 place-items-center rounded-full text-foreground/60 transition-colors hover:bg-background hover:text-foreground focus-visible:bg-background focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
-      >
-        <Info size={16} />
-      </button>
-      {showTooltip && (
-        <span
-          id={tooltipId}
-          role='tooltip'
-          className='absolute right-0 top-8 z-50 w-64 border-2 border-border bg-background-alternative p-3 text-left text-xs font-medium leading-5 shadow-card'
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type='button'
+          aria-label={t('room.settings.title')}
+          className='ml-auto grid h-7 w-7 shrink-0 place-items-center rounded-full text-foreground/60 transition-colors hover:bg-background hover:text-foreground focus-visible:bg-background focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground'
         >
-          {text}
-        </span>
-      )}
-    </div>
+          <Info size={16} />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent className='w-64'>{text}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -736,7 +694,7 @@ function Message({ title, detail, showRoomChoices = false }: { title: string; de
                 router.push(`/room/${roomCode}`);
               }}
             >
-              <input
+              <Input
                 value={roomCode}
                 onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
                 maxLength={6}
@@ -748,7 +706,7 @@ function Message({ title, detail, showRoomChoices = false }: { title: string; de
                 spellCheck={false}
                 inputMode='text'
                 disabled={submitting}
-                className='h-11 min-w-0 flex-1 border-2 border-border bg-background px-4 font-mono uppercase outline-none focus:border-foreground disabled:opacity-60'
+                className='min-w-0 flex-1 bg-background font-mono uppercase'
               />
               <Button type='submit' variant='outline' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6 || submitting}>
                 <ArrowRight size={19} />

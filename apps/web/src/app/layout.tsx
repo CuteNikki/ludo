@@ -5,6 +5,7 @@ import { fallbackLng } from '@/lib/i18n/settings';
 
 import { LanguageProvider } from '@/components/providers/i18n';
 import { ThemeProvider } from '@/components/providers/theme';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 import './globals.css';
 
@@ -25,7 +26,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang={fallbackLng} suppressHydrationWarning>
       <body className={`${archivo.variable} ${fraunces.variable}`}>
         <LanguageProvider lng={fallbackLng}>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
+          </ThemeProvider>
         </LanguageProvider>
       </body>
     </html>

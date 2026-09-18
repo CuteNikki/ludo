@@ -1,6 +1,8 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { LanguageToggle } from '@/components/language-toggle';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
@@ -78,16 +80,16 @@ export default function DiscoverPage() {
       </header>
 
       <section className='mt-8 border-4 border-border bg-background-alternative p-5 shadow-card sm:p-8'>
-        <label className='mb-2 block text-sm font-bold' htmlFor='discover-name'>
+        <Label htmlFor='discover-name' className='mb-2'>
           {t('start.nameLabel')}
-        </label>
-        <input
+        </Label>
+        <Input
           id='discover-name'
           value={name}
           onChange={(event) => setName(event.target.value)}
           maxLength={24}
           placeholder={t('start.namePlaceholder')}
-          className='mb-6 h-12 w-full max-w-sm border-2 border-border bg-background px-4 outline-none focus:border-foreground focus:ring-2 focus:ring-amber-300'
+          className='mb-6 h-12 max-w-sm bg-background'
         />
 
         <div className='mb-4 flex items-center justify-between gap-3'>

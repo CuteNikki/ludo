@@ -12,6 +12,8 @@ import { LanguageToggle } from '@/components/language-toggle';
 import { Reveal } from '@/components/scroll-reveal';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const demoPath: Array<readonly [number, number]> = [
   [4, 0],
@@ -296,16 +298,16 @@ export default function HomePage() {
             <p className='mt-4 max-w-md wrap-break-word leading-7 text-foreground/70'>{t('start.subtitle')}</p>
           </div>
           <section className='min-w-0 max-w-full border-4 border-border bg-background p-6 shadow-card sm:p-8'>
-            <label className='mb-2 block text-sm font-bold' htmlFor='name'>
+            <Label htmlFor='name' className='mb-2'>
               {t('start.nameLabel')}
-            </label>
-            <input
+            </Label>
+            <Input
               id='name'
               value={name}
               onChange={(event) => setName(event.target.value)}
               maxLength={24}
               placeholder={t('start.namePlaceholder')}
-              className='h-12 w-full border-2 border-border bg-background-alternative px-4 outline-none focus:border-foreground focus:ring-2 focus:ring-amber-300'
+              className='h-12'
             />
             <Button className='mt-5 w-full' onClick={() => enter('/room/new')}>
               <Plus size={18} /> {t('start.createRoom')}
@@ -313,9 +315,9 @@ export default function HomePage() {
             <div className='my-7 flex items-center gap-3 text-xs font-bold uppercase text-foreground/40'>
               <span className='h-px flex-1 bg-border' /> {t('start.or')} <span className='h-px flex-1 bg-border' />
             </div>
-            <label className='mb-2 block text-sm font-bold' htmlFor='room'>
+            <Label htmlFor='room' className='mb-2'>
               {t('start.roomLabel')}
-            </label>
+            </Label>
             <form
               className='flex gap-2'
               onSubmit={(event) => {
@@ -323,7 +325,7 @@ export default function HomePage() {
                 if (roomCode.length === 6) enter(`/room/${roomCode}`);
               }}
             >
-              <input
+              <Input
                 id='room'
                 value={roomCode}
                 onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
@@ -334,7 +336,7 @@ export default function HomePage() {
                 autoCapitalize='characters'
                 spellCheck={false}
                 inputMode='text'
-                className='h-11 min-w-0 flex-1 border-2 border-border bg-background-alternative px-4 font-mono uppercase outline-none focus:border-foreground'
+                className='min-w-0 flex-1 font-mono uppercase'
               />
               <Button type='submit' variant='outline' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6}>
                 <ArrowRight size={19} />
