@@ -33,7 +33,7 @@ The "Fair Dice" option ensures that every number is rolled regularly so no one h
 
 The host can fill free lobby seats with computer opponents (`room:addBot`) and remove them again like any other player. Bots are always connected and ready, so a game with a single human player starts as soon as that player is ready. Adding a bot resets the humans' ready status like any other lobby change.
 
-Bots run entirely on the server. They roll like everyone else (including the fair dice option) and pick their piece after a short delay, with no move timer. The choice is a simple heuristic in `apps/server/src/bot-strategy.ts`: capture an opponent, enter the home stretch, leave the yard, step out of danger, and avoid landing within reach of an opponent, with a little randomness. Bots don't vote in the rematch; they follow the humans who do. A room whose humans have all left is torn down like an empty one.
+Bots run entirely on the server. They roll like everyone else (including the fair dice option) and pick their piece after a short delay, with no move timer. The choice is a simple heuristic in `packages/shared/src/bot-strategy.ts` (shared so the landing-page demo, four bots playing each other in the browser, plays by the same rules): capture an opponent, enter the home stretch, leave the yard, step out of danger, and avoid landing within reach of an opponent, with a little randomness. Bots don't vote in the rematch; they follow the humans who do. A room whose humans have all left is torn down like an empty one.
 
 ## Room Settings
 

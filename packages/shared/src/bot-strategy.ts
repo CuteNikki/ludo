@@ -1,4 +1,4 @@
-import type { GameState, PlayerColor } from '@ludo/shared';
+import type { GameState, PlayerColor } from './index';
 
 export const TRACK_LENGTH = 40;
 const START_OFFSETS: Record<PlayerColor, number> = { red: 0, blue: 10, green: 20, yellow: 30 };

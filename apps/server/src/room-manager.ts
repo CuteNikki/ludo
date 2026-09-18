@@ -1,5 +1,5 @@
 import type { GameState, MoveTimeSeconds, Player, PlayerColor, PlayerLeftReason, PublicRoomSummary, RoomErrorCode, RoomSettings } from '@ludo/shared';
-import { chooseBotMove, toBoardPosition } from './bot-strategy';
+import { chooseBotMove, toBoardPosition } from '@ludo/shared';
 import { FairDice } from './fair-dice';
 
 export class RoomError extends Error {

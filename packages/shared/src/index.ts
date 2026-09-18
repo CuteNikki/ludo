@@ -103,3 +103,5 @@ export type RoomErrorCode =
   | 'REMATCH_NOT_AVAILABLE'
   | 'INVALID_EVENT'
   | 'UNKNOWN';
+
+export { TRACK_LENGTH, chooseBotMove, toBoardPosition } from './bot-strategy';

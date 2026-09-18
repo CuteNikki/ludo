@@ -2,12 +2,10 @@
 
 import { ArrowRight, BookOpen, Bot, CircleAlert, Dices, DicesIcon, Flag, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { GameState, PlayerColor } from '@ludo/shared';
-
-import { GameBoard } from '@/components/game-board';
+import { PreviewBoard } from '@/components/preview-board';
 import { LanguageToggle } from '@/components/language-toggle';
 import { Reveal } from '@/components/scroll-reveal';
 import { SiteFooter } from '@/components/site-footer';
@@ -17,100 +15,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const demoPath: Array<readonly [number, number]> = [
-  [4, 0],
-  [4, 1],
-  [4, 2],
-  [4, 3],
-  [4, 4],
-  [3, 4],
-  [2, 4],
-  [1, 4],
-  [0, 4],
-  [0, 5],
-  [0, 6],
-  [1, 6],
-  [2, 6],
-  [3, 6],
-  [4, 6],
-  [4, 7],
-  [4, 8],
-  [4, 9],
-  [4, 10],
-  [5, 10],
-  [6, 10],
-  [6, 9],
-  [6, 8],
-  [6, 7],
-  [6, 6],
-  [7, 6],
-  [8, 6],
-  [9, 6],
-  [10, 6],
-  [10, 5],
-  [10, 4],
-  [9, 4],
-  [8, 4],
-  [7, 4],
-  [6, 4],
-  [6, 3],
-  [6, 2],
-  [6, 1],
-  [6, 0],
-  [5, 0],
-];
-
-const demoOffsets = [0, 10, 20, 30];
-
 const NOTICE_COPY = {
   kicked: { titleKey: 'toast.kickedTitle', textKey: 'toast.kickedText' },
   disconnected: { titleKey: 'toast.disconnectedTitle', textKey: 'toast.disconnectedText' },
   'rematch-timeout': { titleKey: 'toast.rematchTimeoutTitle', textKey: 'toast.rematchTimeoutText' },
 } as const;
-
-type PreviewPlayer = { id: string; name: string; color: PlayerColor };
-
-function createPreviewPlayers(t: (key: string) => string): PreviewPlayer[] {
-  return [
-    { id: 'preview-red', name: t('room.colors.red'), color: 'red' },
-    { id: 'preview-blue', name: t('room.colors.blue'), color: 'blue' },
-    { id: 'preview-green', name: t('room.colors.green'), color: 'green' },
-    { id: 'preview-yellow', name: t('room.colors.yellow'), color: 'yellow' },
-  ];
-}
-
-const previewStartPositions = [
-  [3, -1, 25, 40],
-  [-1, 12, 25, -1],
-  [3, -1, -1, 40],
-  [-1, 12, 25, 40],
-];
-
-function createPreviewState(previewPlayers: PreviewPlayer[]): GameState {
-  return {
-    roomCode: 'DEMO',
-    hostPlayerId: 'preview-red',
-    settings: { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false, mustSpawnOnSix: false },
-    phase: 'playing',
-    turnStage: 'rolling',
-    turnDeadline: null,
-    players: previewPlayers.map((player) => ({ ...player, connected: true, ready: true, isBot: false })),
-    pieces: previewPlayers.flatMap((player, playerIndex) =>
-      Array.from({ length: 4 }, (_, pieceIndex) => ({
-        id: `${player.id}-piece-${pieceIndex}`,
-        playerId: player.id,
-        position: previewStartPositions[playerIndex]?.[pieceIndex] ?? -1,
-      })),
-    ),
-    currentPlayerId: 'preview-red',
-    diceResult: null,
-    movablePieceIds: [],
-    winnerId: null,
-    rematchDeadline: null,
-    rematchPlayerIds: [],
-    revision: 0,
-  };
-}
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -121,93 +30,6 @@ export default function HomePage() {
 
   const stepIcons = [Link2, Dices, Flag];
   const steps = t('howItWorks.steps', { returnObjects: true }) as Array<{ title: string; text: string }>;
-
-  function PreviewBoard() {
-    const previewPlayers = useMemo(() => createPreviewPlayers(t), [t]);
-    const [state, setState] = useState<GameState>(() => createPreviewState(previewPlayers));
-    const roundFinished = useRef(false);
-
-    useEffect(() => {
-      let timer: number | undefined;
-      let active = true;
-      let playerIndex = 0;
-
-      function nextTurn() {
-        if (!active) return;
-        if (roundFinished.current) return;
-        const player = previewPlayers[playerIndex]!;
-        const roll = Math.floor(Math.random() * 6) + 1;
-        let winner = false;
-
-        setState((current) => {
-          if (current.phase === 'finished') return current;
-          const currentPieces = current.pieces.map((candidate) => ({ ...candidate }));
-          const candidates = currentPieces.filter((candidate) => candidate.playerId === player.id && candidate.position < 43);
-          const legalCandidates = candidates.filter((candidate) => {
-            const target = candidate.position === -1 ? (roll === 6 ? 0 : -1) : candidate.position + roll;
-            return (
-              target >= 0 &&
-              target <= 43 &&
-              !currentPieces.some((other) => other.id !== candidate.id && other.playerId === player.id && other.position === target)
-            );
-          });
-          const selected = legalCandidates[Math.floor(Math.random() * legalCandidates.length)];
-          if (!selected) return { ...current, currentPlayerId: player.id, revision: current.revision + 1 };
-
-          const target = selected.position === -1 ? (roll === 6 ? 0 : -1) : selected.position + roll;
-          if (target < 0 || target > 43) return { ...current, currentPlayerId: player.id, diceResult: roll, revision: current.revision + 1 };
-
-          selected.position = target;
-          if (target < 40) {
-            const boardTarget = (demoOffsets[playerIndex]! + target) % demoPath.length;
-            for (const opponent of currentPieces) {
-              const opponentIndex = previewPlayers.findIndex((candidate) => candidate.id === opponent.playerId);
-              if (
-                opponent.playerId !== player.id &&
-                opponent.position >= 0 &&
-                opponent.position < 40 &&
-                (demoOffsets[opponentIndex]! + opponent.position) % demoPath.length === boardTarget
-              ) {
-                opponent.position = -1;
-              }
-            }
-          }
-          winner = currentPieces.filter((piece) => piece.playerId === player.id).every((piece) => piece.position >= 40);
-          return {
-            ...current,
-            pieces: currentPieces,
-            phase: winner ? 'finished' : 'playing',
-            currentPlayerId: player.id,
-            diceResult: roll,
-            winnerId: winner ? player.id : null,
-            revision: current.revision + 1,
-          };
-        });
-        if (winner) {
-          roundFinished.current = true;
-          timer = window.setTimeout(() => {
-            if (active) {
-              roundFinished.current = false;
-              setState(createPreviewState(previewPlayers));
-              playerIndex = 0;
-              timer = window.setTimeout(nextTurn, 1_000);
-            }
-          }, 3_500);
-          return;
-        }
-        playerIndex = (playerIndex + 1) % previewPlayers.length;
-        timer = window.setTimeout(nextTurn, 1_400);
-      }
-
-      timer = window.setTimeout(nextTurn, 1_000);
-      return () => {
-        active = false;
-        if (timer !== undefined) window.clearTimeout(timer);
-      };
-    }, []);
-
-    return <GameBoard state={state} playerId='preview-viewer' onMove={() => undefined} />;
-  }
 
   useEffect(() => {
     const url = new URL(window.location.href);
