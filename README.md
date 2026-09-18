@@ -46,6 +46,9 @@ The host can remove other players from the room while in the lobby. After the ga
 - [ ] **Lobby Leave Notifications**: Implement real-time notifications alerting remaining players in the lobby whenever someone leaves the room.
 - [ ] **Accurate Leave/Kick Notifications**: Fix inaccurate notification messages (e.g., displaying "Kicked by the Host" when it wasn't the case). Update the notification system to properly reflect the actual reason for leaving or being removed.
 - [ ] **Static vs. Dynamic Rendering Optimization**: Investigate and refactor pages so they remain static where possible, preventing the entire site from switching to dynamic rendering solely due to language switching.
+- [ ] **Better Invite UI/UX**: When the room was not found, there should be an input to submit a room code. The room code should also be copyable in the room rather than only the link being available. Additionally the invite form on the home page is not submittable by pressing enter in the invite code field.
+  - Consider adding visual feedback for successful or failed room code submissions.
+  - Ensure the invite input is accessible and user-friendly on both desktop and mobile devices.
 
 ## 2. Core Game Logic & Rules
 
