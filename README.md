@@ -69,7 +69,7 @@ The host can remove other players from the room while in the lobby. After the ga
 ## 4. Features & Content
 
 - [ ] **AI Opponents**: Implement computer-controlled opponents to enable single-player mode.
-- [ ] **Game Description & Rules**: Add an information section or guide explaining how to play the game directly on the website. We already have a how it works section but it doesn't explain the actual game (e.g. rules, objectives).
+- [x] **Game Description & Rules**: Add an information section or guide explaining how to play the game directly on the website. We already have a how it works section but it doesn't explain the actual game (e.g. rules, objectives).
 - [x] **English README**: Translate the `README.md` on GitHub into English.
 
 ## 5. Legal & Compliance

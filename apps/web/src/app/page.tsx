@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, CircleAlert, Dices, DicesIcon, Flag, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
+import { ArrowRight, BookOpen, CircleAlert, Dices, DicesIcon, Flag, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -353,6 +353,9 @@ export default function HomePage() {
         <div className='max-w-xl'>
           <p className='mb-3 text-sm font-black uppercase tracking-[.16em] text-red-600'>{t('howItWorks.eyebrow')}</p>
           <h2 className='font-display text-4xl font-black leading-none sm:text-5xl'>{t('howItWorks.title')}</h2>
+          <a href='/rules' className='link-underline mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-foreground/80 hover:text-foreground'>
+            <BookOpen size={15} /> {t('howItWorks.readFullRules')}
+          </a>
         </div>
         <Reveal className='stagger-fade-in mt-12 grid gap-8 md:grid-cols-3'>
           {steps.map((step, index) => {

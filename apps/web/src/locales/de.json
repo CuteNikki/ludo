@@ -69,7 +69,58 @@
     "fairDice": {
       "title": "Fairer Würfel",
       "text": "Keiner wartet ewig auf die Sechs."
-    }
+    },
+    "readFullRules": "Die vollständigen Regeln lesen"
+  },
+  "rulesPage": {
+    "eyebrow": "Ludo · Spielanleitung",
+    "title": "Regeln",
+    "subtitle": "Der Abschnitt \"So funktioniert's\" erklärt die App. Das hier ist das eigentliche Spiel: \"Mensch ärgere Dich nicht\".",
+    "sections": [
+      {
+        "title": "Ziel",
+        "text": "Bringe als Erster alle vier Figuren aus deinem Hof, einmal um das Spielfeld herum, in dein eigenes Zielhaus."
+      },
+      {
+        "title": "Spielaufbau",
+        "text": "2 bis 4 Spieler bekommen je vier Figuren in ihrer Farbe, die im Hof warten. Das Spiel startet, sobald alle in der Lobby bereit sind."
+      },
+      {
+        "title": "Würfeln und Extrazüge",
+        "text": "Der Server würfelt zu Beginn jedes Zugs automatisch für dich. Eine gewürfelte Sechs gewinnt einen zusätzlichen Wurf direkt nach dem Zug dieser Runde."
+      },
+      {
+        "title": "Aus dem Hof und ziehen",
+        "text": "Eine Figur braucht eine Sechs, um den Hof zu verlassen und aufs Startfeld zu kommen. Danach zieht die gewählte Figur um die gewürfelte Zahl auf der Strecke vorwärts."
+      },
+      {
+        "title": "Schlagen",
+        "text": "Landest du genau auf einem Feld mit einer gegnerischen Figur, wird sie zurück in ihren Hof geschickt - sie muss von vorne beginnen. Dasselbe kann dir überall auf der gemeinsamen Strecke passieren."
+      },
+      {
+        "title": "Gewinnen",
+        "text": "Hat eine Figur die ganze Runde geschafft, zieht sie in dein eigenes Zielhaus ein und ist dort vor Schlagen sicher. Wer als Erster alle vier Figuren im Ziel hat, gewinnt die Runde."
+      }
+    ],
+    "variantsTitle": "So spielt diese App es",
+    "variants": [
+      {
+        "title": "Zugzeit",
+        "text": "Hast du mehr als einen möglichen Zug, entscheidet die vom Host eingestellte Zeit (15-60s), wie lange du eine Figur auswählen kannst, bevor der Zug automatisch weitergeht."
+      },
+      {
+        "title": "Automatische Züge",
+        "text": "Bleibt nach einem Wurf nur ein möglicher Zug übrig, kann er automatisch ausgeführt werden, statt die Zeit abzuwarten - der Host kann das in der Lobby abschalten."
+      },
+      {
+        "title": "Fairer Würfel",
+        "text": "Die Zahlen werden über eine Runde hinweg ausgeglichen, damit niemand ewig auf die benötigte Sechs wartet - die Reihenfolge, in der jede Zahl erscheint, bleibt weiterhin zufällig."
+      },
+      {
+        "title": "Muss bei Sechs einsetzen",
+        "text": "Eine optionale, vom Host aktivierbare Regel: Eine gewürfelte Sechs mit einer noch wartenden Figur zwingt diese aus dem Hof, statt zusätzlich anzubieten, eine bereits im Spiel befindliche Figur zu ziehen."
+      }
+    ]
   },
   "toast": {
     "kickedTitle": "Aus dem Raum entfernt",
@@ -116,6 +167,7 @@
       "UNKNOWN": "Unbekannter Fehler."
     },
     "eyebrow": "Ludo · Raum",
+    "rules": "Regeln",
     "copyLink": "Link",
     "copyCodeAria": "Raum-Code kopieren",
     "copied": "Kopiert",

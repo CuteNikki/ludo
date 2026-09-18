@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import type { ClientEvent, GameState, MoveTimeSeconds, Player, PlayerColor, PlayerLeftReason, RoomErrorCode, RoomSettings, ServerEvent } from '@ludo/shared';
 import {
   ArrowRight,
+  BookOpen,
   Check,
   Clock3,
   CopyCheckIcon,
@@ -244,6 +245,15 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
         <div className='flex items-center gap-2'>
           <LanguageToggle />
           <ThemeToggle />
+          <Button
+            variant='outline'
+            asChild
+            className='hidden h-10 px-2 bg-background-alternative text-foreground hover:bg-background hover:text-foreground sm:inline-flex'
+          >
+            <a href='/rules' target='_blank' rel='noreferrer'>
+              <BookOpen size={17} /> {t('room.rules')}
+            </a>
+          </Button>
           <Button
             variant='outline'
             className='h-10 px-2 bg-background-alternative text-foreground hover:bg-background hover:text-foreground'

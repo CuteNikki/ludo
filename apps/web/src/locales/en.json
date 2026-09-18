@@ -69,7 +69,58 @@
     "fairDice": {
       "title": "Fair dice",
       "text": "No one waits forever for a six."
-    }
+    },
+    "readFullRules": "Read the full rules"
+  },
+  "rulesPage": {
+    "eyebrow": "Ludo · How to play",
+    "title": "Rules",
+    "subtitle": "The \"how it works\" section covers the app. This is the actual game: \"Mensch ärgere Dich nicht\", or Ludo.",
+    "sections": [
+      {
+        "title": "Objective",
+        "text": "Be the first to move all four of your pieces out of your yard, all the way around the board, and into your own home column."
+      },
+      {
+        "title": "Setup",
+        "text": "2 to 4 players each get four pieces in their color, waiting in their yard. The game starts once everyone in the lobby is ready."
+      },
+      {
+        "title": "Rolling and extra turns",
+        "text": "The server rolls for you automatically at the start of every turn. Rolling a six grants an extra roll right after that turn's move."
+      },
+      {
+        "title": "Leaving the yard and moving",
+        "text": "A piece needs a six to leave the yard for its starting square. Once out, move the chosen piece forward by the number rolled along the track."
+      },
+      {
+        "title": "Capturing",
+        "text": "Land exactly on a cell occupied by an opponent's piece to send it back to their yard - it has to start over from there. The same can happen to you, anywhere along the shared track."
+      },
+      {
+        "title": "Winning",
+        "text": "Once a piece completes the full lap, it turns into your own private home column and is safe from capture. The first player to get all four pieces home wins the round."
+      }
+    ],
+    "variantsTitle": "How this app plays it",
+    "variants": [
+      {
+        "title": "Move timer",
+        "text": "When you have more than one legal move, the host-configured timer (15-60s) decides how long you have to pick a piece before the turn passes automatically."
+      },
+      {
+        "title": "Automatic moves",
+        "text": "If a roll leaves you exactly one legal move, it can be played automatically instead of waiting out the timer - the host can turn this off in the lobby."
+      },
+      {
+        "title": "Fair dice",
+        "text": "Numbers are balanced to come up regularly over a game, so no one waits forever for the six they need - the order each number appears in still stays random."
+      },
+      {
+        "title": "Must spawn on six",
+        "text": "An optional rule the host can enable: rolling a six with a piece still waiting forces it out of the yard, instead of also offering to move a piece already on the board."
+      }
+    ]
   },
   "toast": {
     "kickedTitle": "Removed from room",
@@ -116,6 +167,7 @@
       "UNKNOWN": "Unknown error."
     },
     "eyebrow": "Ludo · Room",
+    "rules": "Rules",
     "copyLink": "Link",
     "copyCodeAria": "Copy room code",
     "copied": "Copied",
