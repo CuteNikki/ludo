@@ -1,37 +1,37 @@
 # Ludo
 
-Echtzeit-Multiplayer-Grundgerüst für „Mensch ärgere Dich nicht“ mit Bun, nativen WebSockets und Next.js.
+Real-time multiplayer foundation for "Mensch ärgere Dich nicht" (Ludo) built with Bun, native WebSockets and Next.js.
 
-## Struktur
+## Structure
 
-- `apps/web`: Next.js App Router, Tailwind CSS und Shadcn/UI-Konfiguration
-- `apps/server`: Autoritativer Bun-WebSocket-Server und Raumverwaltung
-- `packages/shared`: Gemeinsames, strikt typisiertes Event-Protokoll und Spielmodell
+- `apps/web`: Next.js App Router, Tailwind CSS and Shadcn/UI configuration
+- `apps/server`: Authoritative Bun WebSocket server and room management
+- `packages/shared`: Shared, strictly typed event protocol and game model
 
-## Start
+## Getting Started
 
 ```bash
 bun install
 bun run dev
 ```
 
-Danach läuft das Frontend auf `http://localhost:3000` und der WebSocket-Server auf `ws://localhost:3001/ws`. Für abweichende Hosts kann im Frontend `NEXT_PUBLIC_WS_URL` gesetzt werden.
+The frontend then runs on `http://localhost:3000` and the WebSocket server on `ws://localhost:3001/ws`. For different hosts, `NEXT_PUBLIC_WS_URL` can be set in the frontend.
 
-## Protokoll
+## Protocol
 
-Clients senden ausschließlich Aktionen wie `room:create`, `room:join`, `player:ready` und `game:move`. Der Server würfelt und ändert den Zustand, erhöht dessen `revision` und verteilt anschließend den vollständigen `GameState` an alle Verbindungen im Raum.
+Clients only ever send actions such as `room:create`, `room:join`, `player:ready` and `game:move`. The server rolls the dice, mutates the state, increments its `revision`, and then broadcasts the full `GameState` to every connection in the room.
 
-Der Server würfelt zu Beginn jedes Zugs automatisch und synchronisiert die Animation sowie das Ergebnis mit allen Clients. Gibt es keinen gültigen Zug, wird dies kurz angezeigt und der nächste Spieler ist automatisch an der Reihe. Gibt es keinen anderen möglichen Zug, wird die Figur nach einer kurzen Anzeige automatisch bewegt. Nur bei mehreren Möglichkeiten bleibt die eingestellte Zeit zur Auswahl einer hervorgehobenen Figur. Der Server prüft alle Bewegungen, führt Schläge aus und wechselt bei Zeitablauf automatisch zum nächsten verbundenen Spieler. Ein Tab kann seinen Sitz nach einem Reload bis zu fünf Minuten lang wieder übernehmen.
+The server automatically rolls the dice at the start of every turn and synchronizes the roll animation and result with all clients. If there is no valid move, this is briefly displayed and the next player automatically takes their turn. If there is no other possible move, the figure is moved automatically after a short display. Only when there are multiple options does the configured time remain to select a highlighted figure. The server validates every move, resolves captures, and automatically advances to the next connected player when time runs out. A tab can reclaim its seat for up to five minutes after a reload.
 
-Die Option „Fairer Würfel“ sorgt dafür, dass alle Zahlen regelmäßig gewürfelt werden und niemand lange auf eine Sechs warten muss. Die Reihenfolge der Würfe bleibt dabei zufällig.
+The "Fair Dice" option ensures that every number is rolled regularly so no one has to wait long for a six. The order of the rolls themselves stays random.
 
-## Raumeinstellungen
+## Room Settings
 
-Der Ersteller eines Raums ist der Host und kann in der Lobby die Zugzeit (15, 30, 45 oder 60 Sekunden), automatische Züge und den fairen Würfel konfigurieren. Die Einstellungen werden an alle Spieler synchronisiert und nach Spielstart gesperrt. Eine Änderung in der Lobby setzt die Bereitschaft aller Spieler zurück.
+The creator of a room is the host and can configure the turn timer (15, 30, 45 or 60 seconds), automatic moves and the fair dice option in the lobby. Settings are synchronized to all players and locked once the game starts. Any change made in the lobby resets every player's ready status.
 
-Jeder Spieler kann in der Lobby seinen Namen ändern und eine noch freie Spielfarbe auswählen. Namen dürfen doppelt vorkommen, belegte Farben sind gesperrt und das gewählte Profil bleibt bei einem Reload erhalten. Ohne Eingabe wird der Name "Gast" verwendet.
+Every player can change their name and pick a still-available player color in the lobby. Names may be duplicated, taken colors are locked, and the chosen profile persists across a reload. If no name is entered, "Guest" is used.
 
-Der Host kann andere Spieler in der Lobby aus dem Raum entfernen. Nach Spielende können Spieler ins Hauptmenü zurückkehren oder für eine weitere Runde stimmen. Die erste Rematch-Stimme startet einen 10-Sekunden-Countdown; Nichtantworter werden danach entfernt und alle Zustimmer kehren mit zurückgesetzten Figuren und unveränderten Raumeinstellungen in die Lobby zurück.
+The host can remove other players from the room while in the lobby. After the game ends, players can return to the main menu or vote for a rematch. The first rematch vote starts a 10-second countdown; players who don't respond are removed afterwards, and everyone who agreed returns to the lobby with reset figures and unchanged room settings.
 
 # Ludo Project To-Do List
 
@@ -67,7 +67,7 @@ Der Host kann andere Spieler in der Lobby aus dem Raum entfernen. Nach Spielende
 
 - [ ] **AI Opponents**: Implement computer-controlled opponents to enable single-player mode.
 - [ ] **Game Description & Rules**: Add an information section or guide explaining how to play the game directly on the website. We already have a how it works section but it doesn't explain the actual game (e.g. rules, objectives).
-- [ ] **English README**: Translate the `README.md` on GitHub into English.
+- [x] **English README**: Translate the `README.md` on GitHub into English.
 
 ## 5. Legal & Compliance
 
