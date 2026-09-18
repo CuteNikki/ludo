@@ -34,7 +34,7 @@
 
   /* Centralized animation registry */
   --animate-movable-piece: piece-ready 1.15s ease-in-out infinite;
-  --animate-piece-capture-token: piece-capture-impact 0.52s ease-out both;
+  --animate-piece-capture-token: piece-capture-impact 0.52s ease-out;
   --animate-dice-rolling: dice-roll 0.65s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   --animate-status-swap: status-swap 0.22s ease-out both;
   --animate-dice-result: dice-result 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both;

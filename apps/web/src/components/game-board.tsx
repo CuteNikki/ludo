@@ -325,6 +325,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
             </div>
           );
         })}
+
         <div className='pointer-events-none absolute inset-0 z-20' aria-hidden='false'>
           {positionedPieces.map(({ piece, owner, coordinate, movable }) => {
             const isInstant = transferringPieceIds.has(piece.id);
@@ -336,10 +337,10 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
             const activeAnimStyle =
               capture || spawn
                 ? ({
-                    '--capture-from-left': getBoardAxisPosition((capture || spawn)!.from[1]),
-                    '--capture-from-top': getBoardAxisPosition((capture || spawn)!.from[0]),
-                    '--capture-to-left': getBoardAxisPosition((capture || spawn)!.to[1]),
-                    '--capture-to-top': getBoardAxisPosition((capture || spawn)!.to[0]),
+                    '--capture-from-left': getCellPosition((capture || spawn)!.from[1]),
+                    '--capture-from-top': getCellPosition((capture || spawn)!.from[0]),
+                    '--capture-to-left': getCellPosition((capture || spawn)!.to[1]),
+                    '--capture-to-top': getCellPosition((capture || spawn)!.to[0]),
                   } as CSSProperties)
                 : undefined;
 
@@ -347,13 +348,19 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
               <div
                 key={piece.id}
                 className={cn(
-                  'pointer-events-none absolute grid w-[6.3%] aspect-square -translate-x-1/2 -translate-y-1/2 place-items-center',
+                  'pointer-events-none absolute flex items-center justify-center',
                   isMoving || capture || spawn ? 'z-50' : 'z-10',
                   !isInstant && !capture && !spawn && 'transition-[left,top] duration-130 ease-[cubic-bezier(0.22,0.8,0.25,1)] will-change-[left,top]',
                   capture && 'animate-piece-capture-flight',
                   spawn && 'animate-piece-spawn-flight',
                 )}
-                style={{ left: getBoardAxisPosition(coordinate[1]), top: getBoardAxisPosition(coordinate[0]), ...activeAnimStyle }}
+                style={{
+                  width: 'calc((100% - 1.25rem) / 11)',
+                  height: 'calc((100% - 1.25rem) / 11)',
+                  left: getCellPosition(coordinate[1]),
+                  top: getCellPosition(coordinate[0]),
+                  ...activeAnimStyle,
+                }}
               >
                 <button
                   type='button'
@@ -368,7 +375,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
                   onBlur={() => setPreview(null)}
                   aria-label={`Figur von ${owner.name}${movable ? ' bewegen' : ''}`}
                   className={cn(
-                    'pointer-events-auto h-full w-full rounded-full border-2 shadow-[inset_0_2px_0_rgba(255,255,255,.35),0_2px_3px_rgba(0,0,0,.4)] transition-[transform,box-shadow] duration-200',
+                    'pointer-events-auto block w-[82%] h-auto aspect-square shrink-0 rounded-full border-2 shadow-[inset_0_2px_0_rgba(255,255,255,.35),0_2px_3px_rgba(0,0,0,.4)] transition-[transform,box-shadow] duration-200',
                     colorStyles[owner.color].token,
                     movable && 'animate-movable-piece cursor-pointer outline-4 outline-amber-300 hover:scale-110',
                     isCaptureTarget && 'scale-90 ring-4 ring-amber-300',
@@ -377,7 +384,6 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
                 >
                   <span className='sr-only'>{owner.name}</span>
                 </button>
-                {/* Notice 'capture' is required here so the '×' only shows up on actual attacks, not spawns! */}
                 {isCaptureTarget && capture && (
                   <span
                     className='pointer-events-none absolute -right-1.5 -top-1.5 z-30 grid h-4 w-4 place-items-center rounded-full border border-background-alternative bg-foreground text-[10px] font-black leading-none text-background shadow-sm'
@@ -438,9 +444,8 @@ function key(coordinate: Coordinate): string {
   return `${coordinate[0]}-${coordinate[1]}`;
 }
 
-function getBoardAxisPosition(index: number): string {
-  const gapOffset = index - ((index + 0.5) * 10) / 11;
-  return `calc(${((index + 0.5) / 11) * 100}% + ${gapOffset * 0.125}rem)`;
+function getCellPosition(index: number): string {
+  return `calc(${index} * ((100% - 1.25rem) / 11) + ${index} * 0.125rem)`;
 }
 
 function getCurrentCoordinates(state: GameState): Record<string, Coordinate> {
