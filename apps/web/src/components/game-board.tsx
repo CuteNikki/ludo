@@ -128,7 +128,9 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
           {positionedPieces.map(({ piece, owner, coordinate, movable }) => {
             const animation = animations[piece.id];
             const isMoving = animation?.kind === 'moving';
-            const flight = animation?.kind === 'spawning' || animation?.kind === 'capturing' ? animation : undefined;
+            const flight =
+              animation?.kind === 'spawning' || animation?.kind === 'capturing' || animation?.kind === 'recoloring' ? animation : undefined;
+            const displayColor = animation?.kind === 'recoloring' ? animation.color : owner.color;
             const isCaptureTarget = previewCoordinate && key(previewCoordinate) === key(coordinate) && previewPiece?.playerId !== piece.playerId;
 
             const activeAnimStyle = flight
@@ -149,7 +151,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
                   isMoving || flight ? 'z-50' : 'z-10',
                   !animation && 'transition-[left,top] duration-130 ease-[cubic-bezier(0.22,0.8,0.25,1)] will-change-[left,top]',
                   flight?.kind === 'capturing' && 'animate-piece-capture-flight',
-                  flight?.kind === 'spawning' && 'animate-piece-spawn-flight',
+                  (flight?.kind === 'spawning' || flight?.kind === 'recoloring') && 'animate-piece-spawn-flight',
                 )}
                 style={{
                   width: 'calc((100% - 1.25rem) / 11)',
@@ -161,6 +163,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
                 onAnimationEnd={(event) => {
                   if (flight?.kind === 'capturing' && event.animationName === 'piece-capture-flight') clearAnimation(piece.id, 'capturing');
                   if (flight?.kind === 'spawning' && event.animationName === 'piece-spawn-flight') clearAnimation(piece.id, 'spawning');
+                  if (flight?.kind === 'recoloring' && event.animationName === 'piece-spawn-flight') clearAnimation(piece.id, 'recoloring');
                 }}
               >
                 <button
@@ -177,7 +180,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
                   aria-label={t(movable ? 'board.pieceAriaMovable' : 'board.pieceAria', { name: owner.name })}
                   className={cn(
                     'pointer-events-auto block w-[82%] h-auto aspect-square shrink-0 rounded-full border-2 shadow-[inset_0_2px_0_rgba(255,255,255,.35),0_2px_3px_rgba(0,0,0,.4)] transition-[transform,box-shadow] duration-200',
-                    colorStyles[owner.color].token,
+                    colorStyles[displayColor].token,
                     movable && 'animate-movable-piece cursor-pointer outline-4 outline-amber-300 hover:scale-110',
                     isCaptureTarget && 'scale-90 ring-4 ring-amber-300',
                     flight?.kind === 'capturing' && 'animate-piece-capture-token',

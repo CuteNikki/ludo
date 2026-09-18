@@ -53,7 +53,7 @@ The host can remove other players from the room while in the lobby. After the ga
 ## 2. Core Game Logic & Rules
 
 - [x] **Optional "Must-Spawn-on-6" Rule**: Add a toggleable rule (disabled by default) that forces players to deploy a figure from home/spawn when rolling a 6 if any figures are still waiting there, preventing them from moving 6 tiles on the board instead.
-- [ ] **Figure Color Transition Bug**: Fix the visual bug when changing a figure's color. Update it so the transition happens smoothly mid-movement or after reaching the destination rather than instantly changing beforehand.
+- [x] **Figure Color Transition Bug**: Fix the visual bug when changing a figure's color. Update it so the transition happens smoothly mid-movement or after reaching the destination rather than instantly changing beforehand.
 
 ## 3. UI / UX, Animations & Mobile Enhancements
 

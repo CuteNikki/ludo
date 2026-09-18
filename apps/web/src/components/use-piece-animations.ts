@@ -1,4 +1,4 @@
-import type { GameState } from '@ludo/shared';
+import type { GameState, PlayerColor } from '@ludo/shared';
 import { useEffect, useRef, useState } from 'react';
 import { type Coordinate, YARDS, getCellPosition, getPieceCoordinate } from './board-geometry';
 
@@ -10,7 +10,8 @@ export type PieceAnimation =
   | { kind: 'moving'; coordinate: Coordinate }
   | { kind: 'spawning'; coordinate: Coordinate; from: Coordinate; to: Coordinate }
   | { kind: 'holding'; coordinate: Coordinate }
-  | { kind: 'capturing'; coordinate: Coordinate; from: Coordinate; to: Coordinate };
+  | { kind: 'capturing'; coordinate: Coordinate; from: Coordinate; to: Coordinate }
+  | { kind: 'recoloring'; coordinate: Coordinate; from: Coordinate; to: Coordinate; color: PlayerColor };
 
 const WALK_STEP_MS = 135;
 const WALK_EASING = 'cubic-bezier(0.22, 0.8, 0.25, 1)';
@@ -25,13 +26,16 @@ const WALK_EASING = 'cubic-bezier(0.22, 0.8, 0.25, 1)';
 export function usePieceAnimations(state: GameState) {
   const [animations, setAnimations] = useState<Record<string, PieceAnimation>>({});
   const previousPositions = useRef(new Map(state.pieces.map((piece) => [piece.id, piece.position])));
+  const previousColors = useRef(new Map(state.players.map((player) => [player.id, player.color])));
   const nodes = useRef(new Map<string, HTMLElement>());
   const walkAnimations = useRef(new Map<string, Animation>());
 
   useEffect(() => {
     let cancelled = false;
     const previous = previousPositions.current;
+    const previousPlayerColors = previousColors.current;
     previousPositions.current = new Map(state.pieces.map((piece) => [piece.id, piece.position]));
+    previousColors.current = new Map(state.players.map((player) => [player.id, player.color]));
 
     // A 'moving' or 'holding' entry only resolves itself once this effect's own async work finishes.
     // If a prior run got superseded before that happened (e.g. two moves arriving in quick succession),
@@ -53,13 +57,24 @@ export function usePieceAnimations(state: GameState) {
       const spawns: Record<string, PieceAnimation> = {};
       const captureHolds: Record<string, PieceAnimation> = {};
       const captureFlights: Record<string, PieceAnimation> = {};
+      const recolors: Record<string, PieceAnimation> = {};
       const walks: Array<{ pieceId: string; waypoints: Coordinate[] }> = [];
 
       for (const player of state.players) {
         const pieces = state.pieces.filter((piece) => piece.playerId === player.id);
+        const previousColor = previousPlayerColors.get(player.id);
         pieces.forEach((piece, yardIndex) => {
           const previousPosition = previous.get(piece.id);
           if (previousPosition === undefined) return;
+
+          // The player picked a different color in the lobby: fly the piece to its new yard slot
+          // still wearing the old color, so the swap reads as an arrival rather than a jump-cut.
+          if (previousPosition === piece.position && previousColor !== undefined && previousColor !== player.color) {
+            const from = getPieceCoordinate(piece, previousColor, yardIndex);
+            const to = getPieceCoordinate(piece, player.color, yardIndex);
+            if (from && to) recolors[piece.id] = { kind: 'recoloring', coordinate: to, from, to, color: previousColor };
+            return;
+          }
 
           if (previousPosition >= 0 && piece.position === -1) {
             const from = getPieceCoordinate({ ...piece, position: previousPosition }, player.color, yardIndex);
@@ -97,8 +112,13 @@ export function usePieceAnimations(state: GameState) {
         if (destination) walkTargets[walk.pieceId] = { kind: 'moving', coordinate: destination };
       }
 
-      if (Object.keys(spawns).length > 0 || Object.keys(captureHolds).length > 0 || Object.keys(walkTargets).length > 0) {
-        setAnimations((current) => ({ ...current, ...spawns, ...captureHolds, ...walkTargets }));
+      if (
+        Object.keys(spawns).length > 0 ||
+        Object.keys(captureHolds).length > 0 ||
+        Object.keys(walkTargets).length > 0 ||
+        Object.keys(recolors).length > 0
+      ) {
+        setAnimations((current) => ({ ...current, ...spawns, ...captureHolds, ...walkTargets, ...recolors }));
       }
 
       await Promise.all(walks.map(({ pieceId, waypoints }) => playWalk(pieceId, waypoints, nodes.current.get(pieceId), walkAnimations.current)));
