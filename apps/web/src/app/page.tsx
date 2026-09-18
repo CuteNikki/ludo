@@ -79,7 +79,7 @@ function createPreviewState(previewPlayers: PreviewPlayer[]): GameState {
   return {
     roomCode: 'DEMO',
     hostPlayerId: 'preview-red',
-    settings: { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true },
+    settings: { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false },
     phase: 'playing',
     turnStage: 'rolling',
     turnDeadline: null,
@@ -322,6 +322,9 @@ export default function HomePage() {
                 <ArrowRight size={19} />
               </Button>
             </div>
+            <a href='/discover' className='mt-4 flex items-center justify-center gap-1.5 text-sm font-bold text-foreground/70 hover:text-foreground'>
+              <Users size={15} /> {t('start.browsePublicRooms')}
+            </a>
           </section>
         </div>
       </section>

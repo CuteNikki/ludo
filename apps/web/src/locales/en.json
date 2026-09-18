@@ -24,7 +24,22 @@
     "or": "or",
     "roomLabel": "Room code",
     "roomPlaceholder": "ABC123",
-    "joinAria": "Join room"
+    "joinAria": "Join room",
+    "browsePublicRooms": "Or browse public rooms"
+  },
+  "discover": {
+    "eyebrow": "Ludo · Discover",
+    "title": "Public rooms",
+    "listTitle": "Open games",
+    "autoRefresh": "Auto-refreshing",
+    "empty": "No public rooms right now. Create one and toggle \"Public room\" in the lobby settings.",
+    "hostedBy": "Hosted by {{name}}",
+    "join": "Join",
+    "phase": {
+      "lobby": "Open",
+      "playing": "In progress",
+      "finished": "Finished"
+    }
   },
   "howItWorks": {
     "eyebrow": "How it works",
@@ -138,7 +153,9 @@
       "autoMoves": "Automatic moves",
       "autoMovesInfo": "If there's no other possible move, the piece is moved automatically.",
       "fairDice": "Fair dice",
-      "fairDiceInfo": "All numbers come up regularly, so no one waits forever for a six."
+      "fairDiceInfo": "All numbers come up regularly, so no one waits forever for a six.",
+      "isPublic": "Public room",
+      "isPublicInfo": "Lists this room on the public discovery page while it's open and still in the lobby."
     },
     "colors": {
       "red": "Red",

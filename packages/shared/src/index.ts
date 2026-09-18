@@ -20,6 +20,15 @@ export interface RoomSettings {
   moveTimeSeconds: MoveTimeSeconds;
   automaticSingleMove: boolean;
   fairDice: boolean;
+  isPublic: boolean;
+}
+
+export interface PublicRoomSummary {
+  roomCode: string;
+  hostName: string;
+  playerCount: number;
+  maxPlayers: number;
+  phase: GameState['phase'];
 }
 
 export interface GameState {
@@ -49,13 +58,15 @@ export type ClientEvent =
   | { type: 'player:update'; payload: { name: string; color: PlayerColor } }
   | { type: 'player:ready'; payload: { ready: boolean } }
   | { type: 'game:rematch'; payload: Record<string, never> }
-  | { type: 'game:move'; payload: { pieceId: string } };
+  | { type: 'game:move'; payload: { pieceId: string } }
+  | { type: 'room:discover'; payload: Record<string, never> };
 
 export type ServerEvent =
   | { type: 'room:joined'; payload: { playerId: string; state: GameState } }
   | { type: 'game:state'; payload: GameState }
   | { type: 'player:left'; payload: { playerId: string } }
   | { type: 'room:rematch'; payload: { roomCode: string | null; movedPlayerIds: string[] } }
+  | { type: 'room:list'; payload: { rooms: PublicRoomSummary[] } }
   | { type: 'room:error'; payload: { code: RoomErrorCode; message: string } };
 
 export type RoomErrorCode =

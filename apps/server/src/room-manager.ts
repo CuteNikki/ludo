@@ -1,4 +1,4 @@
-import type { GameState, MoveTimeSeconds, Player, PlayerColor, RoomErrorCode, RoomSettings } from '@ludo/shared';
+import type { GameState, MoveTimeSeconds, Player, PlayerColor, PublicRoomSummary, RoomErrorCode, RoomSettings } from '@ludo/shared';
 import { FairDice } from './fair-dice';
 
 export class RoomError extends Error {
@@ -13,7 +13,7 @@ export class RoomError extends Error {
 
 const COLORS: PlayerColor[] = ['red', 'blue', 'green', 'yellow'];
 const MOVE_TIMES: MoveTimeSeconds[] = [15, 30, 45, 60];
-const DEFAULT_SETTINGS: RoomSettings = { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true };
+const DEFAULT_SETTINGS: RoomSettings = { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false };
 
 interface Room {
   state: GameState;
@@ -50,6 +50,22 @@ export class RoomManager {
 
   getRoomState(roomCode: string): GameState | null {
     return this.rooms.get(roomCode)?.state ?? null;
+  }
+
+  listPublicRooms(): PublicRoomSummary[] {
+    const summaries: PublicRoomSummary[] = [];
+    for (const room of this.rooms.values()) {
+      if (!room.state.settings.isPublic) continue;
+      const host = room.state.players.find((player) => player.id === room.state.hostPlayerId);
+      summaries.push({
+        roomCode: room.state.roomCode,
+        hostName: host?.name ?? 'Guest',
+        playerCount: room.state.players.length,
+        maxPlayers: COLORS.length,
+        phase: room.state.phase,
+      });
+    }
+    return summaries;
   }
 
   createRoom(playerName: string): { playerId: string; state: GameState } {
@@ -121,7 +137,7 @@ export class RoomManager {
     if (state.phase !== 'lobby') throw new RoomError('SETTINGS_ONLY_LOBBY', 'Settings can only be changed in the lobby.');
     if (state.hostPlayerId !== playerId) throw new RoomError('HOST_ONLY_SETTINGS', 'Only the host can change the room settings.');
     if (!MOVE_TIMES.includes(settings.moveTimeSeconds)) throw new RoomError('INVALID_MOVE_TIME', 'Invalid move time.');
-    if (typeof settings.automaticSingleMove !== 'boolean' || typeof settings.fairDice !== 'boolean')
+    if (typeof settings.automaticSingleMove !== 'boolean' || typeof settings.fairDice !== 'boolean' || typeof settings.isPublic !== 'boolean')
       throw new RoomError('INVALID_SETTINGS', 'Invalid room settings.');
 
     state.settings = { ...settings };

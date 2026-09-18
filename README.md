@@ -27,11 +27,11 @@ The "Fair Dice" option ensures that every number is rolled regularly so no one h
 
 ## Room Settings
 
-The creator of a room is the host and can configure the turn timer (15, 30, 45 or 60 seconds), automatic moves and the fair dice option in the lobby. Settings are synchronized to all players and locked once the game starts. Any change made in the lobby resets every player's ready status.
+The creator of a room is the host and can configure the turn timer (15, 30, 45 or 60 seconds), automatic moves, the fair dice option and the room's public/private visibility in the lobby. Settings are synchronized to all players and locked once the game starts. Any change made in the lobby resets every player's ready status. Public rooms show up, while still in the lobby, on the `/discover` page for anyone to browse and join.
 
 Every player can change their name and pick a still-available player color in the lobby. Names may be duplicated, taken colors are locked, and the chosen profile persists across a reload. If no name is entered, "Guest" is used.
 
-The host can remove other players from the room while in the lobby. After the game ends, players can return to the main menu or vote for a rematch. The first rematch vote starts a 10-second countdown; players who don't respond are removed afterwards, and everyone who agreed returns to the lobby with reset figures and unchanged room settings.
+The host can remove other players from the room while in the lobby. After the game ends, players can return to the main menu or vote for a rematch. The first rematch vote starts a 30-second countdown; players who don't confirm in time are dropped, and everyone who agreed is moved into a brand-new room, reset to the lobby with the same settings.
 
 # Ludo Project To-Do List
 
@@ -42,7 +42,7 @@ The host can remove other players from the room while in the lobby. After the ga
   - Provide clear voting options for players to either play again (rematch) or return to the home screen.
   - Handle room cleanup on timeout: kick out inactive players, and automatically transition rematching players into a brand-new room.
 - [x] **Clear Rematch Voting UX**: Redesign the rematch prompt and UI on the end screen so it is explicitly and unmistakably clear to all participants that a rematch vote is currently taking place.
-- [ ] **Public Rooms & Discovery Page**: Add a visibility toggle to rooms (public vs. private) and build a discovery page that lists active public rooms so players can easily browse and join open games.
+- [x] **Public Rooms & Discovery Page**: Add a visibility toggle to rooms (public vs. private) and build a discovery page that lists active public rooms so players can easily browse and join open games.
 - [ ] **Lobby Leave Notifications**: Implement real-time notifications alerting remaining players in the lobby whenever someone leaves the room.
 - [ ] **Accurate Leave/Kick Notifications**: Fix inaccurate notification messages (e.g., displaying "Kicked by the Host" when it wasn't the case). Update the notification system to properly reflect the actual reason for leaving or being removed.
 - [ ] **Static vs. Dynamic Rendering Optimization**: Investigate and refactor pages so they remain static where possible, preventing the entire site from switching to dynamic rendering solely due to language switching.

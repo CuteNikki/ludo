@@ -50,7 +50,7 @@ describe('RoomManager game turns', () => {
     const guest = manager.joinRoom(host.state.roomCode, 'Linus');
     manager.setReady(host.state.roomCode, guest.playerId, true);
 
-    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: false };
+    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: false, isPublic: true };
     expect(() => manager.setSettings(host.state.roomCode, guest.playerId, settings)).toThrow('Only the host');
     const updated = manager.setSettings(host.state.roomCode, host.playerId, settings);
     expect(updated.settings).toEqual(settings);
@@ -69,7 +69,7 @@ describe('RoomManager game turns', () => {
     );
     const host = manager.createRoom('Ada');
     const guest = manager.joinRoom(host.state.roomCode, 'Linus');
-    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: true };
+    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: true, isPublic: false };
     manager.setSettings(host.state.roomCode, host.playerId, settings);
     manager.setReady(host.state.roomCode, host.playerId, true);
     manager.setReady(host.state.roomCode, guest.playerId, true);
@@ -79,6 +79,24 @@ describe('RoomManager game turns', () => {
     expect(rolled.turnDeadline).toBeGreaterThanOrEqual(beforeRoll + 44_900);
     expect(rolled.turnDeadline).toBeLessThanOrEqual(beforeRoll + 45_100);
     expect(() => manager.setSettings(host.state.roomCode, host.playerId, settings)).toThrow('only be changed in the lobby');
+  });
+
+  test('only lists rooms that opted into public visibility', () => {
+    const manager = new RoomManager();
+    const publicRoom = manager.createRoom('Ada');
+    manager.joinRoom(publicRoom.state.roomCode, 'Linus');
+    manager.setSettings(publicRoom.state.roomCode, publicRoom.playerId, {
+      moveTimeSeconds: 30,
+      automaticSingleMove: true,
+      fairDice: true,
+      isPublic: true,
+    });
+    manager.createRoom('Mika'); // stays private by default
+
+    const listed = manager.listPublicRooms();
+    expect(listed).toEqual([
+      { roomCode: publicRoom.state.roomCode, hostName: 'Ada', playerCount: 2, maxPlayers: 4, phase: 'lobby' },
+    ]);
   });
 
   test('only lets the host remove another player in the lobby', () => {

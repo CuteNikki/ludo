@@ -13,6 +13,7 @@ import {
   CopyIcon,
   Dices,
   DicesIcon,
+  Globe,
   Home,
   Info,
   LogOut,
@@ -544,6 +545,14 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
           checked={settings.fairDice}
           disabled={!isHost}
           onChange={(checked) => onChange({ fairDice: checked })}
+        />
+        <SettingToggle
+          icon={<Globe size={17} />}
+          label={t('room.settings.isPublic')}
+          description={t('room.settings.isPublicInfo')}
+          checked={settings.isPublic}
+          disabled={!isHost}
+          onChange={(checked) => onChange({ isPublic: checked })}
         />
       </fieldset>
     </section>

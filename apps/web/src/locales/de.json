@@ -24,7 +24,22 @@
     "or": "oder",
     "roomLabel": "Raum-Code",
     "roomPlaceholder": "ABC123",
-    "joinAria": "Raum beitreten"
+    "joinAria": "Raum beitreten",
+    "browsePublicRooms": "Oder öffentliche Räume durchsuchen"
+  },
+  "discover": {
+    "eyebrow": "Ludo · Entdecken",
+    "title": "Öffentliche Räume",
+    "listTitle": "Offene Spiele",
+    "autoRefresh": "Automatische Aktualisierung",
+    "empty": "Gerade keine öffentlichen Räume. Erstelle einen und aktiviere \"Öffentlicher Raum\" in den Lobby-Einstellungen.",
+    "hostedBy": "Gehostet von {{name}}",
+    "join": "Beitreten",
+    "phase": {
+      "lobby": "Offen",
+      "playing": "Läuft",
+      "finished": "Beendet"
+    }
   },
   "howItWorks": {
     "eyebrow": "So funktioniert's",
@@ -138,7 +153,9 @@
       "autoMoves": "Automatische Züge",
       "autoMovesInfo": "Wenn es keinen anderen möglichen Zug gibt, wird die Figur automatisch bewegt.",
       "fairDice": "Fairer Würfel",
-      "fairDiceInfo": "Alle Zahlen werden regelmäßig gewürfelt, damit niemand lange auf eine Sechs warten muss."
+      "fairDiceInfo": "Alle Zahlen werden regelmäßig gewürfelt, damit niemand lange auf eine Sechs warten muss.",
+      "isPublic": "Öffentlicher Raum",
+      "isPublicInfo": "Listet diesen Raum auf der öffentlichen Entdecken-Seite, solange er offen und noch in der Lobby ist."
     },
     "colors": {
       "red": "Rot",

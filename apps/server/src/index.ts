@@ -66,6 +66,11 @@ const server = Bun.serve<SocketData>({
           return;
         }
 
+        if (event.type === 'room:discover') {
+          send(socket, { type: 'room:list', payload: { rooms: rooms.listPublicRooms() } });
+          return;
+        }
+
         const { roomCode, playerId } = socket.data;
         if (!roomCode || !playerId) throw new Error('You have not joined a room.');
 
