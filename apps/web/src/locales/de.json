@@ -21,6 +21,7 @@
     "nameLabel": "Dein Name",
     "namePlaceholder": "Spielername",
     "createRoom": "Raum erstellen",
+    "playComputer": "Gegen den Computer spielen",
     "or": "oder",
     "roomLabel": "Raum-Code",
     "roomPlaceholder": "ABC123",
@@ -121,6 +122,10 @@
       {
         "title": "Muss bei Sechs einsetzen",
         "text": "Eine optionale, vom Host aktivierbare Regel: Eine gewürfelte Sechs mit einer noch wartenden Figur zwingt diese aus dem Hof, statt zusätzlich anzubieten, eine bereits im Spiel befindliche Figur zu ziehen."
+      },
+      {
+        "title": "Computergegner",
+        "text": "Der Host kann freie Plätze mit Bots füllen. Sie würfeln und ziehen selbstständig, und ein Spiel gegen Bots kann mit nur einem menschlichen Spieler starten."
       }
     ]
   },
@@ -166,6 +171,8 @@
       "PLAYERS_ONLY_LOBBY": "Spieler können nur in der Lobby entfernt werden.",
       "HOST_ONLY_KICK": "Nur der Host kann Spieler entfernen.",
       "HOST_CANNOT_KICK_SELF": "Der Host kann sich nicht selbst entfernen.",
+      "HOST_ONLY_BOTS": "Nur der Host kann Bots hinzufügen.",
+      "BOTS_ONLY_LOBBY": "Bots können nur in der Lobby hinzugefügt werden.",
       "REMATCH_NOT_AVAILABLE": "Die Abstimmung ist noch nicht verfügbar.",
       "INVALID_EVENT": "Ungültige Nachricht.",
       "UNKNOWN": "Unbekannter Fehler."
@@ -180,6 +187,9 @@
     "yourTurn": "Am Zug",
     "you": " (du)",
     "removePlayerAria": "{{name}} entfernen",
+    "addBot": "Bot hinzufügen",
+    "bot": "Bot",
+    "botThinking": "{{name}} wählt eine Figur",
     "won": "Gewonnen",
     "oneMoreRound": "Noch eine Runde?",
     "rematchVoteInProgress": "Revanche-Abstimmung läuft",

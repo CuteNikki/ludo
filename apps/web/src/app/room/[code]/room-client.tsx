@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import type { ClientEvent, GameState, MoveTimeSeconds, Player, PlayerColor, PlayerLeftReason, RoomErrorCode, RoomSettings, ServerEvent } from '@ludo/shared';
 import {
   ArrowRight,
+  Bot,
   BookOpen,
   Check,
   Clock3,
@@ -116,6 +117,9 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
         const joinedPlayer = event.payload.state.players.find((player) => player.id === event.payload.playerId);
         if (joinedPlayer) sessionStorage.setItem('ludo-player-name', joinedPlayer.name);
         if (requestedCode === 'NEW') {
+          // "Play against the computer" on the home page creates the room with this many bots already seated.
+          const botCount = Math.min(3, Math.max(0, Number(new URLSearchParams(window.location.search).get('bots')) || 0));
+          for (let index = 0; index < botCount; index += 1) send(socket, { type: 'room:addBot', payload: {} });
           window.history.replaceState(null, '', `/room/${event.payload.state.roomCode}`);
         }
       } else if (event.type === 'game:state') {
@@ -190,6 +194,8 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   const secondsLeft = state.turnDeadline === null ? 0 : Math.min(settings.moveTimeSeconds, Math.max(0, Math.ceil((state.turnDeadline - now) / 1000)));
   const rematchSecondsLeft = state.rematchDeadline === null ? 30 : Math.max(0, Math.ceil((state.rematchDeadline - now) / 1000));
   const wantsRematch = state.rematchPlayerIds.includes(playerId);
+  // Bots decide their own move, so their turns have no countdown to show.
+  const showCountdown = state.turnStage === 'move' && state.turnDeadline !== null;
   const shareUrl = typeof window === 'undefined' ? '' : `${window.location.origin}/room/${roomCode}`;
 
   async function copyRoomLink() {
@@ -305,7 +311,8 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                         <p className='mt-1.5 text-xs font-bold text-foreground/70'>
                           {t('room.rematchStatus', {
                             accepted: state.rematchPlayerIds.length,
-                            total: state.players.length,
+                            // Bots don't vote, they follow whoever does.
+                            total: state.players.filter((player) => !player.isBot).length,
                             seconds: rematchSecondsLeft,
                           })}
                         </p>
@@ -336,15 +343,15 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                       <p className='max-w-48 truncate text-xl font-black'>{currentPlayer?.name}</p>
                     </div>
                     <div className='flex h-8 w-16 shrink-0 items-center justify-end gap-2 font-mono text-2xl font-black'>
-                      {state.turnStage === 'move' && (
+                      {showCountdown && (
                         <>
                           <Clock3 size={20} /> {secondsLeft}
                         </>
                       )}
                     </div>
                   </div>
-                  <div className={cn('mt-3 h-2 shrink-0 overflow-hidden', state.turnStage === 'move' && 'bg-border/20')}>
-                    {state.turnStage === 'move' && (
+                  <div className={cn('mt-3 h-2 shrink-0 overflow-hidden', showCountdown && 'bg-border/20')}>
+                    {showCountdown && (
                       <div
                         className='h-full bg-red-500 transition-[width] duration-200'
                         style={{ width: `${(secondsLeft / state.settings.moveTimeSeconds) * 100}%` }}
@@ -361,7 +368,13 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                       <div>
                         <p className='animate-dice-result font-display text-6xl font-black leading-none'>{state.diceResult}</p>
                         {state.turnStage === 'move' && (
-                          <p className='mt-2 text-sm font-bold'>{isMyTurn ? t('room.chooseAPieceSelf') : t('room.chooseAPieceOther')}</p>
+                          <p className='mt-2 text-sm font-bold'>
+                            {currentPlayer?.isBot
+                              ? t('room.botThinking', { name: currentPlayer.name })
+                              : isMyTurn
+                                ? t('room.chooseAPieceSelf')
+                                : t('room.chooseAPieceOther')}
+                          </p>
                         )}
                         {state.turnStage === 'auto-move' && <p className='mt-2 text-sm font-bold'>{t('room.autoMoving')}</p>}
                         {state.turnStage === 'no-move' && <p className='mt-2 text-sm font-bold text-red-700 dark:text-red-400'>{t('room.noValidMove')}</p>}
@@ -398,9 +411,12 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
                 )}
               >
                 <span className={cn('h-4 w-4 rounded-full border-2 border-background-alternative shadow-sm', colorClasses[player.color])} />
-                <span className='min-w-0 flex-1 truncate font-bold'>
-                  {player.name}
-                  {player.id === playerId ? t('room.you') : ''}
+                <span className='flex min-w-0 flex-1 items-center gap-1.5 font-bold'>
+                  <span className='truncate'>
+                    {player.name}
+                    {player.id === playerId ? t('room.you') : ''}
+                  </span>
+                  {player.isBot && <Bot size={15} className='shrink-0 text-foreground/60' aria-label={t('room.bot')} />}
                 </span>
                 {player.id === state.hostPlayerId && state.phase === 'lobby' && (
                   <span className='text-[10px] font-bold uppercase text-foreground/60'>{t('room.host')}</span>
@@ -426,6 +442,11 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
               </div>
             ))}
           </div>
+          {state.phase === 'lobby' && isHost && state.players.length < 4 && (
+            <Button variant='outline' className='mt-3 w-full' onClick={() => emit({ type: 'room:addBot', payload: {} })}>
+              <Bot size={17} /> {t('room.addBot')}
+            </Button>
+          )}
           {state.phase === 'lobby' && (
             <Button
               className='mt-5 w-full'

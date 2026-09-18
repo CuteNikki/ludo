@@ -1,4 +1,5 @@
 import type { GameState, MoveTimeSeconds, Player, PlayerColor, PlayerLeftReason, PublicRoomSummary, RoomErrorCode, RoomSettings } from '@ludo/shared';
+import { chooseBotMove, toBoardPosition } from './bot-strategy';
 import { FairDice } from './fair-dice';
 
 export class RoomError extends Error {
@@ -13,6 +14,7 @@ export class RoomError extends Error {
 
 const COLORS: PlayerColor[] = ['red', 'blue', 'green', 'yellow'];
 const MOVE_TIMES: MoveTimeSeconds[] = [15, 30, 45, 60];
+const BOT_NAMES = ['Robo', 'Beep', 'Chip', 'Pixel'];
 const DEFAULT_SETTINGS: RoomSettings = { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false, mustSpawnOnSix: false };
 
 interface Room {
@@ -55,6 +57,7 @@ export class RoomManager {
     private readonly rematchDurationMs = 30_000,
     private readonly onRematchResolved: RematchListener = () => undefined,
     private readonly onPlayerLeft: PlayerLeftListener = () => undefined,
+    private readonly botMoveDelayMs = 1_100,
   ) {}
 
   getRoomState(roomCode: string): GameState | null {
@@ -156,7 +159,7 @@ export class RoomManager {
       throw new RoomError('INVALID_SETTINGS', 'Invalid room settings.');
 
     state.settings = { ...settings };
-    for (const player of state.players) player.ready = false;
+    for (const player of state.players) player.ready = player.isBot;
     state.revision += 1;
     return state;
   }
@@ -174,6 +177,22 @@ export class RoomManager {
     player.name = this.getPlayerName(name);
     player.ready = false;
     state.revision += 1;
+    return state;
+  }
+
+  /**
+   * Adds a computer opponent to the lobby. Like any other lobby change it resets the humans' ready
+   * status (bots are always ready), so nobody is dropped into a game they didn't expect.
+   */
+  addBot(roomCode: string, hostPlayerId: string): GameState {
+    const state = this.getState(roomCode);
+    if (state.phase !== 'lobby') throw new RoomError('BOTS_ONLY_LOBBY', 'Bots can only be added in the lobby.');
+    if (state.hostPlayerId !== hostPlayerId) throw new RoomError('HOST_ONLY_BOTS', 'Only the host can add bots.');
+    if (state.players.length >= COLORS.length) throw new RoomError('ROOM_FULL', 'The room is full.');
+
+    const name = BOT_NAMES.find((candidate) => !state.players.some((player) => player.name === candidate)) ?? 'Bot';
+    this.addPlayer(state, name, true);
+    for (const player of state.players) player.ready = player.isBot;
     return state;
   }
 
@@ -204,7 +223,8 @@ export class RoomManager {
       state.rematchDeadline = Date.now() + this.rematchDurationMs;
       this.scheduleRematchResolution(state);
     }
-    if (state.rematchPlayerIds.length === state.players.length) {
+    // Bots never vote - they simply follow whichever humans agree to play again.
+    if (state.rematchPlayerIds.length === state.players.filter((player) => !player.isBot).length) {
       this.resolveRematch(state);
       return null;
     }
@@ -227,7 +247,13 @@ export class RoomManager {
       this.scheduleAutoMove(state, playerId, state.movablePieceIds[0]!);
     } else if (state.movablePieceIds.length > 0) {
       state.turnStage = 'move';
-      this.scheduleMoveDeadline(state);
+      if (state.players.find((player) => player.id === playerId)?.isBot) {
+        // A bot decides on its own, so there's no move timer to run down.
+        state.turnDeadline = null;
+        this.scheduleBotMove(state, playerId);
+      } else {
+        this.scheduleMoveDeadline(state);
+      }
     } else {
       state.turnStage = 'no-move';
       state.turnDeadline = null;
@@ -254,11 +280,11 @@ export class RoomManager {
 
     piece.position = piece.position === -1 ? 0 : piece.position + state.diceResult;
     if (piece.position < 40) {
-      const target = this.toBoardPosition(player.color, piece.position);
+      const target = toBoardPosition(player.color, piece.position);
       for (const opponentPiece of state.pieces) {
         if (opponentPiece.playerId === playerId || opponentPiece.position < 0 || opponentPiece.position >= 40) continue;
         const opponent = state.players.find((candidate) => candidate.id === opponentPiece.playerId);
-        if (opponent && this.toBoardPosition(opponent.color, opponentPiece.position) === target) opponentPiece.position = -1;
+        if (opponent && toBoardPosition(opponent.color, opponentPiece.position) === target) opponentPiece.position = -1;
       }
     }
 
@@ -312,9 +338,13 @@ export class RoomManager {
     room.state.pieces = room.state.pieces.filter((piece) => piece.playerId !== playerId);
     room.state.rematchPlayerIds = room.state.rematchPlayerIds.filter((candidate) => candidate !== playerId);
     this.fairDice.removePlayer(playerId);
-    this.onPlayerLeft(roomCode, { playerId, playerName: player.name, reason });
-    if (room.state.players.length === 0) {
+    if (!player.isBot) this.onPlayerLeft(roomCode, { playerId, playerName: player.name, reason });
+    // A room with only bots left has nobody to play for, so it winds down like an empty one.
+    if (room.state.players.every((candidate) => candidate.isBot)) {
       this.clearTurnTimer(roomCode);
+      for (const bot of room.state.players) this.fairDice.removePlayer(bot.id);
+      room.state.players = [];
+      room.state.pieces = [];
       room.state.hostPlayerId = null;
       const cleanupTimer = setTimeout(
         () => {
@@ -330,12 +360,12 @@ export class RoomManager {
       room.state.currentPlayerId = room.state.players[0]?.id ?? null;
       this.beginTurn(room.state);
     }
-    if (room.state.hostPlayerId === playerId) room.state.hostPlayerId = room.state.players[0]?.id ?? null;
+    if (room.state.hostPlayerId === playerId) room.state.hostPlayerId = room.state.players.find((candidate) => !candidate.isBot)?.id ?? null;
     room.state.revision += 1;
     return room.state;
   }
 
-  private addPlayer(state: GameState, rawName: string): { playerId: string; state: GameState } {
+  private addPlayer(state: GameState, rawName: string, isBot = false): { playerId: string; state: GameState } {
     const playerId = crypto.randomUUID();
     const color = COLORS.find((candidate) => !state.players.some((player) => player.color === candidate)) ?? 'red';
     const player: Player = {
@@ -343,7 +373,8 @@ export class RoomManager {
       name: this.getPlayerName(rawName),
       color,
       connected: true,
-      ready: false,
+      ready: isBot,
+      isBot,
     };
     state.players.push(player);
     if (state.hostPlayerId === null) state.hostPlayerId = playerId;
@@ -438,6 +469,18 @@ export class RoomManager {
     }, this.autoMoveDelayMs);
   }
 
+  private scheduleBotMove(state: GameState, playerId: string) {
+    const room = this.rooms.get(state.roomCode);
+    if (!room) return;
+    room.turnTimer = setTimeout(() => {
+      if (state.phase !== 'playing' || state.turnStage !== 'move' || state.currentPlayerId !== playerId) return;
+      const pieceId = chooseBotMove(state, playerId);
+      if (!pieceId) return;
+      this.performMove(state, playerId, pieceId);
+      this.onStateChange(state.roomCode, state);
+    }, this.botMoveDelayMs);
+  }
+
   private scheduleNoMoveTransition(state: GameState) {
     const room = this.rooms.get(state.roomCode);
     if (!room) return;
@@ -468,8 +511,10 @@ export class RoomManager {
     const oldRoomCode = state.roomCode;
     this.clearTurnTimer(oldRoomCode);
 
-    const accepted = state.players.filter((player) => state.rematchPlayerIds.includes(player.id));
-    const declined = state.players.filter((player) => !state.rematchPlayerIds.includes(player.id));
+    // Bots follow the humans: they move to the new room only if at least one human agreed to play again.
+    const anyHumanAccepted = state.players.some((player) => !player.isBot && state.rematchPlayerIds.includes(player.id));
+    const accepted = state.players.filter((player) => (player.isBot ? anyHumanAccepted : state.rematchPlayerIds.includes(player.id)));
+    const declined = state.players.filter((player) => !accepted.includes(player));
     for (const player of declined) this.fairDice.removePlayer(player.id);
 
     this.rooms.delete(oldRoomCode);
@@ -491,10 +536,10 @@ export class RoomManager {
     let newRoomCode = this.generateRoomCode();
     while (this.rooms.has(newRoomCode)) newRoomCode = this.generateRoomCode();
 
-    for (const player of accepted) player.ready = false;
+    for (const player of accepted) player.ready = player.isBot;
     const newState: GameState = {
       roomCode: newRoomCode,
-      hostPlayerId: accepted.some((player) => player.id === state.hostPlayerId) ? state.hostPlayerId : (accepted[0]?.id ?? null),
+      hostPlayerId: accepted.some((player) => player.id === state.hostPlayerId) ? state.hostPlayerId : (accepted.find((player) => !player.isBot)?.id ?? null),
       settings: { ...state.settings },
       phase: 'lobby',
       turnStage: 'rolling',
@@ -519,11 +564,6 @@ export class RoomManager {
   private clearTurnTimer(roomCode: string) {
     const timer = this.rooms.get(roomCode)?.turnTimer;
     if (timer) clearTimeout(timer);
-  }
-
-  private toBoardPosition(color: PlayerColor, relativePosition: number): number {
-    const offsets: Record<PlayerColor, number> = { red: 0, blue: 10, green: 20, yellow: 30 };
-    return (offsets[color] + relativePosition) % 40;
   }
 
   private generateRoomCode(): string {

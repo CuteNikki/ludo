@@ -85,6 +85,8 @@ const server = Bun.serve<SocketData>({
           broadcast(roomCode, { type: 'game:state', payload: rooms.setSettings(roomCode, playerId, event.payload) });
         } else if (event.type === 'room:kick') {
           broadcast(roomCode, { type: 'game:state', payload: rooms.kickPlayer(roomCode, playerId, event.payload.playerId) });
+        } else if (event.type === 'room:addBot') {
+          broadcast(roomCode, { type: 'game:state', payload: rooms.addBot(roomCode, playerId) });
         } else if (event.type === 'room:leave') {
           const state = rooms.leaveRoom(roomCode, playerId);
           if (state) broadcast(roomCode, { type: 'game:state', payload: state });

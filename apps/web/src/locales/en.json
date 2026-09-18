@@ -21,6 +21,7 @@
     "nameLabel": "Your name",
     "namePlaceholder": "Player name",
     "createRoom": "Create room",
+    "playComputer": "Play against the computer",
     "or": "or",
     "roomLabel": "Room code",
     "roomPlaceholder": "ABC123",
@@ -121,6 +122,10 @@
       {
         "title": "Must spawn on six",
         "text": "An optional rule the host can enable: rolling a six with a piece still waiting forces it out of the yard, instead of also offering to move a piece already on the board."
+      },
+      {
+        "title": "Computer opponents",
+        "text": "The host can fill free seats with bots. They roll and move on their own, and a game against bots can start with just one human player."
       }
     ]
   },
@@ -166,6 +171,8 @@
       "PLAYERS_ONLY_LOBBY": "Players can only be removed in the lobby.",
       "HOST_ONLY_KICK": "Only the host can remove players.",
       "HOST_CANNOT_KICK_SELF": "The host can't remove themselves.",
+      "HOST_ONLY_BOTS": "Only the host can add bots.",
+      "BOTS_ONLY_LOBBY": "Bots can only be added in the lobby.",
       "REMATCH_NOT_AVAILABLE": "Voting isn't available yet.",
       "INVALID_EVENT": "Invalid message.",
       "UNKNOWN": "Unknown error."
@@ -180,6 +187,9 @@
     "yourTurn": "Current turn",
     "you": " (you)",
     "removePlayerAria": "Remove {{name}}",
+    "addBot": "Add bot",
+    "bot": "Bot",
+    "botThinking": "{{name}} is choosing a piece",
     "won": "Won",
     "oneMoreRound": "One more round?",
     "rematchVoteInProgress": "Rematch vote in progress",

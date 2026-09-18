@@ -25,6 +25,12 @@ The server automatically rolls the dice at the start of every turn and synchroni
 
 The "Fair Dice" option ensures that every number is rolled regularly so no one has to wait long for a six. The order of the rolls themselves stays random.
 
+## Bots
+
+The host can fill free lobby seats with computer opponents (`room:addBot`) and remove them again like any other player. Bots are always connected and ready, so a game with a single human player starts as soon as that player is ready. Adding a bot resets the humans' ready status like any other lobby change.
+
+Bots run entirely on the server. They roll like everyone else (including the fair dice option) and pick their piece after a short delay, with no move timer. The choice is a simple heuristic in `apps/server/src/bot-strategy.ts`: capture an opponent, enter the home stretch, leave the yard, step out of danger, and avoid landing within reach of an opponent, with a little randomness. Bots don't vote in the rematch; they follow the humans who do. A room whose humans have all left is torn down like an empty one.
+
 ## Room Settings
 
 The creator of a room is the host and can configure the turn timer (15, 30, 45 or 60 seconds), automatic moves, the fair dice option and the room's public/private visibility in the lobby. Settings are synchronized to all players and locked once the game starts. Any change made in the lobby resets every player's ready status. Public rooms show up, while still in the lobby, on the `/discover` page for anyone to browse and join, along with a per-setting overview (on/off and move time) of how the room is configured.
@@ -72,7 +78,7 @@ The host can remove other players from the room while in the lobby. After the ga
 
 ## 4. Features & Content
 
-- [ ] **AI Opponents**: Implement computer-controlled opponents to enable single-player mode.
+- [x] **AI Opponents**: Implement computer-controlled opponents to enable single-player mode. The home page has a "Play against the computer" shortcut, and the host can add or remove bots in any lobby.
 - [x] **Game Description & Rules**: Add an information section or guide explaining how to play the game directly on the website. We already have a how it works section but it doesn't explain the actual game (e.g. rules, objectives).
 - [x] **English README**: Translate the `README.md` on GitHub into English.
 

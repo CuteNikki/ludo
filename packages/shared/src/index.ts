@@ -6,6 +6,8 @@ export interface Player {
   color: PlayerColor;
   connected: boolean;
   ready: boolean;
+  /** Computer-controlled: always connected and ready, picks its own moves and votes for rematches. */
+  isBot: boolean;
 }
 
 export interface Piece {
@@ -57,6 +59,7 @@ export type ClientEvent =
   | { type: 'room:settings'; payload: RoomSettings }
   | { type: 'room:leave'; payload: Record<string, never> }
   | { type: 'room:kick'; payload: { playerId: string } }
+  | { type: 'room:addBot'; payload: Record<string, never> }
   | { type: 'player:update'; payload: { name: string; color: PlayerColor } }
   | { type: 'player:ready'; payload: { ready: boolean } }
   | { type: 'game:rematch'; payload: Record<string, never> }
@@ -95,6 +98,8 @@ export type RoomErrorCode =
   | 'PLAYERS_ONLY_LOBBY'
   | 'HOST_ONLY_KICK'
   | 'HOST_CANNOT_KICK_SELF'
+  | 'HOST_ONLY_BOTS'
+  | 'BOTS_ONLY_LOBBY'
   | 'REMATCH_NOT_AVAILABLE'
   | 'INVALID_EVENT'
   | 'UNKNOWN';

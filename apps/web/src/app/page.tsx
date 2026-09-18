@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, BookOpen, CircleAlert, Dices, DicesIcon, Flag, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
+import { ArrowRight, BookOpen, Bot, CircleAlert, Dices, DicesIcon, Flag, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -93,7 +93,7 @@ function createPreviewState(previewPlayers: PreviewPlayer[]): GameState {
     phase: 'playing',
     turnStage: 'rolling',
     turnDeadline: null,
-    players: previewPlayers.map((player) => ({ ...player, connected: true, ready: true })),
+    players: previewPlayers.map((player) => ({ ...player, connected: true, ready: true, isBot: false })),
     pieces: previewPlayers.flatMap((player, playerIndex) =>
       Array.from({ length: 4 }, (_, pieceIndex) => ({
         id: `${player.id}-piece-${pieceIndex}`,
@@ -318,6 +318,9 @@ export default function HomePage() {
             />
             <Button className='mt-5 w-full' onClick={() => enter('/room/new')}>
               <Plus size={18} /> {t('start.createRoom')}
+            </Button>
+            <Button variant='outline' className='mt-3 w-full' onClick={() => enter('/room/new?bots=3')}>
+              <Bot size={18} /> {t('start.playComputer')}
             </Button>
             <div className='my-7 flex items-center gap-3 text-xs font-bold uppercase text-foreground/40'>
               <span className='h-px flex-1 bg-border' /> {t('start.or')} <span className='h-px flex-1 bg-border' />

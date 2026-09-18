@@ -342,3 +342,150 @@ describe('RoomManager game turns', () => {
     expect(first.state.turnStage).toBe('rolling');
   });
 });
+
+describe('RoomManager bots', () => {
+  test('lets only the host add bots in the lobby, up to the room size', () => {
+    const manager = new RoomManager();
+    const host = manager.createRoom('Ada');
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+
+    expect(() => manager.addBot(host.state.roomCode, guest.playerId)).toThrow('Only the host');
+    manager.addBot(host.state.roomCode, host.playerId);
+    expect(() => manager.addBot(host.state.roomCode, host.playerId)).not.toThrow();
+    expect(host.state.players).toHaveLength(4);
+    expect(() => manager.addBot(host.state.roomCode, host.playerId)).toThrow('full');
+
+    const bots = host.state.players.filter((player) => player.isBot);
+    expect(bots).toHaveLength(2);
+    expect(new Set(host.state.players.map((player) => player.color)).size).toBe(4);
+    expect(bots.every((bot) => bot.ready && bot.connected)).toBe(true);
+  });
+
+  test('resets humans to not ready when a bot joins, but keeps bots ready', () => {
+    const manager = new RoomManager();
+    const host = manager.createRoom('Ada');
+    manager.setReady(host.state.roomCode, host.playerId, true);
+    manager.addBot(host.state.roomCode, host.playerId);
+
+    expect(host.state.players.find((player) => player.id === host.playerId)?.ready).toBe(false);
+    manager.setSettings(host.state.roomCode, host.playerId, { ...host.state.settings, fairDice: false });
+    expect(host.state.players.find((player) => player.isBot)?.ready).toBe(true);
+  });
+
+  test('starts a single-player game once the lone human is ready', () => {
+    const manager = new RoomManager();
+    const host = manager.createRoom('Ada');
+    manager.addBot(host.state.roomCode, host.playerId);
+    expect(host.state.phase).toBe('lobby');
+
+    manager.setReady(host.state.roomCode, host.playerId, true);
+    expect(host.state.phase).toBe('playing');
+  });
+
+  test('refuses to add bots once the game is running', () => {
+    const { manager, first } = startGame();
+    expect(() => manager.addBot(first.state.roomCode, first.playerId)).toThrow('only be added in the lobby');
+  });
+
+  test('plays its own moves without a turn timer', async () => {
+    // Human: 6 (spawn), 1 (step). Bot: 6 (spawn), 1 (step) - all moves after the roll are made by
+    // the manager for the bot, and by this test's listener for the human.
+    const rolls = [6, 1, 6, 1];
+    let rollIndex = 0;
+    let humanId = '';
+    let botId = '';
+    let stopped = false;
+    let resolveBotStepped: (() => void) | undefined;
+    const botStepped = new Promise<void>((resolve) => {
+      resolveBotStepped = resolve;
+    });
+    const manager: RoomManager = new RoomManager(
+      (roomCode, state) => {
+        if (stopped) return;
+        if (state.pieces.some((piece) => piece.playerId === botId && piece.position === 1)) {
+          stopped = true;
+          resolveBotStepped?.();
+          return;
+        }
+        if (state.currentPlayerId === humanId && state.turnStage === 'move') manager.move(roomCode, humanId, state.movablePieceIds[0]!);
+      },
+      60_000,
+      () => rolls[rollIndex++] ?? 1,
+      5,
+      5,
+      null,
+      30_000,
+      () => undefined,
+      () => undefined,
+      5,
+    );
+    const host = manager.createRoom('Ada');
+    humanId = host.playerId;
+    manager.addBot(host.state.roomCode, host.playerId);
+    botId = host.state.players.find((player) => player.isBot)!.id;
+    manager.setReady(host.state.roomCode, host.playerId, true);
+
+    await botStepped;
+    const botTurnStage = host.state.currentPlayerId === botId ? host.state.turnDeadline : null;
+    expect(botTurnStage).toBeNull();
+    expect(host.state.pieces.some((piece) => piece.playerId === botId && piece.position === 1)).toBe(true);
+  });
+
+  test('removes a bot silently, without a leave notification', () => {
+    const leftEvents: PlayerLeftEvent[] = [];
+    const manager = new RoomManager(() => undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, (_roomCode, event) =>
+      leftEvents.push(event),
+    );
+    const host = manager.createRoom('Ada');
+    manager.addBot(host.state.roomCode, host.playerId);
+    const bot = host.state.players.find((player) => player.isBot)!;
+
+    const updated = manager.kickPlayer(host.state.roomCode, host.playerId, bot.id);
+    expect(updated.players.map((player) => player.id)).toEqual([host.playerId]);
+    expect(updated.pieces.every((piece) => piece.playerId === host.playerId)).toBe(true);
+    expect(leftEvents).toEqual([]);
+  });
+
+  test('winds the room down when the last human leaves', () => {
+    const manager = new RoomManager();
+    const host = manager.createRoom('Ada');
+    manager.addBot(host.state.roomCode, host.playerId);
+
+    expect(manager.leaveRoom(host.state.roomCode, host.playerId)).toBeNull();
+    expect(manager.getRoomState(host.state.roomCode)?.players).toEqual([]);
+  });
+
+  test('hands the host role to a human, never a bot', () => {
+    const manager = new RoomManager();
+    const host = manager.createRoom('Ada');
+    manager.addBot(host.state.roomCode, host.playerId);
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+
+    const updated = manager.leaveRoom(host.state.roomCode, host.playerId);
+    expect(updated?.hostPlayerId).toBe(guest.playerId);
+  });
+
+  test('carries bots into the rematch room once every human has voted', () => {
+    const transitions: RematchTransition[] = [];
+    const manager = new RoomManager(() => undefined, 60_000, () => 6, 900, 1_800, null, 30_000, (transition) => transitions.push(transition));
+    const host = manager.createRoom('Ada');
+    manager.addBot(host.state.roomCode, host.playerId);
+    manager.setReady(host.state.roomCode, host.playerId, true);
+
+    const pieces = host.state.pieces.filter((piece) => piece.playerId === host.playerId);
+    pieces[0]!.position = 40;
+    pieces[1]!.position = 41;
+    pieces[2]!.position = 42;
+    pieces[3]!.position = 37;
+    const rolled = manager.roll(host.state.roomCode, host.playerId);
+    manager.move(host.state.roomCode, host.playerId, rolled.movablePieceIds[0]!);
+    expect(host.state.phase).toBe('finished');
+
+    expect(manager.voteRematch(host.state.roomCode, host.playerId)).toBeNull();
+    const newState = transitions[0]?.newState;
+    expect(newState?.phase).toBe('lobby');
+    expect(newState?.players.map((player) => player.isBot)).toEqual([false, true]);
+    expect(newState?.players.find((player) => player.isBot)?.ready).toBe(true);
+    expect(newState?.hostPlayerId).toBe(host.playerId);
+  });
+});
