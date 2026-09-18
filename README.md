@@ -63,7 +63,7 @@ The host can remove other players from the room while in the lobby. After the ga
   - Fix touch interactions to ensure full feature parity for mobile users.
   - Adapt the movement preview to support tap/touch events on mobile devices (e.g., tap a figure once for a preview and again to confirm the move, replacing desktop `hover`).
 - [x] **Language Selector Dropdown**: Refactor the language selector into a scalable dropdown component to easily accommodate more languages in the future.
-- [ ] **Lighthouse Performance Optimization**: Run Lighthouse audits and optimize the application for performance, accessibility, best practices, and SEO based on the audit results. Currently all 100 scores besides Accessibility due to color contrast issues.
+- [x] **Lighthouse Performance Optimization**: Run Lighthouse audits and optimize the application for performance, accessibility, best practices, and SEO based on the audit results. Verified against a production build: 100/100/100/100 (desktop) and 97/100/100/100 (mobile, default throttling - only Performance dips slightly under simulated slow 4G/4x CPU).
 - [x] **Favicon & Metadata**: Add a favicon to the website and ensure all relevant metadata (title, description, social sharing tags) are properly configured for better SEO and user experience.
 
 ## 4. Features & Content
