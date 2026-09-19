@@ -26,6 +26,7 @@ export interface RoomSettings {
   mustSpawnOnSix: boolean;
   extraTurnOnCapture: boolean;
   safeStartSquares: boolean;
+  threeTriesToLeaveYard: boolean;
 }
 
 export interface PublicRoomSummary {

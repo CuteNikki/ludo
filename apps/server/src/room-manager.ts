@@ -18,6 +18,10 @@ const MOVE_TIMES: MoveTimeSeconds[] = [15, 30, 45, 60];
 const BOT_NAMES = ['Robo', 'Beep', 'Chip', 'Pixel'];
 /** How long a player who dropped out of a running game keeps their seat. */
 const GAME_GRACE_MS = 5 * 60 * 1000;
+/** How many rolls a player who is waiting for a six gets per turn with "three tries". */
+const YARD_TRIES = 3;
+/** The last square of a home column, relative to a piece's own start. */
+const LAST_POSITION = 43;
 const DEFAULT_SETTINGS: RoomSettings = {
   moveTimeSeconds: 30,
   automaticSingleMove: true,
@@ -26,11 +30,22 @@ const DEFAULT_SETTINGS: RoomSettings = {
   mustSpawnOnSix: false,
   extraTurnOnCapture: false,
   safeStartSquares: false,
+  threeTriesToLeaveYard: false,
 };
+
+/** Counts within a single turn (including its extra rolls), which start over whenever the turn passes on. */
+interface TurnCounters {
+  playerId: string | null;
+  /** Rolls in a row that couldn't bring a piece out of the yard while a six was the only way to move. */
+  yardMisses: number;
+}
+
+const freshCounters = (playerId: string | null = null): TurnCounters => ({ playerId, yardMisses: 0 });
 
 interface Room {
   state: GameState;
   turnTimer?: ReturnType<typeof setTimeout>;
+  counters: TurnCounters;
 }
 
 type StateListener = (roomCode: string, state: GameState) => void;
@@ -117,7 +132,7 @@ export class RoomManager {
       rematchPlayerIds: [],
       revision: 0,
     };
-    this.rooms.set(roomCode, { state });
+    this.rooms.set(roomCode, { state, counters: freshCounters() });
     const joined = this.addPlayer(state, playerName);
     state.hostPlayerId = joined.playerId;
     return joined;
@@ -169,7 +184,8 @@ export class RoomManager {
       typeof settings.isPublic !== 'boolean' ||
       typeof settings.mustSpawnOnSix !== 'boolean' ||
       typeof settings.extraTurnOnCapture !== 'boolean' ||
-      typeof settings.safeStartSquares !== 'boolean'
+      typeof settings.safeStartSquares !== 'boolean' ||
+      typeof settings.threeTriesToLeaveYard !== 'boolean'
     )
       throw new RoomError('INVALID_SETTINGS', 'Invalid room settings.');
 
@@ -557,8 +573,42 @@ export class RoomManager {
       const connectedPlayers = state.players.filter((player) => player.connected);
       const currentIndex = connectedPlayers.findIndex((player) => player.id === state.currentPlayerId);
       state.currentPlayerId = connectedPlayers[(currentIndex + 1) % connectedPlayers.length]?.id ?? null;
+      const room = this.rooms.get(state.roomCode);
+      if (room) room.counters = freshCounters(state.currentPlayerId);
     }
     this.beginTurn(state);
+  }
+
+  private getTurnCounters(room: Room): TurnCounters {
+    // The turn can also change hands outside `advanceTurn` (a player leaving, the game starting).
+    if (room.counters.playerId !== room.state.currentPlayerId) room.counters = freshCounters(room.state.currentPlayerId);
+    return room.counters;
+  }
+
+  /**
+   * Whether the only way for the player to move at all is a six that brings a piece out of the yard:
+   * everything else is either still in the yard or stuck at the end of the home column.
+   */
+  private isWaitingForSix(state: GameState, playerId: string): boolean {
+    const ownPieces = state.pieces.filter((piece) => piece.playerId === playerId);
+    const isStuckAtHome = (piece: Piece) => {
+      if (piece.position < TRACK_LENGTH) return false;
+      for (let square = piece.position + 1; square <= LAST_POSITION; square += 1) {
+        if (!ownPieces.some((other) => other.position === square)) return false;
+      }
+      return true;
+    };
+    return ownPieces.some((piece) => piece.position === -1) && ownPieces.every((piece) => piece.position === -1 || isStuckAtHome(piece));
+  }
+
+  /** With "three tries", a player who can only get going with a six rolls again after a miss, up to three times a turn. */
+  private shouldRetryRoll(room: Room): boolean {
+    const { state } = room;
+    const playerId = state.currentPlayerId;
+    if (!state.settings.threeTriesToLeaveYard || !playerId || !this.isWaitingForSix(state, playerId)) return false;
+    const counters = this.getTurnCounters(room);
+    counters.yardMisses += 1;
+    return counters.yardMisses < YARD_TRIES;
   }
 
   private scheduleMoveDeadline(state: GameState) {
@@ -602,7 +652,8 @@ export class RoomManager {
     if (!room) return;
     room.turnTimer = setTimeout(() => {
       if (state.phase !== 'playing' || state.turnStage !== 'no-move') return;
-      this.advanceTurn(state, false);
+      if (this.shouldRetryRoll(room)) this.beginTurn(state);
+      else this.advanceTurn(state, false);
       state.revision += 1;
       this.onStateChange(state.roomCode, state);
     }, this.noMoveDelayMs);
@@ -661,7 +712,7 @@ export class RoomManager {
       rematchPlayerIds: [],
       revision: 0,
     };
-    this.rooms.set(newRoomCode, { state: newState });
+    this.rooms.set(newRoomCode, { state: newState, counters: freshCounters() });
 
     this.onRematchResolved({ oldRoomCode, newRoomCode, movedPlayerIds: accepted.map((player) => player.id), newState });
   }

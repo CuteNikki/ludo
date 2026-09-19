@@ -147,6 +147,10 @@
         "text": "Eine optionale, vom Host aktivierbare Regel: Die vier farbigen Startfelder sind sicher. Eine Figur auf einem Startfeld kann nicht geschlagen werden, und ein von einer anderen Farbe besetztes Feld darf weder angezogen noch besetzt werden, dieser Zug ist dann nicht möglich. Ist kein anderer Zug möglich, ist der nächste Spieler dran."
       },
       {
+        "title": "Drei Versuche",
+        "text": "Eine optionale, vom Host aktivierbare Regel: Wenn keine Figur auf dem Feld ziehen kann, weil alle noch im Hof stehen oder am Ende der Zielreihe festsitzen, darf man pro Zug bis zu dreimal würfeln, um eine Sechs zu bekommen. Nach dem dritten Fehlwurf ist der nächste Spieler dran."
+      },
+      {
         "title": "Computergegner",
         "text": "Der Host kann freie Plätze mit Bots füllen. Sie würfeln und ziehen selbstständig, und ein Spiel gegen Bots kann mit nur einem menschlichen Spieler starten."
       },
@@ -278,6 +282,8 @@
       "extraTurnOnCaptureInfo": "Wer eine gegnerische Figur schlägt, darf noch einmal würfeln.",
       "safeStartSquares": "Sichere Startfelder",
       "safeStartSquaresInfo": "Figuren auf einem Startfeld können nicht geschlagen werden, und auf ein Startfeld, auf dem eine Figur einer anderen Farbe steht, darf niemand ziehen oder einsetzen.",
+      "threeTriesToLeaveYard": "Drei Versuche",
+      "threeTriesToLeaveYardInfo": "Wenn nur eine Sechs dich weiterbringt, weil alle deine Figuren im Hof stehen oder am Ende der Zielreihe festsitzen, darfst du pro Zug bis zu dreimal würfeln, um eine zu bekommen.",
       "isPublic": "Öffentlicher Raum",
       "isPublicInfo": "Listet diesen Raum auf der öffentlichen Entdecken-Seite, solange er offen und noch in der Lobby ist."
     },

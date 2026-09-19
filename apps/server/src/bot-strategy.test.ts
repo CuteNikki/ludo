@@ -19,6 +19,7 @@ function stateFor(dice: number, botPositions: number[], opponentPositions: numbe
       mustSpawnOnSix: false,
       extraTurnOnCapture: false,
       safeStartSquares: false,
+      threeTriesToLeaveYard: false,
     },
     phase: 'playing',
     turnStage: 'move',

@@ -28,6 +28,7 @@ export function createPreviewState(previewPlayers: PreviewPlayer[]): GameState {
       mustSpawnOnSix: false,
       extraTurnOnCapture: false,
       safeStartSquares: false,
+      threeTriesToLeaveYard: false,
     },
     phase: 'playing',
     turnStage: 'rolling',

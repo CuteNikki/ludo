@@ -1,4 +1,4 @@
-import type { RoomSettings } from '@ludo/shared';
+import type { Piece, RoomSettings } from '@ludo/shared';
 import { describe, expect, test } from 'bun:test';
 
 import { RoomManager, type PlayerLeftEvent, type RematchTransition } from './room-manager';
@@ -45,6 +45,58 @@ function startConfiguredGame(overrides: Partial<RoomSettings>, rolls: number | n
   return { manager, host, guest, hostPieces: piecesOf(host.playerId), guestPieces: piecesOf(guest.playerId) };
 }
 
+interface TurnEvent {
+  who: 'host' | 'guest';
+  stage: string;
+  dice: number | null;
+}
+
+/**
+ * Like `startConfiguredGame`, but with fast timers, so rolls and no-move transitions happen on their own.
+ * `arrange` runs before the first roll to set up piece positions; `waitFor` resolves once an event
+ * matching the predicate has been broadcast (or already was).
+ */
+function startTimedGame(
+  overrides: Partial<RoomSettings>,
+  rolls: number | number[],
+  arrange: (hostPieces: Piece[], guestPieces: Piece[]) => void = () => undefined,
+) {
+  const sequence = Array.isArray(rolls) ? rolls : [rolls];
+  let rollIndex = 0;
+  const events: TurnEvent[] = [];
+  const waiters: Array<{ matches: (event: TurnEvent) => boolean; resolve: () => void }> = [];
+  let guestId = '';
+  const manager = new RoomManager(
+    (_roomCode, state) => {
+      const event: TurnEvent = { who: state.currentPlayerId === guestId ? 'guest' : 'host', stage: state.turnStage, dice: state.diceResult };
+      events.push(event);
+      for (const waiter of waiters) if (waiter.matches(event)) waiter.resolve();
+    },
+    60_000,
+    () => sequence[Math.min(rollIndex++, sequence.length - 1)]!,
+    5,
+    5,
+    null,
+  );
+  const host = manager.createRoom('Ada');
+  const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+  guestId = guest.playerId;
+  manager.setSettings(host.state.roomCode, host.playerId, { ...host.state.settings, fairDice: false, ...overrides });
+  manager.setReady(host.state.roomCode, host.playerId, true);
+  manager.setReady(host.state.roomCode, guest.playerId, true);
+  arrange(
+    host.state.pieces.filter((piece) => piece.playerId === host.playerId),
+    host.state.pieces.filter((piece) => piece.playerId === guest.playerId),
+  );
+  const waitFor = (matches: (event: TurnEvent) => boolean) =>
+    new Promise<void>((resolve) => {
+      if (events.some(matches)) resolve();
+      else waiters.push({ matches, resolve });
+    });
+  const count = (matches: (event: TurnEvent) => boolean) => events.filter(matches).length;
+  return { host, guest, events, waitFor, count };
+}
+
 describe('RoomManager game turns', () => {
   test('starts only after every player is ready', () => {
     const manager = new RoomManager();
@@ -85,6 +137,7 @@ describe('RoomManager game turns', () => {
       mustSpawnOnSix: false,
       extraTurnOnCapture: false,
       safeStartSquares: false,
+      threeTriesToLeaveYard: false,
     };
     expect(() => manager.setSettings(host.state.roomCode, guest.playerId, settings)).toThrow('Only the host');
     const updated = manager.setSettings(host.state.roomCode, host.playerId, settings);
@@ -112,6 +165,7 @@ describe('RoomManager game turns', () => {
       mustSpawnOnSix: false,
       extraTurnOnCapture: false,
       safeStartSquares: false,
+      threeTriesToLeaveYard: false,
     };
     manager.setSettings(host.state.roomCode, host.playerId, settings);
     manager.setReady(host.state.roomCode, host.playerId, true);
@@ -136,6 +190,7 @@ describe('RoomManager game turns', () => {
       mustSpawnOnSix: false,
       extraTurnOnCapture: false,
       safeStartSquares: false,
+      threeTriesToLeaveYard: false,
     };
     manager.setSettings(publicRoom.state.roomCode, publicRoom.playerId, settings);
     manager.createRoom('Mika'); // stays private by default
@@ -267,6 +322,7 @@ describe('RoomManager game turns', () => {
       mustSpawnOnSix: true,
       extraTurnOnCapture: false,
       safeStartSquares: false,
+      threeTriesToLeaveYard: false,
     });
     manager.setReady(host.state.roomCode, host.playerId, true);
     manager.setReady(host.state.roomCode, guest.playerId, true);
@@ -471,6 +527,59 @@ describe('RoomManager game turns', () => {
       manager.move(host.state.roomCode, host.playerId, hostPieces[0]!.id);
 
       expect(guestPieces[0]!.position).toBe(-1);
+    });
+  });
+
+  describe('three tries to leave the yard', () => {
+    const hostMisses = (event: TurnEvent) => event.who === 'host' && event.stage === 'no-move';
+    const guestTurn = (event: TurnEvent) => event.who === 'guest';
+
+    test('is disabled by default', () => {
+      const manager = new RoomManager();
+      const host = manager.createRoom('Ada');
+      expect(host.state.settings.threeTriesToLeaveYard).toBe(false);
+    });
+
+    test('passes the turn after a single miss when disabled', async () => {
+      const { waitFor, count } = startTimedGame({}, 1);
+      await waitFor(guestTurn);
+      expect(count(hostMisses)).toBe(1);
+    });
+
+    test('gives a player who is waiting for a six three rolls', async () => {
+      const { waitFor, events } = startTimedGame({ threeTriesToLeaveYard: true }, [1, 2, 3]);
+      await waitFor(guestTurn);
+
+      expect(events.filter(hostMisses).map((event) => event.dice)).toEqual([1, 2, 3]);
+    });
+
+    test('keeps the turn once a six brings a piece out', async () => {
+      const { waitFor, count } = startTimedGame({ threeTriesToLeaveYard: true }, [1, 6]);
+      await waitFor((event) => event.who === 'host' && event.stage === 'move' && event.dice === 6);
+
+      expect(count(hostMisses)).toBe(1);
+      expect(count(guestTurn)).toBe(0);
+    });
+
+    test('counts pieces stuck at the end of the home column as waiting for a six', async () => {
+      const { waitFor, count } = startTimedGame({ threeTriesToLeaveYard: true }, 1, (hostPieces) => {
+        hostPieces[0]!.position = 43;
+        hostPieces[1]!.position = 42;
+        hostPieces[2]!.position = 41;
+      });
+      await waitFor(guestTurn);
+
+      expect(count(hostMisses)).toBe(3);
+    });
+
+    test('does not apply while a piece on the board could move on another roll', async () => {
+      // A piece on 39 can't take a 5 (it would overshoot the home column), but it isn't stuck either.
+      const { waitFor, count } = startTimedGame({ threeTriesToLeaveYard: true }, 5, (hostPieces) => {
+        hostPieces[0]!.position = 39;
+      });
+      await waitFor(guestTurn);
+
+      expect(count(hostMisses)).toBe(1);
     });
   });
 
@@ -907,6 +1016,7 @@ describe('RoomManager closed tabs and empty rooms', () => {
     mustSpawnOnSix: false,
     extraTurnOnCapture: false,
     safeStartSquares: false,
+    threeTriesToLeaveYard: false,
   };
 
   /** Short lobby grace period, everything else default; `onLeft` sees who was dropped and why. */

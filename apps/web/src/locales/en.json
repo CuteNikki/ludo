@@ -147,6 +147,10 @@
         "text": "An optional rule the host can enable: the four colored start squares are safe. A piece standing on one can't be captured, and a square occupied by another color can't be landed on or spawned onto, so that move isn't available. If no other move is possible, the turn passes."
       },
       {
+        "title": "Three tries",
+        "text": "An optional rule the host can enable: if you have no piece on the board that can move, because everything is still in the yard or stuck at the end of your home column, you roll up to three times in a turn to get a six. The turn passes after the third miss."
+      },
+      {
         "title": "Computer opponents",
         "text": "The host can fill free seats with bots. They roll and move on their own, and a game against bots can start with just one human player."
       },
@@ -278,6 +282,8 @@
       "extraTurnOnCaptureInfo": "Capturing an opponent's piece earns you another roll.",
       "safeStartSquares": "Safe start squares",
       "safeStartSquaresInfo": "Pieces on a start square can't be captured, and nobody can land or leave the yard onto a start square that another color's piece is standing on.",
+      "threeTriesToLeaveYard": "Three tries",
+      "threeTriesToLeaveYardInfo": "If a six is the only way for you to move, because all your pieces are in the yard or stuck at the end of your home column, you roll up to three times per turn to get one.",
       "isPublic": "Public room",
       "isPublicInfo": "Lists this room on the public discovery page while it's open and still in the lobby."
     },
