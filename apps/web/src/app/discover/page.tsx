@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { PAGE_DECOR_A } from '@/components/decor';
 import { PageHeader, PageShell } from '@/components/page-shell';
 import { TapTooltip } from '@/components/tap-tooltip';
+import { usePlayerName } from '@/lib/player-name';
 import { order } from '@/lib/reveal';
 import { cn } from '@/lib/utils';
 import type { ClientEvent, PublicRoomSummary, RoomSettings, ServerEvent } from '@ludo/shared';
@@ -22,11 +23,7 @@ export default function DiscoverPage() {
   const socketRef = useRef<WebSocket | null>(null);
   const [rooms, setRooms] = useState<PublicRoomSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [name, setName] = useState('');
-
-  useEffect(() => {
-    setName(sessionStorage.getItem('ludo-player-name') ?? '');
-  }, []);
+  const [name, setName] = usePlayerName();
 
   useEffect(() => {
     let active = true;
@@ -56,7 +53,6 @@ export default function DiscoverPage() {
   }, []);
 
   function joinRoom(roomCode: string) {
-    sessionStorage.setItem('ludo-player-name', name.trim());
     router.push(`/room/${roomCode}`);
   }
 

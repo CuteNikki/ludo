@@ -13,6 +13,7 @@ import { Toast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { usePlayerName } from '@/lib/player-name';
 import { order } from '@/lib/reveal';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +29,7 @@ const stepStyles = ['bg-p-red text-white', 'bg-p-blue text-white', 'bg-p-green t
 export default function HomePage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [name, setName] = useState('');
+  const [name, setName] = usePlayerName();
   const [roomCode, setRoomCode] = useState('');
   const [notice, setNotice] = useState<'kicked' | 'disconnected' | 'rematch-timeout' | null>(null);
 
@@ -48,11 +49,9 @@ export default function HomePage() {
       url.searchParams.delete('notice');
       window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
     }
-    setName(sessionStorage.getItem('ludo-player-name') ?? '');
   }, []);
 
   function enter(path: string) {
-    sessionStorage.setItem('ludo-player-name', name.trim());
     router.push(path);
   }
 
