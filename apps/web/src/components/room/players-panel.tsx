@@ -49,12 +49,12 @@ export function PlayersPanel({
   const canClaimHost = hostAway && !!me && !me.isBot && me.connected && me.id !== state.hostPlayerId;
 
   return (
-    <section className='toy-card p-4 sm:p-5'>
+    <section className='toy-card @container p-4 sm:p-5'>
       <div className='mb-3 flex items-center justify-between gap-3'>
         <h2 className='flex items-center gap-2 font-display text-2xl'>
           <Users size={22} strokeWidth={2.5} /> {t('room.players')} {state.players.length}/4
         </h2>
-        {state.spectatorCount > 0 && <SpectatorCount count={state.spectatorCount} labelled className='shrink-0 text-sm' />}
+        {state.spectatorCount > 0 && <SpectatorCount count={state.spectatorCount} spelledOut className='shrink-0 text-sm' />}
       </div>
 
       <ul className='space-y-2'>
