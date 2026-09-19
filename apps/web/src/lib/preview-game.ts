@@ -20,7 +20,7 @@ export function createPreviewState(previewPlayers: PreviewPlayer[]): GameState {
   return {
     roomCode: 'DEMO',
     hostPlayerId: previewPlayers[0]?.id ?? null,
-    settings: { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false, mustSpawnOnSix: false },
+    settings: { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false, mustSpawnOnSix: false, extraTurnOnCapture: false },
     phase: 'playing',
     turnStage: 'rolling',
     turnDeadline: null,

@@ -18,7 +18,14 @@ const MOVE_TIMES: MoveTimeSeconds[] = [15, 30, 45, 60];
 const BOT_NAMES = ['Robo', 'Beep', 'Chip', 'Pixel'];
 /** How long a player who dropped out of a running game keeps their seat. */
 const GAME_GRACE_MS = 5 * 60 * 1000;
-const DEFAULT_SETTINGS: RoomSettings = { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false, mustSpawnOnSix: false };
+const DEFAULT_SETTINGS: RoomSettings = {
+  moveTimeSeconds: 30,
+  automaticSingleMove: true,
+  fairDice: true,
+  isPublic: false,
+  mustSpawnOnSix: false,
+  extraTurnOnCapture: false,
+};
 
 interface Room {
   state: GameState;
@@ -159,7 +166,8 @@ export class RoomManager {
       typeof settings.automaticSingleMove !== 'boolean' ||
       typeof settings.fairDice !== 'boolean' ||
       typeof settings.isPublic !== 'boolean' ||
-      typeof settings.mustSpawnOnSix !== 'boolean'
+      typeof settings.mustSpawnOnSix !== 'boolean' ||
+      typeof settings.extraTurnOnCapture !== 'boolean'
     )
       throw new RoomError('INVALID_SETTINGS', 'Invalid room settings.');
 
@@ -284,19 +292,24 @@ export class RoomManager {
     if (!piece || !player) throw new RoomError('PIECE_NOT_FOUND', 'The piece was not found.');
 
     piece.position = piece.position === -1 ? 0 : piece.position + state.diceResult;
+    let captured = false;
     if (piece.position < 40) {
       const target = toBoardPosition(player.color, piece.position);
       for (const opponentPiece of state.pieces) {
         if (opponentPiece.playerId === playerId || opponentPiece.position < 0 || opponentPiece.position >= 40) continue;
         const opponent = state.players.find((candidate) => candidate.id === opponentPiece.playerId);
-        if (opponent && toBoardPosition(opponent.color, opponentPiece.position) === target) opponentPiece.position = -1;
+        if (opponent && toBoardPosition(opponent.color, opponentPiece.position) === target) {
+          opponentPiece.position = -1;
+          captured = true;
+        }
       }
     }
 
     if (state.pieces.filter((candidate) => candidate.playerId === playerId).every((candidate) => candidate.position >= 40)) {
       this.finishGame(state, playerId);
     } else {
-      this.advanceTurn(state, state.diceResult === 6);
+      // A six and a capture each earn one extra roll; they don't stack when a six also captures.
+      this.advanceTurn(state, state.diceResult === 6 || (captured && state.settings.extraTurnOnCapture));
     }
     state.revision += 1;
     return state;

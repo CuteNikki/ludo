@@ -51,7 +51,14 @@ describe('RoomManager game turns', () => {
     const guest = manager.joinRoom(host.state.roomCode, 'Linus');
     manager.setReady(host.state.roomCode, guest.playerId, true);
 
-    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: false, isPublic: true, mustSpawnOnSix: false };
+    const settings = {
+      moveTimeSeconds: 45 as const,
+      automaticSingleMove: false,
+      fairDice: false,
+      isPublic: true,
+      mustSpawnOnSix: false,
+      extraTurnOnCapture: false,
+    };
     expect(() => manager.setSettings(host.state.roomCode, guest.playerId, settings)).toThrow('Only the host');
     const updated = manager.setSettings(host.state.roomCode, host.playerId, settings);
     expect(updated.settings).toEqual(settings);
@@ -70,7 +77,14 @@ describe('RoomManager game turns', () => {
     );
     const host = manager.createRoom('Ada');
     const guest = manager.joinRoom(host.state.roomCode, 'Linus');
-    const settings = { moveTimeSeconds: 45 as const, automaticSingleMove: false, fairDice: true, isPublic: false, mustSpawnOnSix: false };
+    const settings = {
+      moveTimeSeconds: 45 as const,
+      automaticSingleMove: false,
+      fairDice: true,
+      isPublic: false,
+      mustSpawnOnSix: false,
+      extraTurnOnCapture: false,
+    };
     manager.setSettings(host.state.roomCode, host.playerId, settings);
     manager.setReady(host.state.roomCode, host.playerId, true);
     manager.setReady(host.state.roomCode, guest.playerId, true);
@@ -92,6 +106,7 @@ describe('RoomManager game turns', () => {
       fairDice: true,
       isPublic: true,
       mustSpawnOnSix: false,
+      extraTurnOnCapture: false,
     };
     manager.setSettings(publicRoom.state.roomCode, publicRoom.playerId, settings);
     manager.createRoom('Mika'); // stays private by default
@@ -221,6 +236,7 @@ describe('RoomManager game turns', () => {
       fairDice: false,
       isPublic: false,
       mustSpawnOnSix: true,
+      extraTurnOnCapture: false,
     });
     manager.setReady(host.state.roomCode, host.playerId, true);
     manager.setReady(host.state.roomCode, guest.playerId, true);
@@ -246,6 +262,74 @@ describe('RoomManager game turns', () => {
 
     expect(moved.pieces.find((piece) => piece.id === pieceId)?.position).toBe(3);
     expect(moved.currentPlayerId).toBe(second.playerId);
+  });
+
+  describe('extra turn on capture', () => {
+    /** Red (host) has a piece on 5 and blue has one on square 8, so red rolling a 3 captures it. */
+    function startCaptureGame(extraTurnOnCapture: boolean, roll: number) {
+      const manager = new RoomManager(
+        () => undefined,
+        60_000,
+        () => roll,
+        900,
+        1_800,
+        null,
+      );
+      const host = manager.createRoom('Ada');
+      const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+      manager.setSettings(host.state.roomCode, host.playerId, { ...host.state.settings, fairDice: false, extraTurnOnCapture });
+      manager.setReady(host.state.roomCode, host.playerId, true);
+      manager.setReady(host.state.roomCode, guest.playerId, true);
+      const hostPiece = host.state.pieces.find((piece) => piece.playerId === host.playerId)!;
+      const guestPiece = host.state.pieces.find((piece) => piece.playerId === guest.playerId)!;
+      hostPiece.position = 5;
+      guestPiece.position = 38;
+      return { manager, host, guest, hostPiece, guestPiece };
+    }
+
+    test('is disabled by default', () => {
+      const manager = new RoomManager();
+      const host = manager.createRoom('Ada');
+      expect(host.state.settings.extraTurnOnCapture).toBe(false);
+    });
+
+    test('passes the turn after a capture when disabled', () => {
+      const { manager, host, guest, hostPiece, guestPiece } = startCaptureGame(false, 3);
+      manager.roll(host.state.roomCode, host.playerId);
+      const moved = manager.move(host.state.roomCode, host.playerId, hostPiece.id);
+
+      expect(guestPiece.position).toBe(-1);
+      expect(moved.currentPlayerId).toBe(guest.playerId);
+    });
+
+    test('lets the capturing player roll again when enabled', () => {
+      const { manager, host, hostPiece, guestPiece } = startCaptureGame(true, 3);
+      manager.roll(host.state.roomCode, host.playerId);
+      const moved = manager.move(host.state.roomCode, host.playerId, hostPiece.id);
+
+      expect(guestPiece.position).toBe(-1);
+      expect(moved.currentPlayerId).toBe(host.playerId);
+      expect(moved.turnStage).toBe('rolling');
+      expect(moved.diceResult).toBeNull();
+    });
+
+    test('passes the turn after a move without a capture when enabled', () => {
+      const { manager, host, guest, hostPiece, guestPiece } = startCaptureGame(true, 3);
+      guestPiece.position = 30;
+      manager.roll(host.state.roomCode, host.playerId);
+      const moved = manager.move(host.state.roomCode, host.playerId, hostPiece.id);
+
+      expect(guestPiece.position).toBe(30);
+      expect(moved.currentPlayerId).toBe(guest.playerId);
+    });
+
+    test('rejects settings without the flag', () => {
+      const manager = new RoomManager();
+      const host = manager.createRoom('Ada');
+      const { extraTurnOnCapture: _omitted, ...incomplete } = host.state.settings;
+
+      expect(() => manager.setSettings(host.state.roomCode, host.playerId, incomplete as never)).toThrow('Invalid room settings.');
+    });
   });
 
   test('automatically performs the only legal move', async () => {
@@ -673,7 +757,14 @@ describe('RoomManager host handover', () => {
 });
 
 describe('RoomManager closed tabs and empty rooms', () => {
-  const publicSettings = { moveTimeSeconds: 30 as const, automaticSingleMove: true, fairDice: true, isPublic: true, mustSpawnOnSix: false };
+  const publicSettings = {
+    moveTimeSeconds: 30 as const,
+    automaticSingleMove: true,
+    fairDice: true,
+    isPublic: true,
+    mustSpawnOnSix: false,
+    extraTurnOnCapture: false,
+  };
 
   /** Short lobby grace period, everything else default; `onLeft` sees who was dropped and why. */
   function lobbyManager(lobbyGraceMs: number, onLeft: (event: PlayerLeftEvent) => void = () => undefined) {

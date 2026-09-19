@@ -24,6 +24,7 @@ export interface RoomSettings {
   fairDice: boolean;
   isPublic: boolean;
   mustSpawnOnSix: boolean;
+  extraTurnOnCapture: boolean;
 }
 
 export interface PublicRoomSummary {

@@ -4,7 +4,7 @@ import type { MoveTimeSeconds, Player, PlayerColor, RoomSettings } from '@ludo/s
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Check, Clock3, Dice6, Dices, Globe, Info, Palette, Settings2, Sparkles, UserRound } from 'lucide-react';
+import { Check, Clock3, Dice6, Dices, Globe, Info, Palette, Settings2, Sparkles, Swords, UserRound } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -188,6 +188,14 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
           checked={settings.mustSpawnOnSix}
           disabled={!isHost}
           onChange={(checked) => onChange({ mustSpawnOnSix: checked })}
+        />
+        <SettingToggle
+          icon={<Swords size={18} strokeWidth={2.5} />}
+          label={t('room.settings.extraTurnOnCapture')}
+          description={t('room.settings.extraTurnOnCaptureInfo')}
+          checked={settings.extraTurnOnCapture}
+          disabled={!isHost}
+          onChange={(checked) => onChange({ extraTurnOnCapture: checked })}
         />
         <SettingToggle
           icon={<Globe size={18} strokeWidth={2.5} />}

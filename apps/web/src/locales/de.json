@@ -139,6 +139,10 @@
         "text": "Eine optionale, vom Host aktivierbare Regel: Eine gewürfelte Sechs mit einer noch wartenden Figur zwingt diese aus dem Hof, statt zusätzlich anzubieten, eine bereits im Spiel befindliche Figur zu ziehen."
       },
       {
+        "title": "Extrazug beim Schlagen",
+        "text": "Eine optionale, vom Host aktivierbare Regel: Wer eine gegnerische Figur schlägt, darf noch einmal würfeln. Das addiert sich nicht mit einer Sechs, ein schlagender Sechserwurf gibt also nur einen zusätzlichen Wurf."
+      },
+      {
         "title": "Computergegner",
         "text": "Der Host kann freie Plätze mit Bots füllen. Sie würfeln und ziehen selbstständig, und ein Spiel gegen Bots kann mit nur einem menschlichen Spieler starten."
       },
@@ -266,6 +270,8 @@
       "fairDiceInfo": "Alle Zahlen werden regelmäßig gewürfelt, damit niemand lange auf eine Sechs warten muss.",
       "mustSpawnOnSix": "Muss bei Sechs einsetzen",
       "mustSpawnOnSixInfo": "Bei einer gewürfelten Sechs muss eine wartende Figur eingesetzt werden, statt eine bereits im Spiel befindliche Figur 6 Felder zu ziehen.",
+      "extraTurnOnCapture": "Extrazug beim Schlagen",
+      "extraTurnOnCaptureInfo": "Wer eine gegnerische Figur schlägt, darf noch einmal würfeln.",
       "isPublic": "Öffentlicher Raum",
       "isPublicInfo": "Listet diesen Raum auf der öffentlichen Entdecken-Seite, solange er offen und noch in der Lobby ist."
     },

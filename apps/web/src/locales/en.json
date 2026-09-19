@@ -139,6 +139,10 @@
         "text": "An optional rule the host can enable: rolling a six with a piece still waiting forces it out of the yard, instead of also offering to move a piece already on the board."
       },
       {
+        "title": "Extra turn on capture",
+        "text": "An optional rule the host can enable: capturing an opponent's piece earns you another roll. It doesn't stack with a six, so a capturing six still gives just one extra roll."
+      },
+      {
         "title": "Computer opponents",
         "text": "The host can fill free seats with bots. They roll and move on their own, and a game against bots can start with just one human player."
       },
@@ -266,6 +270,8 @@
       "fairDiceInfo": "All numbers come up regularly, so no one waits forever for a six.",
       "mustSpawnOnSix": "Must spawn on six",
       "mustSpawnOnSixInfo": "Rolling a six forces a figure out of the yard if one is waiting there, instead of letting a figure already on the board move 6 tiles.",
+      "extraTurnOnCapture": "Extra turn on capture",
+      "extraTurnOnCaptureInfo": "Capturing an opponent's piece earns you another roll.",
       "isPublic": "Public room",
       "isPublicInfo": "Lists this room on the public discovery page while it's open and still in the lobby."
     },

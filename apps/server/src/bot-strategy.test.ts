@@ -11,7 +11,7 @@ function stateFor(dice: number, botPositions: number[], opponentPositions: numbe
   return {
     roomCode: 'TEST',
     hostPlayerId: 'human',
-    settings: { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false, mustSpawnOnSix: false },
+    settings: { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false, mustSpawnOnSix: false, extraTurnOnCapture: false },
     phase: 'playing',
     turnStage: 'move',
     turnDeadline: null,
