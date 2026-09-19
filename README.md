@@ -1,6 +1,25 @@
 # Ludo
 
-Real-time multiplayer foundation for "Mensch ärgere Dich nicht" (Ludo) built with Bun, native WebSockets and Next.js.
+The classic board game "Mensch ärgere Dich nicht" (Ludo) in the browser: real-time multiplayer for two to four players, with computer opponents, no accounts and nothing to install. Live at [ludo.niso.moe](https://ludo.niso.moe).
+
+## Features
+
+- **Real-time multiplayer:** the server is authoritative. Clients only send actions, and the server rolls the dice, validates every move and broadcasts the state to the room.
+- **Rooms:** create a room, share the six-character code or the link, and play. Rooms can be listed publicly on a discovery page so anyone can join.
+- **The full game:** captures, the home column, a move timer, automatic single moves, an optional "must spawn on six" rule and a fair dice option, so no one waits forever for a six.
+- **Computer opponents:** the host can fill free seats with bots, so a game against them starts with just one human player.
+- **Host controls:** room settings, removing inactive players (even mid-game), automatic host handover and a rematch vote at the end of every game.
+- **Animation and sound:** pieces walk along the track, captured pieces fly home and the dice roll. The sound effects are synthesized with the Web Audio API, so there are no audio files.
+- **A live demo on the landing page:** four bots play each other in the browser, using the same rules and bot strategy as the real game.
+- **English and German**, light, dark and system themes, and a layout that works on phones with touch support.
+- **Privacy-minded:** no accounts, ads or analytics. Game state lives in the server's memory only.
+
+## Tech Stack
+
+- **Web:** Next.js (App Router, React 19), Tailwind CSS v4, Radix UI / shadcn/ui, i18next and Lucide icons
+- **Server:** Bun with native WebSockets, written in TypeScript
+- **Shared:** `@ludo/shared`, a package with the typed event protocol, the game model and the bot strategy, used by both the server and the web app so they can't drift apart
+- **Tooling:** Bun workspaces, `bun test`, Prettier and Docker Compose
 
 ## Structure
 
@@ -16,6 +35,8 @@ bun run dev
 ```
 
 The frontend then runs on `http://localhost:3000` and the WebSocket server on `ws://localhost:3001/ws`. For different hosts, `NEXT_PUBLIC_WS_URL` can be set in the frontend. For a real deployment, also set `NEXT_PUBLIC_SITE_URL` to the site's public URL so social sharing previews (Open Graph/Twitter cards) link to the right images.
+
+`bun run typecheck` and `bun run test` check every workspace.
 
 ### Legal pages
 
@@ -42,51 +63,3 @@ The creator of a room is the host and can configure the turn timer (15, 30, 45 o
 Every player can change their name and pick a still-available player color in the lobby. Names may be duplicated, taken colors are locked, and the chosen profile persists across a reload. If no name is entered, "Guest" is used.
 
 The host can remove other players from the room, in the lobby and during a game (a running game asks for a second click to confirm). Removing the player whose turn it is hands the turn to the next player in line, and if only one player is left they win by forfeit. If the host is disconnected for 30 seconds, the host role moves to another connected human player; the game is never scrapped, and the original host doesn't get it back. After the game ends, players can return to the main menu or vote for a rematch. The first rematch vote starts a 30-second countdown; players who don't confirm in time are dropped, and everyone who agreed is moved into a brand-new room, reset to the lobby with the same settings.
-
-# Ludo Project To-Do List
-
-## 1. Game Flow, Rooms & Match Lifecycle
-
-- [x] **End-Screen & Post-Game Timer**:
-  - Implement a 30-second post-game countdown timer when a match finishes.
-  - Provide clear voting options for players to either play again (rematch) or return to the home screen.
-  - Handle room cleanup on timeout: kick out inactive players, and automatically transition rematching players into a brand-new room.
-- [x] **Clear Rematch Voting UX**: Redesign the rematch prompt and UI on the end screen so it is explicitly and unmistakably clear to all participants that a rematch vote is currently taking place.
-- [x] **Public Rooms & Discovery Page**: Add a visibility toggle to rooms (public vs. private) and build a discovery page that lists active public rooms so players can easily browse and join open games.
-- [x] **Lobby Leave Notifications**: Implement real-time notifications alerting remaining players in the lobby whenever someone leaves the room.
-- [x] **Accurate Leave/Kick Notifications**: Fix inaccurate notification messages (e.g., displaying "Kicked by the Host" when it wasn't the case). Update the notification system to properly reflect the actual reason for leaving or being removed.
-- [x] **Static vs. Dynamic Rendering Optimization**: Investigate and refactor pages so they remain static where possible, preventing the entire site from switching to dynamic rendering solely due to language switching.
-- [x] **Better Invite UI/UX**: When the room was not found, there should be an input to submit a room code. The room code should also be copyable in the room rather than only the link being available. Additionally the invite form on the home page is not submittable by pressing enter in the invite code field.
-  - Consider adding visual feedback for successful or failed room code submissions.
-  - Ensure the invite input is accessible and user-friendly on both desktop and mobile devices.
-- [x] **Host Moderation During Games**: Idle players cost everyone a full turn timer on each of their turns, so the host can now remove players mid-game (with a confirmation click). The turn passes on cleanly, the last player standing wins, and the host role is handed over if the host is gone for more than 30 seconds.
-- [x] **Room Settings in Discovery**: Show an icon for each room setting on the discovery page, green when enabled and red when disabled, with a hover/tap tooltip explaining what is currently set in that room.
-
-## 2. Core Game Logic & Rules
-
-- [x] **Optional "Must-Spawn-on-6" Rule**: Add a toggleable rule (disabled by default) that forces players to deploy a figure from home/spawn when rolling a 6 if any figures are still waiting there, preventing them from moving 6 tiles on the board instead.
-- [x] **Figure Color Transition Bug**: Fix the visual bug when changing a figure's color. Update it so the transition happens smoothly mid-movement or after reaching the destination rather than instantly changing beforehand.
-
-## 3. UI / UX, Animations & Mobile Enhancements
-
-- [x] **Global Animations & Reveal Effects**: Add smooth fade-in and scroll-reveal animations across the home page and room page.
-- [x] **Shadcn/UI Redesign**: Overhaul the application's interface to incorporate more components from `shadcn/ui` for a cohesive and modern look.
-- [x] **Mobile Responsiveness & Touch Support**:
-  - Fix touch interactions to ensure full feature parity for mobile users.
-  - Adapt the movement preview to support tap/touch events on mobile devices (e.g., tap a figure once for a preview and again to confirm the move, replacing desktop `hover`).
-- [x] **Language Selector Dropdown**: Refactor the language selector into a scalable dropdown component to easily accommodate more languages in the future.
-- [x] **Theme Dropdown with System Option**: Turn the theme button into a dropdown like the language selector so a "system" theme can be supported alongside light and dark. Selected entries show their checkmark on the far right in both dropdowns.
-- [x] **Toast Auto-Dismiss & Exit Animation**: Toasts and in-room notices did not disappear by themselves and had no remove animation. They now dismiss automatically and fade out.
-- [x] **"How It Works" Scroll Reveal**: The section's title stayed visible at all times instead of revealing on scroll. The heading now fades in with the rest of the section.
-- [x] **Lighthouse Performance Optimization**: Run Lighthouse audits and optimize the application for performance, accessibility, best practices, and SEO based on the audit results. Verified against a production build: 100/100/100/100 (desktop) and 97/100/100/100 (mobile, default throttling - only Performance dips slightly under simulated slow 4G/4x CPU).
-- [x] **Favicon & Metadata**: Add a favicon to the website and ensure all relevant metadata (title, description, social sharing tags) are properly configured for better SEO and user experience.
-
-## 4. Features & Content
-
-- [x] **AI Opponents**: Implement computer-controlled opponents to enable single-player mode. The home page has a "Play against the computer" shortcut, and the host can add or remove bots in any lobby.
-- [x] **Game Description & Rules**: Add an information section or guide explaining how to play the game directly on the website. We already have a how it works section but it doesn't explain the actual game (e.g. rules, objectives).
-- [x] **English README**: Translate the `README.md` on GitHub into English.
-
-## 5. Legal & Compliance
-
-- [x] **Legal Pages & Footer Links**: Create and add standard legal pages (Imprint/Impressum, Privacy Policy, Terms of Service) and include a direct link back to the [GitHub repository](https://github.com/CuteNikki/ludo).
