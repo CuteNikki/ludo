@@ -97,11 +97,11 @@ export default function HomePage() {
               </span>
               <span className='eyebrow'>{t('hero.live')}</span>
             </p>
-            <h1 className='reveal-load font-display text-[2.6rem] leading-[1.05] sm:text-7xl 2xl:text-8xl' style={order(1)}>
+            <h1 className='reveal-load font-display text-[2.6rem] leading-[1.05] sm:text-7xl lg:text-[min(4.5rem,calc(6vw-0.25rem))] 2xl:text-8xl' style={order(1)}>
               {t('hero.titleLine1')}
               <br />
               <span
-                className='reveal-load mt-2 inline-block -rotate-2 rounded-xl border-3 border-border bg-p-red px-3 pb-1 text-white shadow-card sm:mt-3 sm:px-4'
+                className='reveal-load mt-2 inline-block -rotate-2 rounded-xl border-3 border-border bg-p-red px-3 pb-1 text-white shadow-card sm:mt-3 sm:px-4 lg:whitespace-nowrap'
                 style={order(2, '-9deg')}
               >
                 {t('hero.titleEm')}
@@ -115,7 +115,7 @@ export default function HomePage() {
             {/* The scroll target of the navbar's "Play" link. It is this plain wrapper, not the card: the card animates in,
                 and a scroll aimed at it would land where it starts rather than where it ends up. */}
             <div id='start' className='mt-8 w-full max-w-xl'>
-              <section className='reveal-load toy-card w-full p-5 sm:p-6' style={order(4)}>
+              <section className='reveal-load toy-card @container w-full p-5 sm:p-6' style={order(4)}>
                 <Label htmlFor='name' className='mb-2'>
                   {t('start.nameLabel')}
                 </Label>
@@ -126,7 +126,7 @@ export default function HomePage() {
                   maxLength={24}
                   placeholder={t('start.namePlaceholder')}
                 />
-                <div className='mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2'>
+                <div className='mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 @lg:grid-cols-2'>
                   <Button size='lg' onClick={() => enter('/room/new')}>
                     <Plus size={20} strokeWidth={3} /> {t('start.createRoom')}
                   </Button>

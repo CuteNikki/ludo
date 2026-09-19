@@ -13,7 +13,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-/** The one navbar, mounted by the root layout. Links collapse into a menu panel below `md`. */
+/** The one navbar, mounted by the root layout. Links collapse into a menu panel below `lg`. */
 export function SiteNavbar() {
   const { t } = useTranslation();
   const pathname = usePathname();
@@ -38,7 +38,7 @@ export function SiteNavbar() {
   }, [open]);
 
   return (
-    <header className='relative z-40 border-b-3 border-border bg-background-alternative shadow-[0_4px_0_var(--shadow-color)]'>
+    <header className='relative z-40 border-b-3 border-border bg-background-alternative shadow-toy'>
       <a
         href='#main'
         className='absolute left-4 top-2 z-50 -translate-y-20 rounded-lg border-3 border-border bg-primary px-4 py-2 font-display text-primary-foreground shadow-toy focus:translate-y-0'
@@ -51,7 +51,7 @@ export function SiteNavbar() {
           <Wordmark className='text-4xl' />
         </Link>
 
-        <nav aria-label={t('nav.aria')} className='ml-6 hidden items-center gap-1.5 md:flex'>
+        <nav aria-label={t('nav.aria')} className='ml-6 hidden items-center gap-1.5 lg:flex'>
           {links.map(({ href, label, icon: Icon }) => {
             const active = pathname === href;
             return (
@@ -61,7 +61,7 @@ export function SiteNavbar() {
                 aria-current={active ? 'page' : undefined}
                 {...newTab}
                 className={cn(
-                  'inline-flex h-10 items-center gap-2 rounded-lg border-3 px-3.5 font-display tracking-wide transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-foreground',
+                  'inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-lg border-3 px-3.5 font-display tracking-wide transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-foreground',
                   active ? 'border-border bg-primary text-primary-foreground shadow-[0_3px_0_var(--shadow-color)]' : 'border-transparent hover:bg-foreground/10',
                 )}
               >
@@ -72,7 +72,7 @@ export function SiteNavbar() {
         </nav>
 
         <div className='ml-auto flex items-center gap-2'>
-          <div className='hidden items-center gap-2 md:flex'>
+          <div className='hidden items-center gap-2 lg:flex'>
             <LanguageToggle />
             <ThemeToggle />
             <SoundToggle />
@@ -85,7 +85,7 @@ export function SiteNavbar() {
           <Button
             variant='outline'
             size='icon'
-            className='size-10 md:hidden'
+            className='size-10 lg:hidden'
             aria-expanded={open}
             aria-controls='mobile-menu'
             aria-label={open ? t('nav.closeMenu') : t('nav.openMenu')}
@@ -97,7 +97,7 @@ export function SiteNavbar() {
       </div>
 
       {open && (
-        <div id='mobile-menu' className='animate-status-swap absolute inset-x-0 top-full border-b-3 border-border bg-background-alternative shadow-[0_4px_0_var(--shadow-color)] md:hidden'>
+        <div id='mobile-menu' className='animate-status-swap absolute inset-x-0 top-full border-b-3 border-border bg-background-alternative shadow-toy lg:hidden'>
           <div className='mx-auto grid max-w-lg gap-3 px-4 py-4 sm:px-6'>
             <nav aria-label={t('nav.aria')} className='grid gap-2'>
               {links.map(({ href, label, icon: Icon }) => (
