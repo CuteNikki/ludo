@@ -104,11 +104,11 @@
         "text": "2 to 4 players each get four pieces in their color, waiting in their yard. The game starts once everyone in the lobby is ready."
       },
       {
-        "title": "Rolling and extra turns",
+        "title": "Rolling",
         "text": "The server rolls for you automatically at the start of every turn. Rolling a six grants an extra roll right after that turn's move."
       },
       {
-        "title": "Leaving the yard and moving",
+        "title": "Leaving the yard",
         "text": "A piece needs a six to leave the yard for its starting square. Once out, move the chosen piece forward by the number rolled along the track."
       },
       {

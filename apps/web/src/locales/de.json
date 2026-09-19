@@ -104,11 +104,11 @@
         "text": "2 bis 4 Spieler bekommen je vier Figuren in ihrer Farbe, die im Hof warten. Das Spiel startet, sobald alle in der Lobby bereit sind."
       },
       {
-        "title": "Würfeln und Extrazüge",
+        "title": "Würfeln",
         "text": "Der Server würfelt zu Beginn jedes Zugs automatisch für dich. Eine gewürfelte Sechs gewinnt einen zusätzlichen Wurf direkt nach dem Zug dieser Runde."
       },
       {
-        "title": "Aus dem Hof und ziehen",
+        "title": "Aus dem Hof",
         "text": "Eine Figur braucht eine Sechs, um den Hof zu verlassen und aufs Startfeld zu kommen. Danach zieht die gewählte Figur um die gewürfelte Zahl auf der Strecke vorwärts."
       },
       {

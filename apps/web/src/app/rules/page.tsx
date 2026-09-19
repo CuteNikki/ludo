@@ -2,7 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 
-import { Dices, Flag, Home, Repeat, Shield, Swords, Trophy, Users } from 'lucide-react';
+import { Dices, Flag, Home, Shield, Swords, Target, Trophy, Users } from 'lucide-react';
 
 import { order } from '@/lib/reveal';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,8 @@ import { PAGE_DECOR_B } from '@/components/decor';
 import { PageHeader, PageShell } from '@/components/page-shell';
 import { Reveal } from '@/components/scroll-reveal';
 
-const sectionIcons = [Users, Dices, Repeat, Swords, Home, Trophy];
+// One per `rulesPage.sections` entry, in order: objective, setup, rolling, leaving the yard, capturing, winning.
+const sectionIcons = [Target, Users, Dices, Home, Swords, Trophy];
 const sectionColors = ['bg-p-red', 'bg-p-blue', 'bg-p-yellow', 'bg-p-green'] as const;
 
 export default function RulesPage() {
