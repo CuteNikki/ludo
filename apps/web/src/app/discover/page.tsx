@@ -86,60 +86,72 @@ export default function DiscoverPage() {
         {t('discover.listTitle')}
       </h2>
 
-      {!loading && rooms.length === 0 && (
-        <div className='reveal-load toy-card grid place-items-center gap-3 border-dashed p-10 text-center shadow-none' style={order(6)}>
-          <Dices size={40} strokeWidth={2} className='text-foreground/50' />
-          <p className='max-w-md font-bold text-foreground/70'>{t('discover.empty')}</p>
-        </div>
-      )}
+      {/* The list's space is held from the start, with placeholders while it loads, so the footer
+          doesn't jump when the rooms arrive. */}
+      <div className='min-h-[50dvh]'>
+        {loading && (
+          <ul aria-hidden='true' className='grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'>
+            {[0, 1, 2].map((placeholder) => (
+              <li key={placeholder} className='toy-card h-44 animate-pulse bg-foreground/5 shadow-none' />
+            ))}
+          </ul>
+        )}
 
-      <ul className='grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'>
-        {rooms.map((room, index) => {
-          const joinable = room.phase === 'lobby' && room.playerCount < room.maxPlayers;
-          return (
-            // Rooms appear and disappear as the list refreshes; a new card pops in, the others stay put.
-            <li key={room.roomCode} className='reveal-load toy-card flex flex-col gap-4 p-5' style={order(6 + Math.min(index, 5), index % 2 === 0 ? '-3deg' : '3deg')}>
-              <div className='flex items-start justify-between gap-3'>
-                <div className='min-w-0'>
-                  <p className='truncate font-display text-3xl tracking-[.12em]'>{room.roomCode}</p>
-                  <p className='truncate text-sm font-bold text-foreground/65'>{t('discover.hostedBy', { name: room.hostName })}</p>
-                </div>
-                <span
-                  className={cn(
-                    'shrink-0 rounded-md border-2 border-border px-2 py-0.5 text-xs font-extrabold uppercase',
-                    room.phase === 'lobby' ? 'bg-p-green text-white' : 'bg-background text-foreground/70',
-                  )}
-                >
-                  {t(`discover.phase.${room.phase}`)}
-                </span>
-              </div>
+        {!loading && rooms.length === 0 && (
+          <div className='reveal-load toy-card grid place-items-center gap-3 border-dashed p-10 text-center shadow-none' style={order(6)}>
+            <Dices size={40} strokeWidth={2} className='text-foreground/50' />
+            <p className='max-w-md font-bold text-foreground/70'>{t('discover.empty')}</p>
+          </div>
+        )}
 
-              <div className='flex flex-wrap items-center justify-between gap-x-3 gap-y-2'>
-                <span
-                  className='flex items-center gap-1.5'
-                  role='img'
-                  aria-label={`${room.playerCount}/${room.maxPlayers}`}
-                >
-                  {Array.from({ length: room.maxPlayers }, (_, seat) => (
-                    <span
-                      key={seat}
-                      className={cn('size-5 rounded-full border-3 border-border', seat < room.playerCount ? seatColors[seat % seatColors.length] : 'bg-background')}
-                    />
-                  ))}
-                  <span className='ml-1 text-sm font-extrabold'>
-                    {room.playerCount}/{room.maxPlayers}
+        <ul className='grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'>
+          {rooms.map((room, index) => {
+            const joinable = room.phase === 'lobby' && room.playerCount < room.maxPlayers;
+            return (
+              // Rooms appear and disappear as the list refreshes; a new card pops in, the others stay put.
+              <li key={room.roomCode} className='reveal-load toy-card flex flex-col gap-4 p-5' style={order(6 + Math.min(index, 5), index % 2 === 0 ? '-3deg' : '3deg')}>
+                <div className='flex items-start justify-between gap-3'>
+                  <div className='min-w-0'>
+                    <p className='truncate font-display text-3xl tracking-[.12em]'>{room.roomCode}</p>
+                    <p className='truncate text-sm font-bold text-foreground/65'>{t('discover.hostedBy', { name: room.hostName })}</p>
+                  </div>
+                  <span
+                    className={cn(
+                      'shrink-0 rounded-md border-2 border-border px-2 py-0.5 text-xs font-extrabold uppercase',
+                      room.phase === 'lobby' ? 'bg-p-green text-white' : 'bg-background text-foreground/70',
+                    )}
+                  >
+                    {t(`discover.phase.${room.phase}`)}
                   </span>
-                </span>
-                <RoomSettingIcons settings={room.settings} />
-              </div>
+                </div>
 
-              <Button className='mt-auto w-full' disabled={!joinable} onClick={() => joinRoom(room.roomCode)}>
-                {t('discover.join')} <ArrowRight size={18} strokeWidth={3} />
-              </Button>
-            </li>
-          );
-        })}
-      </ul>
+                <div className='flex flex-wrap items-center justify-between gap-x-3 gap-y-2'>
+                  <span
+                    className='flex items-center gap-1.5'
+                    role='img'
+                    aria-label={`${room.playerCount}/${room.maxPlayers}`}
+                  >
+                    {Array.from({ length: room.maxPlayers }, (_, seat) => (
+                      <span
+                        key={seat}
+                        className={cn('size-5 rounded-full border-3 border-border', seat < room.playerCount ? seatColors[seat % seatColors.length] : 'bg-background')}
+                      />
+                    ))}
+                    <span className='ml-1 text-sm font-extrabold'>
+                      {room.playerCount}/{room.maxPlayers}
+                    </span>
+                  </span>
+                  <RoomSettingIcons settings={room.settings} />
+                </div>
+
+                <Button className='mt-auto w-full' disabled={!joinable} onClick={() => joinRoom(room.roomCode)}>
+                  {t('discover.join')} <ArrowRight size={18} strokeWidth={3} />
+                </Button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </PageShell>
   );
 }

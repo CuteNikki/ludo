@@ -39,7 +39,8 @@ export function RoomCard({ roomCode, onLeave }: { roomCode: string; onLeave: () 
       <button
         type='button'
         onClick={() => copy('code')}
-        aria-label={copied === 'code' ? t('room.copied') : t('room.copyCodeAria')}
+        // The name starts with the code that is written on the button, as screen-reader users expect.
+        aria-label={`${roomCode}: ${copied === 'code' ? t('room.copied') : t('room.copyCodeAria')}`}
         title={copied === 'code' ? t('room.copied') : t('room.copyCodeAria')}
         // Sized by the card, not the screen: the widest codes (all W's) only fit at the larger size in a wide card.
         className='group mt-0.5 flex max-w-full touch-manipulation items-center gap-2 rounded-lg font-display text-4xl leading-none tracking-[.14em] transition-colors hover:text-foreground/70 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-foreground @md:text-5xl'

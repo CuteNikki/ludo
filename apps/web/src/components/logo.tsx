@@ -20,12 +20,9 @@ const letterColors = ['text-p-red', 'text-p-blue', 'text-p-green', 'text-p-yello
 /** "Ludo" with each letter in a player color and a sticker-style outline. */
 export function Wordmark({ className }: { className?: string }) {
   return (
-    <span
-      aria-label='Ludo'
-      className={cn('font-display leading-none tracking-wide [-webkit-text-stroke:5px_var(--border)] [paint-order:stroke_fill]', className)}
-    >
+    <span className={cn('font-display leading-none tracking-wide [-webkit-text-stroke:5px_var(--border)] [paint-order:stroke_fill]', className)}>
       {'Ludo'.split('').map((letter, index) => (
-        <span key={index} aria-hidden='true' className={letterColors[index]}>
+        <span key={index} className={letterColors[index]}>
           {letter}
         </span>
       ))}

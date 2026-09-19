@@ -170,7 +170,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
     );
   }
 
-  if (!state || !playerId) return <Message title={t('room.message.openingRoom')} detail={t('room.message.connecting')} />;
+  if (!state || !playerId) return <RoomLoading />;
 
   const me = state.players.find((player) => player.id === playerId);
   const isHost = state.hostPlayerId === playerId;
@@ -295,6 +295,33 @@ function send(socket: WebSocket, event: ClientEvent) {
   socket.send(JSON.stringify(event));
 }
 
+/**
+ * What the room shows while it connects. It is laid out like the room itself and fills the screen, so
+ * when the real room arrives the footer is already below the fold and nothing visibly jumps.
+ */
+function RoomLoading() {
+  const { t } = useTranslation();
+
+  return (
+    <div className='mx-auto flex min-h-dvh w-full max-w-480 flex-col px-3 py-3 sm:px-6 sm:py-5 lg:px-8 lg:py-6' role='status'>
+      <div className='room-grid'>
+        <div className='room-hud'>
+          <div className='toy-card p-4 sm:p-5'>
+            <p className='eyebrow text-accent'>{t('room.message.openingRoom')}</p>
+            <p className='mt-1 font-display text-3xl leading-tight sm:text-4xl'>{t('room.message.connecting')}</p>
+          </div>
+        </div>
+        <div className='room-board'>
+          <div className='room-board-size mx-auto aspect-square animate-pulse rounded-2xl border-4 border-border bg-foreground/5 shadow-[8px_8px_0_var(--shadow-color)]' />
+        </div>
+        <div className='room-players'>
+          <div className='toy-card h-56 animate-pulse bg-foreground/5 shadow-none' />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Message({ title, detail, showRoomChoices = false }: { title: string; detail: string; showRoomChoices?: boolean }) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -340,7 +367,7 @@ function Message({ title, detail, showRoomChoices = false }: { title: string; de
             <p className='mt-2 h-4 text-xs font-bold text-foreground/60' aria-live='polite'>
               {submitting ? t('room.message.lookingUpRoom') : ''}
             </p>
-            <div className='mt-2 flex items-center gap-3 text-xs font-extrabold uppercase text-foreground/50'>
+            <div className='mt-2 flex items-center gap-3 text-xs font-extrabold uppercase text-foreground/70'>
               <span className='h-0.5 flex-1 rounded-full bg-foreground/20' /> {t('start.or')} <span className='h-0.5 flex-1 rounded-full bg-foreground/20' />
             </div>
             <div className='mt-4 flex flex-col justify-center gap-3 sm:flex-row'>

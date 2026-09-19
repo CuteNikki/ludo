@@ -33,7 +33,7 @@ export function LanguageToggle({ layout = 'dropdown' }: { layout?: 'dropdown' | 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='outline' aria-label={i18n.t('language.aria')} className='min-h-10 gap-1.5 px-3'>
+        <Button variant='outline' aria-label={`${i18n.t('language.aria')}: ${languageCodes[current]}`} className='min-h-10 gap-1.5 px-3'>
           <Languages size={18} />
           <span className='uppercase'>{languageCodes[current]}</span>
           <ChevronDown size={14} className='text-foreground/60' />
