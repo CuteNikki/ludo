@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ArrowRight, Clock3, Dice6, Dices, RefreshCw, Repeat, ShieldCheck, Sparkles, Swords, Users } from 'lucide-react';
+import { ArrowRight, Clock3, Dice6, Dices, RefreshCw, Repeat, ShieldCheck, Sparkles, Swords, Target, Users } from 'lucide-react';
 
 import { usePlayerName } from '@/lib/player-name';
 import { order } from '@/lib/reveal';
@@ -167,6 +167,7 @@ const BOOLEAN_SETTINGS = [
   { key: 'extraTurnOnCapture', icon: Swords, labelKey: 'room.settings.extraTurnOnCapture', infoKey: 'room.settings.extraTurnOnCaptureInfo' },
   { key: 'safeStartSquares', icon: ShieldCheck, labelKey: 'room.settings.safeStartSquares', infoKey: 'room.settings.safeStartSquaresInfo' },
   { key: 'threeTriesToLeaveYard', icon: Repeat, labelKey: 'room.settings.threeTriesToLeaveYard', infoKey: 'room.settings.threeTriesToLeaveYardInfo' },
+  { key: 'mustCapture', icon: Target, labelKey: 'room.settings.mustCapture', infoKey: 'room.settings.mustCaptureInfo' },
 ] as const;
 
 /** One icon per setting, green when on and red when off, with the current value on hover/tap. */

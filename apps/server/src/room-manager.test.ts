@@ -138,6 +138,7 @@ describe('RoomManager game turns', () => {
       extraTurnOnCapture: false,
       safeStartSquares: false,
       threeTriesToLeaveYard: false,
+      mustCapture: false,
     };
     expect(() => manager.setSettings(host.state.roomCode, guest.playerId, settings)).toThrow('Only the host');
     const updated = manager.setSettings(host.state.roomCode, host.playerId, settings);
@@ -166,6 +167,7 @@ describe('RoomManager game turns', () => {
       extraTurnOnCapture: false,
       safeStartSquares: false,
       threeTriesToLeaveYard: false,
+      mustCapture: false,
     };
     manager.setSettings(host.state.roomCode, host.playerId, settings);
     manager.setReady(host.state.roomCode, host.playerId, true);
@@ -191,6 +193,7 @@ describe('RoomManager game turns', () => {
       extraTurnOnCapture: false,
       safeStartSquares: false,
       threeTriesToLeaveYard: false,
+      mustCapture: false,
     };
     manager.setSettings(publicRoom.state.roomCode, publicRoom.playerId, settings);
     manager.createRoom('Mika'); // stays private by default
@@ -323,6 +326,7 @@ describe('RoomManager game turns', () => {
       extraTurnOnCapture: false,
       safeStartSquares: false,
       threeTriesToLeaveYard: false,
+      mustCapture: false,
     });
     manager.setReady(host.state.roomCode, host.playerId, true);
     manager.setReady(host.state.roomCode, guest.playerId, true);
@@ -580,6 +584,68 @@ describe('RoomManager game turns', () => {
       await waitFor(guestTurn);
 
       expect(count(hostMisses)).toBe(1);
+    });
+  });
+
+  describe('must capture', () => {
+    /** Red's piece on 5 can capture blue's on square 8 with a 3, while red's piece on 20 has a free move. */
+    function startCaptureChoice(overrides: Partial<RoomSettings>, roll = 3, blueSquare = 38) {
+      const context = startConfiguredGame(overrides, roll);
+      context.hostPieces[0]!.position = 5;
+      context.hostPieces[1]!.position = 20;
+      context.guestPieces[0]!.position = blueSquare;
+      return context;
+    }
+
+    test('is disabled by default', () => {
+      const manager = new RoomManager();
+      const host = manager.createRoom('Ada');
+      expect(host.state.settings.mustCapture).toBe(false);
+    });
+
+    test('offers every move when disabled', () => {
+      const { manager, host, hostPieces } = startCaptureChoice({});
+      const rolled = manager.roll(host.state.roomCode, host.playerId);
+      expect(rolled.movablePieceIds).toEqual([hostPieces[0]!.id, hostPieces[1]!.id]);
+    });
+
+    test('offers only the capturing move when enabled', () => {
+      const { manager, host, hostPieces } = startCaptureChoice({ mustCapture: true });
+      const rolled = manager.roll(host.state.roomCode, host.playerId);
+      expect(rolled.movablePieceIds).toEqual([hostPieces[0]!.id]);
+    });
+
+    test('offers every move when nothing can be captured', () => {
+      const { manager, host, hostPieces } = startCaptureChoice({ mustCapture: true }, 3, 30);
+      const rolled = manager.roll(host.state.roomCode, host.playerId);
+      expect(rolled.movablePieceIds).toEqual([hostPieces[0]!.id, hostPieces[1]!.id]);
+    });
+
+    test('takes priority over must spawn on six', () => {
+      // On a six, red's piece on 2 captures blue's on square 8; red also has pieces waiting in the yard.
+      const spawning = startConfiguredGame({ mustSpawnOnSix: true }, 6);
+      spawning.hostPieces[0]!.position = 2;
+      spawning.guestPieces[0]!.position = 38;
+      const spawned = spawning.manager.roll(spawning.host.state.roomCode, spawning.host.playerId);
+      expect(spawning.hostPieces.find((piece) => piece.id === spawned.movablePieceIds[0])?.position).toBe(-1);
+
+      const capturing = startConfiguredGame({ mustSpawnOnSix: true, mustCapture: true }, 6);
+      capturing.hostPieces[0]!.position = 2;
+      capturing.guestPieces[0]!.position = 38;
+      const rolled = capturing.manager.roll(capturing.host.state.roomCode, capturing.host.playerId);
+      expect(rolled.movablePieceIds).toEqual([capturing.hostPieces[0]!.id]);
+    });
+
+    test('counts leaving the yard onto an occupied start square as a capture', () => {
+      // Blue's piece on 30 stands on square 0, red's start square.
+      const { manager, host, hostPieces, guestPieces } = startConfiguredGame({ mustCapture: true }, 6);
+      hostPieces[0]!.position = 10;
+      guestPieces[0]!.position = 30;
+
+      const rolled = manager.roll(host.state.roomCode, host.playerId);
+
+      expect(rolled.movablePieceIds).toHaveLength(1);
+      expect(hostPieces.find((piece) => piece.id === rolled.movablePieceIds[0])?.position).toBe(-1);
     });
   });
 
@@ -1017,6 +1083,7 @@ describe('RoomManager closed tabs and empty rooms', () => {
     extraTurnOnCapture: false,
     safeStartSquares: false,
     threeTriesToLeaveYard: false,
+    mustCapture: false,
   };
 
   /** Short lobby grace period, everything else default; `onLeft` sees who was dropped and why. */

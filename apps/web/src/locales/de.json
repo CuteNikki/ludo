@@ -151,6 +151,10 @@
         "text": "Eine optionale, vom Host aktivierbare Regel: Wenn keine Figur auf dem Feld ziehen kann, weil alle noch im Hof stehen oder am Ende der Zielreihe festsitzen, darf man pro Zug bis zu dreimal würfeln, um eine Sechs zu bekommen. Nach dem dritten Fehlwurf ist der nächste Spieler dran."
       },
       {
+        "title": "Schlagzwang",
+        "text": "Eine optionale, vom Host aktivierbare Regel: Kann einer deiner Züge eine gegnerische Figur schlagen, werden nur solche Züge angeboten. Das gilt auch fürs Einsetzen auf ein besetztes Startfeld und geht der Regel \"Muss bei Sechs einsetzen\" vor."
+      },
+      {
         "title": "Computergegner",
         "text": "Der Host kann freie Plätze mit Bots füllen. Sie würfeln und ziehen selbstständig, und ein Spiel gegen Bots kann mit nur einem menschlichen Spieler starten."
       },
@@ -284,6 +288,8 @@
       "safeStartSquaresInfo": "Figuren auf einem Startfeld können nicht geschlagen werden, und auf ein Startfeld, auf dem eine Figur einer anderen Farbe steht, darf niemand ziehen oder einsetzen.",
       "threeTriesToLeaveYard": "Drei Versuche",
       "threeTriesToLeaveYardInfo": "Wenn nur eine Sechs dich weiterbringt, weil alle deine Figuren im Hof stehen oder am Ende der Zielreihe festsitzen, darfst du pro Zug bis zu dreimal würfeln, um eine zu bekommen.",
+      "mustCapture": "Schlagzwang",
+      "mustCaptureInfo": "Kann ein Zug eine gegnerische Figur schlagen, musst du ihn machen. Schlagen geht dem Einsetzen bei Sechs vor.",
       "isPublic": "Öffentlicher Raum",
       "isPublicInfo": "Listet diesen Raum auf der öffentlichen Entdecken-Seite, solange er offen und noch in der Lobby ist."
     },

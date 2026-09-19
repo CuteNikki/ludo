@@ -4,7 +4,7 @@ import type { MoveTimeSeconds, Player, PlayerColor, RoomSettings } from '@ludo/s
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Check, Clock3, Dice6, Dices, Globe, Info, Palette, Repeat, Settings2, ShieldCheck, Sparkles, Swords, UserRound } from 'lucide-react';
+import { Check, Clock3, Dice6, Dices, Globe, Info, Palette, Repeat, Settings2, ShieldCheck, Sparkles, Swords, Target, UserRound } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -212,6 +212,14 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
           checked={settings.threeTriesToLeaveYard}
           disabled={!isHost}
           onChange={(checked) => onChange({ threeTriesToLeaveYard: checked })}
+        />
+        <SettingToggle
+          icon={<Target size={18} strokeWidth={2.5} />}
+          label={t('room.settings.mustCapture')}
+          description={t('room.settings.mustCaptureInfo')}
+          checked={settings.mustCapture}
+          disabled={!isHost}
+          onChange={(checked) => onChange({ mustCapture: checked })}
         />
         <SettingToggle
           icon={<Globe size={18} strokeWidth={2.5} />}

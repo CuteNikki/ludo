@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS: RoomSettings = {
   extraTurnOnCapture: false,
   safeStartSquares: false,
   threeTriesToLeaveYard: false,
+  mustCapture: false,
 };
 
 /** Counts within a single turn (including its extra rolls), which start over whenever the turn passes on. */
@@ -185,7 +186,8 @@ export class RoomManager {
       typeof settings.mustSpawnOnSix !== 'boolean' ||
       typeof settings.extraTurnOnCapture !== 'boolean' ||
       typeof settings.safeStartSquares !== 'boolean' ||
-      typeof settings.threeTriesToLeaveYard !== 'boolean'
+      typeof settings.threeTriesToLeaveYard !== 'boolean' ||
+      typeof settings.mustCapture !== 'boolean'
     )
       throw new RoomError('INVALID_SETTINGS', 'Invalid room settings.');
 
@@ -530,12 +532,19 @@ export class RoomManager {
     if (!player) return [];
     const ownPieces = state.pieces.filter((piece) => piece.playerId === playerId);
 
-    const movable = ownPieces.filter((piece) => {
+    const legalMoves = ownPieces.filter((piece) => {
       const targetPosition = piece.position === -1 ? (diceResult === 6 ? 0 : -1) : piece.position + diceResult;
       if (targetPosition < 0 || targetPosition > 43) return false;
       if (this.isBlockedBySafeSquare(state, player, targetPosition)) return false;
       return !ownPieces.some((other) => other.id !== piece.id && other.position === targetPosition);
     });
+
+    // With "must capture", a move that captures an opponent is the only kind on offer. This also beats
+    // "must spawn on six": the spawn preference below only applies to whatever is left.
+    const capturingMoves = state.settings.mustCapture
+      ? legalMoves.filter((piece) => this.getOpponentPiecesAt(state, player, piece.position === -1 ? 0 : piece.position + diceResult).length > 0)
+      : [];
+    const movable = capturingMoves.length > 0 ? capturingMoves : legalMoves;
 
     if (diceResult === 6) {
       const homeMovable = movable.filter((piece) => piece.position === -1);

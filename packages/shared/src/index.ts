@@ -27,6 +27,7 @@ export interface RoomSettings {
   extraTurnOnCapture: boolean;
   safeStartSquares: boolean;
   threeTriesToLeaveYard: boolean;
+  mustCapture: boolean;
 }
 
 export interface PublicRoomSummary {
