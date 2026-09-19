@@ -9,6 +9,7 @@ import { ArrowRight, Clock3, Dice6, Dices, RefreshCw, Repeat, ShieldCheck, Spark
 
 import { usePlayerName } from '@/lib/player-name';
 import { order } from '@/lib/reveal';
+import { isJoinable, sortRooms } from '@/lib/room-list';
 import { cn } from '@/lib/utils';
 
 import { PAGE_DECOR_A } from '@/components/decor';
@@ -104,8 +105,10 @@ export default function DiscoverPage() {
         )}
 
         <ul className='grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'>
-          {rooms.map((room, index) => {
-            const joinable = room.phase === 'lobby' && room.playerCount < room.maxPlayers;
+          {sortRooms(rooms).map((room, index) => {
+            const joinable = isJoinable(room);
+            // A lobby with no free seat gets its own label; only rooms you can still join say "Open".
+            const status = room.phase === 'lobby' && !joinable ? 'full' : room.phase;
             return (
               // Rooms appear and disappear as the list refreshes; a new card pops in, the others stay put.
               <li
@@ -121,10 +124,10 @@ export default function DiscoverPage() {
                   <span
                     className={cn(
                       'shrink-0 rounded-md border-2 border-border px-2 py-0.5 text-xs font-extrabold uppercase',
-                      room.phase === 'lobby' ? 'bg-p-green text-white' : 'bg-background text-foreground/70',
+                      joinable ? 'bg-p-green text-white' : 'bg-background text-foreground/70',
                     )}
                   >
-                    {t(`discover.phase.${room.phase}`)}
+                    {t(`discover.phase.${status}`)}
                   </span>
                 </div>
 

@@ -51,6 +51,7 @@
     "settingOff": "Off",
     "phase": {
       "lobby": "Open",
+      "full": "Full",
       "playing": "In progress",
       "finished": "Finished"
     }
