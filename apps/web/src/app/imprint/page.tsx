@@ -12,7 +12,7 @@ export default function ImprintPage() {
   return (
     <LegalPage page='imprint'>
       {isOperatorConfigured ? (
-        <address className='mt-6 space-y-2 border-2 border-border bg-background p-4 not-italic'>
+        <address className='mt-6 max-w-md space-y-2 toy-tile p-4 not-italic'>
           <p className='font-black'>{operator.name}</p>
           <p className='flex gap-2 text-sm text-foreground/80'>
             <MapPin size={16} className='mt-0.5 shrink-0' aria-label={t('legal.imprint.address')} />
@@ -42,7 +42,7 @@ export default function ImprintPage() {
           )}
         </address>
       ) : (
-        <p role='status' className='mt-6 flex gap-2 border-2 border-amber-500 bg-amber-500/10 p-4 text-sm font-bold text-amber-700 dark:text-amber-400'>
+        <p role='status' className='mt-6 flex gap-2 rounded-lg border-3 border-amber-500 bg-amber-500/10 p-4 text-sm font-bold text-amber-700 dark:text-amber-400'>
           <TriangleAlert size={18} className='shrink-0' /> {t('legal.imprint.notConfigured')}
         </p>
       )}

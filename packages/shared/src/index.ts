@@ -59,6 +59,7 @@ export type ClientEvent =
   | { type: 'room:settings'; payload: RoomSettings }
   | { type: 'room:leave'; payload: Record<string, never> }
   | { type: 'room:kick'; payload: { playerId: string } }
+  | { type: 'room:claimHost'; payload: Record<string, never> }
   | { type: 'room:addBot'; payload: Record<string, never> }
   | { type: 'player:update'; payload: { name: string; color: PlayerColor } }
   | { type: 'player:ready'; payload: { ready: boolean } }
@@ -71,6 +72,7 @@ export type PlayerLeftReason = 'left' | 'kicked' | 'disconnected';
 export type ServerEvent =
   | { type: 'room:joined'; payload: { playerId: string; state: GameState } }
   | { type: 'game:state'; payload: GameState }
+  | { type: 'player:joined'; payload: { playerId: string; playerName: string } }
   | { type: 'player:left'; payload: { playerId: string; playerName: string; reason: PlayerLeftReason } }
   | { type: 'room:rematch'; payload: { roomCode: string | null; movedPlayerIds: string[] } }
   | { type: 'room:list'; payload: { rooms: PublicRoomSummary[] } }
@@ -98,6 +100,7 @@ export type RoomErrorCode =
   | 'KICK_NOT_AVAILABLE'
   | 'HOST_ONLY_KICK'
   | 'HOST_CANNOT_KICK_SELF'
+  | 'HOST_STILL_HERE'
   | 'HOST_ONLY_BOTS'
   | 'BOTS_ONLY_LOBBY'
   | 'REMATCH_NOT_AVAILABLE'

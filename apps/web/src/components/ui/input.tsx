@@ -7,7 +7,8 @@ const Input = forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(({ cla
     <input
       type={type}
       className={cn(
-        'flex h-11 w-full border-2 border-border bg-background-alternative px-4 text-base outline-none transition-colors placeholder:text-foreground/40 focus:border-foreground focus:ring-2 focus:ring-amber-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+        // 16px minimum on touch screens keeps iOS from zooming the page when the field is focused.
+        'flex h-12 w-full rounded-lg border-3 border-border bg-background-alternative px-4 text-base font-bold shadow-[inset_0_3px_0_rgb(0_0_0/0.07)] outline-none transition-[box-shadow,border-color] placeholder:font-semibold placeholder:text-foreground/40 focus:ring-4 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
       ref={ref}

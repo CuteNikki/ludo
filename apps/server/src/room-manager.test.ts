@@ -446,13 +446,14 @@ describe('RoomManager bots', () => {
     expect(leftEvents).toEqual([]);
   });
 
-  test('winds the room down when the last human leaves', () => {
+  test('deletes the room as soon as the last human leaves', () => {
     const manager = new RoomManager();
     const host = manager.createRoom('Ada');
     manager.addBot(host.state.roomCode, host.playerId);
 
     expect(manager.leaveRoom(host.state.roomCode, host.playerId)).toBeNull();
-    expect(manager.getRoomState(host.state.roomCode)?.players).toEqual([]);
+    expect(manager.getRoomState(host.state.roomCode)).toBeNull();
+    expect(() => manager.joinRoom(host.state.roomCode, 'Linus')).toThrow('not found');
   });
 
   test('hands the host role to a human, never a bot', () => {
@@ -621,5 +622,162 @@ describe('RoomManager host handover', () => {
 
     const updated = manager.leaveRoom(state.roomCode, host.playerId);
     expect(updated?.hostPlayerId).toBe(third.playerId);
+  });
+});
+
+describe('RoomManager closed tabs and empty rooms', () => {
+  const publicSettings = { moveTimeSeconds: 30 as const, automaticSingleMove: true, fairDice: true, isPublic: true, mustSpawnOnSix: false };
+
+  /** Short lobby grace period, everything else default; `onLeft` sees who was dropped and why. */
+  function lobbyManager(lobbyGraceMs: number, onLeft: (event: PlayerLeftEvent) => void = () => undefined) {
+    return new RoomManager(() => undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, (_roomCode, event) => onLeft(event), undefined, 60_000, lobbyGraceMs);
+  }
+
+  test('drops a player who closed their tab from the lobby once the grace period ends', async () => {
+    const left: PlayerLeftEvent[] = [];
+    const manager = lobbyManager(20, (event) => left.push(event));
+    const host = manager.createRoom('Ada');
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+
+    manager.disconnectPlayer(host.state.roomCode, guest.playerId);
+    expect(host.state.players.map((player) => player.id)).toEqual([host.playerId, guest.playerId]);
+
+    await sleep(80);
+    expect(host.state.players.map((player) => player.id)).toEqual([host.playerId]);
+    expect(left).toEqual([{ playerId: guest.playerId, playerName: 'Linus', reason: 'disconnected' }]);
+  });
+
+  test('lets a reloading player keep their seat in the lobby', async () => {
+    const manager = lobbyManager(40);
+    const host = manager.createRoom('Ada');
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+
+    manager.disconnectPlayer(host.state.roomCode, guest.playerId);
+    manager.joinRoom(host.state.roomCode, 'Linus', guest.playerId);
+
+    await sleep(100);
+    expect(host.state.players.map((player) => player.id)).toEqual([host.playerId, guest.playerId]);
+    expect(host.state.players.every((player) => player.connected)).toBe(true);
+  });
+
+  test('keeps the seat of a player who dropped out of a running game', async () => {
+    const manager = lobbyManager(20);
+    const host = manager.createRoom('Ada');
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+    manager.setReady(host.state.roomCode, host.playerId, true);
+    manager.setReady(host.state.roomCode, guest.playerId, true);
+    expect(host.state.phase).toBe('playing');
+
+    manager.disconnectPlayer(host.state.roomCode, guest.playerId);
+    await sleep(80);
+    expect(host.state.players.map((player) => player.id)).toContain(guest.playerId);
+  });
+
+  test('gives a game that started during the grace period the long grace period', async () => {
+    const manager = lobbyManager(40);
+    const host = manager.createRoom('Ada');
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+    const third = manager.joinRoom(host.state.roomCode, 'Mika');
+    manager.disconnectPlayer(host.state.roomCode, third.playerId);
+    // Everyone else readies up (and the absent player was already ready) before the lobby grace runs out.
+    manager.setReady(host.state.roomCode, third.playerId, true);
+    manager.setReady(host.state.roomCode, host.playerId, true);
+    manager.setReady(host.state.roomCode, guest.playerId, true);
+    expect(host.state.phase).toBe('playing');
+
+    await sleep(120);
+    expect(host.state.players.map((player) => player.id)).toContain(third.playerId);
+  });
+
+  test('deletes an abandoned room and stops listing it', async () => {
+    const manager = lobbyManager(20);
+    const host = manager.createRoom('Ada');
+    manager.setSettings(host.state.roomCode, host.playerId, publicSettings);
+    expect(manager.listPublicRooms()).toHaveLength(1);
+
+    manager.disconnectPlayer(host.state.roomCode, host.playerId);
+    // Nobody is connected any more, so it is already hidden while the seat is held for a reload.
+    expect(manager.listPublicRooms()).toEqual([]);
+
+    await sleep(80);
+    expect(manager.getRoomState(host.state.roomCode)).toBeNull();
+    expect(() => manager.joinRoom(host.state.roomCode, 'Linus')).toThrow('not found');
+  });
+
+  test('lists a room again if its host reconnects in time', async () => {
+    const manager = lobbyManager(60);
+    const host = manager.createRoom('Ada');
+    manager.setSettings(host.state.roomCode, host.playerId, publicSettings);
+
+    manager.disconnectPlayer(host.state.roomCode, host.playerId);
+    manager.joinRoom(host.state.roomCode, 'Ada', host.playerId);
+    expect(manager.listPublicRooms().map((room) => room.roomCode)).toEqual([host.state.roomCode]);
+
+    await sleep(120);
+    expect(manager.getRoomState(host.state.roomCode)).not.toBeNull();
+  });
+
+  test('hands the host role on when an absent host is finally dropped', async () => {
+    const manager = lobbyManager(20);
+    const host = manager.createRoom('Ada');
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+
+    manager.disconnectPlayer(host.state.roomCode, host.playerId);
+    await sleep(80);
+    expect(host.state.hostPlayerId).toBe(guest.playerId);
+  });
+});
+
+describe('RoomManager taking over the host role', () => {
+  function room() {
+    const manager = new RoomManager();
+    const host = manager.createRoom('Ada');
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+    return { manager, host, guest, code: host.state.roomCode };
+  }
+
+  test('lets a connected player take over once the host has gone', () => {
+    const { manager, host, guest, code } = room();
+    manager.disconnectPlayer(code, host.playerId);
+
+    const updated = manager.claimHost(code, guest.playerId);
+    expect(updated.hostPlayerId).toBe(guest.playerId);
+    // And the new host can act like one.
+    expect(() => manager.setSettings(code, guest.playerId, { ...updated.settings, moveTimeSeconds: 45 })).not.toThrow();
+  });
+
+  test('never takes the role from a host who is still there', () => {
+    const { manager, host, guest, code } = room();
+    expect(() => manager.claimHost(code, guest.playerId)).toThrow('still here');
+    expect(host.state.hostPlayerId).toBe(host.playerId);
+  });
+
+  test('leaves things as they are when the host asks for their own role', () => {
+    const { manager, host, code } = room();
+    expect(manager.claimHost(code, host.playerId).hostPlayerId).toBe(host.playerId);
+  });
+
+  test('refuses bots and strangers', () => {
+    const { manager, host, code } = room();
+    manager.addBot(code, host.playerId);
+    const bot = host.state.players.find((player) => player.isBot)!;
+    manager.disconnectPlayer(code, host.playerId);
+
+    expect(() => manager.claimHost(code, bot.id)).toThrow('not found');
+    expect(() => manager.claimHost(code, 'nobody')).toThrow('not found');
+  });
+
+  test('cancels the pending automatic handover', async () => {
+    const manager = new RoomManager(() => undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 20);
+    const host = manager.createRoom('Ada');
+    const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+    const third = manager.joinRoom(host.state.roomCode, 'Mika');
+    manager.disconnectPlayer(host.state.roomCode, host.playerId);
+
+    manager.claimHost(host.state.roomCode, third.playerId);
+    await sleep(80);
+    // The timer would have picked Linus; the claim already settled it.
+    expect(host.state.hostPlayerId).toBe(third.playerId);
+    expect(guest.playerId).not.toBe(third.playerId);
   });
 });

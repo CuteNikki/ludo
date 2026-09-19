@@ -1,6 +1,18 @@
 {
   "nav": {
-    "howItWorks": "How it works"
+    "aria": "Main",
+    "home": "Ludo home",
+    "rooms": "Public rooms",
+    "rules": "Rules",
+    "play": "Play",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "skip": "Skip to content"
+  },
+  "footerLinks": {
+    "play": "Play",
+    "createRoom": "Create a room",
+    "project": "Project"
   },
   "hero": {
     "live": "The board is open",
@@ -21,12 +33,11 @@
     "nameLabel": "Your name",
     "namePlaceholder": "Player name",
     "createRoom": "Create room",
-    "playComputer": "Play against the computer",
+    "playComputer": "Play vs. bots",
     "or": "or",
     "roomLabel": "Room code",
     "roomPlaceholder": "ABC123",
-    "joinAria": "Join room",
-    "browsePublicRooms": "Or browse public rooms"
+    "joinAria": "Join room"
   },
   "discover": {
     "eyebrow": "Ludo · Discover",
@@ -46,7 +57,7 @@
   },
   "howItWorks": {
     "eyebrow": "How it works",
-    "title": "Three steps to the first capture.",
+    "title": "Four steps to a good round.",
     "steps": [
       {
         "title": "Share a room",
@@ -59,6 +70,10 @@
       {
         "title": "Celebrate",
         "text": "Knock pieces out, stay within the time limit, and take first place."
+      },
+      {
+        "title": "Don't get mad",
+        "text": "Sent back to your yard? It happens to everyone. Laugh it off and roll again."
       }
     ],
     "players": {
@@ -129,7 +144,7 @@
       },
       {
         "title": "Removing inactive players",
-        "text": "The host can remove a player who has gone quiet at any time, even mid-game, and the turn moves on to the next player. If only one player is left, they win. If the host is away for more than 30 seconds, the host role passes to another player."
+        "text": "The host can remove a player who has gone quiet at any time, even mid-game, and the turn moves on to the next player. If only one player is left, they win. If the host is away for more than 30 seconds, the host role passes to another player. Anyone in the room can take the role over right away once the host is gone. In the lobby, someone who closes their tab is dropped after about 15 seconds."
       }
     ]
   },
@@ -179,10 +194,24 @@
       "BOTS_ONLY_LOBBY": "Bots can only be added in the lobby.",
       "REMATCH_NOT_AVAILABLE": "Voting isn't available yet.",
       "INVALID_EVENT": "Invalid message.",
-      "UNKNOWN": "Unknown error."
+      "UNKNOWN": "Unknown error.",
+      "HOST_STILL_HERE": "The host is still here."
     },
     "eyebrow": "Ludo · Room",
-    "rules": "Rules",
+    "hud": {
+      "yourTurn": "Your turn!",
+      "turnOf": "{{name}}'s turn",
+      "seatsAria": "Players and their last roll",
+      "rolled": "{{name}} rolled a {{value}}",
+      "noRoll": "{{name}} hasn't rolled yet",
+      "secondsLeft": "{{count}} seconds left"
+    },
+    "invite": {
+      "title": "Invite friends",
+      "text": "Share the code or the link. Up to four players fit in a room.",
+      "codeLabel": "Room code"
+    },
+    "leave": "Leave",
     "copyLink": "Link",
     "copyCodeAria": "Copy room code",
     "copied": "Copied",
@@ -196,14 +225,13 @@
     "addBot": "Add bot",
     "bot": "Bot",
     "botThinking": "{{name}} is choosing a piece",
-    "won": "Won",
+    "won": "Winner",
     "oneMoreRound": "One more round?",
     "rematchVoteInProgress": "Rematch vote in progress",
     "rematchVotedAria": "{{name}} voted to play again",
     "rematchStatus": "{{accepted}}/{{total}} in favor · {{seconds}}s",
     "rematchAccepted": "Confirmed",
-    "rematchCta": "Play again",
-    "mainMenu": "Main menu",
+    "rematchCta": "Rematch",
     "rollAnimating": "Rolling dice ...",
     "chooseAPieceSelf": "Choose a piece to move it",
     "chooseAPieceOther": "Choosing a piece",
@@ -215,7 +243,8 @@
     "leaveNotice": {
       "left": "{{name}} left the room.",
       "kicked": "{{name}} was removed by the host.",
-      "disconnected": "{{name}} disconnected."
+      "disconnected": "{{name}} disconnected.",
+      "joined": "{{name}} joined the room."
     },
     "profile": {
       "title": "Your profile",
@@ -252,9 +281,14 @@
       "connecting": "Connecting to the game server ...",
       "lookingUpRoom": "Looking for that room ...",
       "noConnection": "No connection to the game server.",
-      "newRoom": "Create new room",
-      "toHomepage": "Go to homepage"
-    }
+      "newRoom": "Create",
+      "toHomepage": "Home",
+      "gameRunning": "Game already started",
+      "roomFull": "Room is full"
+    },
+    "away": "Away",
+    "claimHost": "Take over",
+    "claimHostAria": "Become the host"
   },
   "board": {
     "ariaLabel": "Ludo board",
@@ -264,7 +298,7 @@
   },
   "legal": {
     "eyebrow": "Ludo · Legal",
-    "lastUpdated": "Last updated: September 18, 2026",
+    "lastUpdated": "Last updated: September 19, 2026",
     "nav": {
       "aria": "Legal",
       "imprint": "Imprint",
@@ -345,6 +379,7 @@
           "items": [
             "Cookie ludo_lng (up to one year): remembers the language you picked.",
             "Local storage ludo-theme: remembers your light, dark or system theme choice.",
+            "Local storage ludo-sound: remembers whether you turned the sound effects off.",
             "Session storage ludo-player-name: pre-fills your name. It is cleared when you close the tab.",
             "Session storage ludo-player:<room code>: lets you reclaim your seat after a reload. It is cleared when you leave the room or close the tab."
           ]
@@ -460,5 +495,12 @@
         }
       ]
     }
+  },
+  "sound": {
+    "aria": "Sound effects",
+    "on": "Sound on",
+    "off": "Sound off",
+    "mute": "Turn sound off",
+    "unmute": "Turn sound on"
   }
 }

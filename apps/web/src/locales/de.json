@@ -1,6 +1,18 @@
 {
   "nav": {
-    "howItWorks": "So funktioniert's"
+    "aria": "Hauptnavigation",
+    "home": "Ludo Startseite",
+    "rooms": "Öffentliche Räume",
+    "rules": "Regeln",
+    "play": "Spielen",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "skip": "Zum Inhalt springen"
+  },
+  "footerLinks": {
+    "play": "Spielen",
+    "createRoom": "Raum erstellen",
+    "project": "Projekt"
   },
   "hero": {
     "live": "Das Brett ist eröffnet",
@@ -21,12 +33,11 @@
     "nameLabel": "Dein Name",
     "namePlaceholder": "Spielername",
     "createRoom": "Raum erstellen",
-    "playComputer": "Gegen den Computer spielen",
+    "playComputer": "Gegen Bots spielen",
     "or": "oder",
     "roomLabel": "Raum-Code",
     "roomPlaceholder": "ABC123",
-    "joinAria": "Raum beitreten",
-    "browsePublicRooms": "Oder öffentliche Räume durchsuchen"
+    "joinAria": "Raum beitreten"
   },
   "discover": {
     "eyebrow": "Ludo · Entdecken",
@@ -46,7 +57,7 @@
   },
   "howItWorks": {
     "eyebrow": "So funktioniert's",
-    "title": "Drei Schritte bis zum ersten Rauswurf.",
+    "title": "Vier Schritte zu einer guten Runde.",
     "steps": [
       {
         "title": "Raum teilen",
@@ -59,6 +70,10 @@
       {
         "title": "Sieg feiern",
         "text": "Schmeiß Figuren raus, bleib im Zeitlimit und hol dir den ersten Platz."
+      },
+      {
+        "title": "Nicht ärgern",
+        "text": "Rausgeworfen? Das passiert jedem. Kurz durchatmen, lachen und weiterwürfeln."
       }
     ],
     "players": {
@@ -129,7 +144,7 @@
       },
       {
         "title": "Inaktive Spieler entfernen",
-        "text": "Der Host kann jederzeit einen Spieler entfernen, der nicht mehr reagiert, auch mitten im Spiel, und der Zug geht an den nächsten Spieler. Bleibt nur ein Spieler übrig, gewinnt er. Ist der Host länger als 30 Sekunden weg, geht die Host-Rolle an einen anderen Spieler."
+        "text": "Der Host kann jederzeit einen Spieler entfernen, der nicht mehr reagiert, auch mitten im Spiel, und der Zug geht an den nächsten Spieler. Bleibt nur ein Spieler übrig, gewinnt er. Ist der Host länger als 30 Sekunden weg, geht die Host-Rolle an einen anderen Spieler. Jeder im Raum kann die Rolle sofort übernehmen, sobald der Host weg ist. In der Lobby wird jemand, der seinen Tab schließt, nach etwa 15 Sekunden entfernt."
       }
     ]
   },
@@ -179,10 +194,24 @@
       "BOTS_ONLY_LOBBY": "Bots können nur in der Lobby hinzugefügt werden.",
       "REMATCH_NOT_AVAILABLE": "Die Abstimmung ist noch nicht verfügbar.",
       "INVALID_EVENT": "Ungültige Nachricht.",
-      "UNKNOWN": "Unbekannter Fehler."
+      "UNKNOWN": "Unbekannter Fehler.",
+      "HOST_STILL_HERE": "Der Host ist noch da."
     },
     "eyebrow": "Ludo · Raum",
-    "rules": "Regeln",
+    "hud": {
+      "yourTurn": "Du bist dran!",
+      "turnOf": "{{name}} ist dran",
+      "seatsAria": "Spieler und ihr letzter Wurf",
+      "rolled": "{{name}} hat eine {{value}} gewürfelt",
+      "noRoll": "{{name}} hat noch nicht gewürfelt",
+      "secondsLeft": "Noch {{count}} Sekunden"
+    },
+    "invite": {
+      "title": "Freunde einladen",
+      "text": "Teile den Code oder den Link. In einem Raum ist Platz für bis zu vier Spieler.",
+      "codeLabel": "Raumcode"
+    },
+    "leave": "Verlassen",
     "copyLink": "Link",
     "copyCodeAria": "Raum-Code kopieren",
     "copied": "Kopiert",
@@ -196,14 +225,13 @@
     "addBot": "Bot hinzufügen",
     "bot": "Bot",
     "botThinking": "{{name}} wählt eine Figur",
-    "won": "Gewonnen",
+    "won": "Gewinner",
     "oneMoreRound": "Noch eine Runde?",
     "rematchVoteInProgress": "Revanche-Abstimmung läuft",
     "rematchVotedAria": "{{name}} hat für eine weitere Runde gestimmt",
     "rematchStatus": "{{accepted}}/{{total}} dafür · {{seconds}}s",
     "rematchAccepted": "Zugesagt",
     "rematchCta": "Nochmal",
-    "mainMenu": "Hauptmenü",
     "rollAnimating": "Würfel rollt ...",
     "chooseAPieceSelf": "Wähle eine Figur, um sie zu bewegen",
     "chooseAPieceOther": "Wählt eine Figur",
@@ -215,7 +243,8 @@
     "leaveNotice": {
       "left": "{{name}} hat den Raum verlassen.",
       "kicked": "{{name}} wurde vom Host entfernt.",
-      "disconnected": "{{name}} hat die Verbindung verloren."
+      "disconnected": "{{name}} hat die Verbindung verloren.",
+      "joined": "{{name}} ist dem Raum beigetreten."
     },
     "profile": {
       "title": "Dein Profil",
@@ -252,9 +281,14 @@
       "connecting": "Verbindung zum Spielserver wird hergestellt ...",
       "lookingUpRoom": "Raum wird gesucht ...",
       "noConnection": "Keine Verbindung zum Spielserver.",
-      "newRoom": "Neuen Raum erstellen",
-      "toHomepage": "Zur Homepage"
-    }
+      "newRoom": "Erstellen",
+      "toHomepage": "Start",
+      "gameRunning": "Spiel läuft bereits",
+      "roomFull": "Raum ist voll"
+    },
+    "away": "Abwesend",
+    "claimHost": "Übernehmen",
+    "claimHostAria": "Host-Rolle übernehmen"
   },
   "board": {
     "ariaLabel": "Ludo-Spielfeld",
@@ -264,7 +298,7 @@
   },
   "legal": {
     "eyebrow": "Ludo · Rechtliches",
-    "lastUpdated": "Zuletzt aktualisiert: 18. September 2026",
+    "lastUpdated": "Zuletzt aktualisiert: 19. September 2026",
     "nav": {
       "aria": "Rechtliches",
       "imprint": "Impressum",
@@ -345,6 +379,7 @@
           "items": [
             "Cookie ludo_lng (bis zu einem Jahr): merkt sich die gewählte Sprache.",
             "Local Storage ludo-theme: merkt sich deine Wahl von hellem, dunklem oder System-Farbschema.",
+            "Local Storage ludo-sound: merkt sich, ob du die Soundeffekte ausgeschaltet hast.",
             "Session Storage ludo-player-name: füllt deinen Namen vor. Er wird beim Schließen des Tabs gelöscht.",
             "Session Storage ludo-player:<Raumcode>: ermöglicht dir, deinen Platz nach einem Neuladen wieder einzunehmen. Er wird beim Verlassen des Raums oder Schließen des Tabs gelöscht."
           ]
@@ -460,5 +495,12 @@
         }
       ]
     }
+  },
+  "sound": {
+    "aria": "Soundeffekte",
+    "on": "Ton an",
+    "off": "Ton aus",
+    "mute": "Ton ausschalten",
+    "unmute": "Ton einschalten"
   }
 }

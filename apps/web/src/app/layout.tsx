@@ -1,16 +1,19 @@
 import type { Metadata, Viewport } from 'next';
-import { Archivo, Fraunces } from 'next/font/google';
+import { Lilita_One, Nunito } from 'next/font/google';
 
 import { fallbackLng } from '@/lib/i18n/settings';
 
 import { LanguageProvider } from '@/components/providers/i18n';
+import { SoundProvider } from '@/components/providers/sound';
 import { ThemeProvider } from '@/components/providers/theme';
+import { SiteFooter } from '@/components/site-footer';
+import { SiteNavbar } from '@/components/site-navbar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 import './globals.css';
 
-const archivo = Archivo({ subsets: ['latin'], variable: '--font-sans' });
-const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-display' });
+const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito' });
+const lilita = Lilita_One({ subsets: ['latin'], weight: '400', variable: '--font-lilita' });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 const title = 'Ludo · Real-time multiplayer board game';
@@ -41,8 +44,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f4f0e7' },
-    { media: '(prefers-color-scheme: dark)', color: '#292524' },
+    { media: '(prefers-color-scheme: light)', color: '#fdf2d8' },
+    { media: '(prefers-color-scheme: dark)', color: '#191430' },
   ],
 };
 
@@ -53,10 +56,21 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang={fallbackLng} suppressHydrationWarning>
-      <body className={`${archivo.variable} ${fraunces.variable}`}>
+      <body className={`${nunito.variable} ${lilita.variable}`}>
         <LanguageProvider lng={fallbackLng}>
           <ThemeProvider>
-            <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
+            <SoundProvider>
+              <TooltipProvider delayDuration={200}>
+                {/* One navbar, one footer, for every page. Pages render only their own content. */}
+                <div className='flex min-h-dvh flex-col'>
+                  <SiteNavbar />
+                  <main id='main' className='flex flex-1 flex-col'>
+                    {children}
+                  </main>
+                  <SiteFooter />
+                </div>
+              </TooltipProvider>
+            </SoundProvider>
           </ThemeProvider>
         </LanguageProvider>
       </body>

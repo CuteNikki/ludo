@@ -3,13 +3,13 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { LanguageToggle } from '@/components/language-toggle';
-import { SiteFooter } from '@/components/site-footer';
+import { PAGE_DECOR_A } from '@/components/decor';
+import { PageHeader, PageShell } from '@/components/page-shell';
 import { TapTooltip } from '@/components/tap-tooltip';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { order } from '@/lib/reveal';
 import { cn } from '@/lib/utils';
 import type { ClientEvent, PublicRoomSummary, RoomSettings, ServerEvent } from '@ludo/shared';
-import { ArrowRight, Clock3, Dice6, Dices, DicesIcon, Home, RefreshCw, Sparkles, Users } from 'lucide-react';
+import { ArrowRight, Clock3, Dice6, Dices, RefreshCw, Sparkles, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -61,90 +61,90 @@ export default function DiscoverPage() {
   }
 
   return (
-    <>
-      <main className='mx-auto min-h-screen max-w-4xl px-3 py-2 sm:px-4 sm:py-6'>
-        <header className='flex flex-wrap items-center justify-between gap-4 border-4 border-border bg-background-alternative p-4 shadow-card sm:p-5'>
-          <a href='/' className='flex items-center gap-2' aria-label={t('room.message.toHomepage')}>
-            <DicesIcon className='size-10 shrink-0 rounded-lg bg-foreground p-1.5 text-background' />
-            <div>
-              <p className='text-xs font-black uppercase tracking-[.16em] text-red-700 dark:text-red-400'>{t('discover.eyebrow')}</p>
-              <h1 className='font-mono text-xl font-black tracking-widest'>{t('discover.title')}</h1>
-            </div>
-          </a>
-          <div className='flex items-center gap-2'>
-            <LanguageToggle />
-            <ThemeToggle />
-            <Button variant='outline' asChild className='h-10 px-3 bg-background-alternative text-foreground hover:bg-background hover:text-foreground'>
-              <a href='/'>
-                <Home size={17} /> {t('room.message.toHomepage')}
-              </a>
-            </Button>
-          </div>
-        </header>
+    <PageShell width='wide' decor={PAGE_DECOR_A}>
+      <PageHeader eyebrow={t('discover.eyebrow')} title={t('discover.title')} icon={Users} accent='blue'>
+        <span className={cn('eyebrow inline-flex items-center gap-2 self-start text-foreground/70 sm:self-auto', loading && 'animate-pulse')}>
+          <RefreshCw size={14} strokeWidth={3} className={loading ? 'animate-spin' : ''} /> {t('discover.autoRefresh')}
+        </span>
+      </PageHeader>
 
-        <section className='mt-8 border-4 border-border bg-background-alternative p-5 shadow-card sm:p-8'>
-          <Label htmlFor='discover-name' className='mb-2'>
-            {t('start.nameLabel')}
-          </Label>
-          <Input
-            id='discover-name'
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            maxLength={24}
-            placeholder={t('start.namePlaceholder')}
-            className='mb-6 h-12 max-w-sm bg-background'
-          />
+      <section className='reveal-load toy-card mb-8 p-5 sm:p-6' style={order(4)}>
+        <Label htmlFor='discover-name' className='mb-2'>
+          {t('start.nameLabel')}
+        </Label>
+        <Input
+          id='discover-name'
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          maxLength={24}
+          placeholder={t('start.namePlaceholder')}
+          className='max-w-sm'
+        />
+      </section>
 
-          <div className='mb-4 flex items-center justify-between gap-3'>
-            <h2 className='flex items-center gap-2 text-lg font-black'>
-              <Users size={19} /> {t('discover.listTitle')}
-            </h2>
-            <span className={cn('flex items-center gap-1.5 text-[10px] font-bold uppercase text-foreground/60', loading && 'animate-pulse')}>
-              <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> {t('discover.autoRefresh')}
-            </span>
-          </div>
+      <h2 className='reveal-load mb-4 font-display text-3xl' style={order(5)}>
+        {t('discover.listTitle')}
+      </h2>
 
-          {!loading && rooms.length === 0 && <p className='py-10 text-center text-sm font-medium text-foreground/70'>{t('discover.empty')}</p>}
+      {!loading && rooms.length === 0 && (
+        <div className='reveal-load toy-card grid place-items-center gap-3 border-dashed p-10 text-center shadow-none' style={order(6)}>
+          <Dices size={40} strokeWidth={2} className='text-foreground/50' />
+          <p className='max-w-md font-bold text-foreground/70'>{t('discover.empty')}</p>
+        </div>
+      )}
 
-          <div className='space-y-2'>
-            {rooms.map((room) => {
-              const joinable = room.phase === 'lobby' && room.playerCount < room.maxPlayers;
-              return (
-                <div
-                  key={room.roomCode}
-                  className='flex flex-wrap items-center justify-between gap-3 border-2 border-border bg-background p-3 transition-colors duration-300'
-                >
-                  <div className='min-w-0'>
-                    <p className='truncate font-mono text-lg font-black tracking-widest'>{room.roomCode}</p>
-                    <p className='truncate text-xs font-bold text-foreground/60'>{t('discover.hostedBy', { name: room.hostName })}</p>
-                    <RoomSettingIcons settings={room.settings} />
-                  </div>
-                  <div className='flex items-center gap-3'>
-                    <span className='text-sm font-bold'>
-                      {room.playerCount}/{room.maxPlayers}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-[10px] font-bold uppercase',
-                        room.phase === 'lobby' ? 'text-emerald-700 dark:text-emerald-400' : 'text-foreground/50',
-                      )}
-                    >
-                      {t(`discover.phase.${room.phase}`)}
-                    </span>
-                    <Button className='h-10 px-3 text-xs' disabled={!joinable} onClick={() => joinRoom(room.roomCode)}>
-                      {t('discover.join')} <ArrowRight size={15} />
-                    </Button>
-                  </div>
+      <ul className='grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'>
+        {rooms.map((room, index) => {
+          const joinable = room.phase === 'lobby' && room.playerCount < room.maxPlayers;
+          return (
+            // Rooms appear and disappear as the list refreshes; a new card pops in, the others stay put.
+            <li key={room.roomCode} className='reveal-load toy-card flex flex-col gap-4 p-5' style={order(6 + Math.min(index, 5), index % 2 === 0 ? '-3deg' : '3deg')}>
+              <div className='flex items-start justify-between gap-3'>
+                <div className='min-w-0'>
+                  <p className='truncate font-display text-3xl tracking-[.12em]'>{room.roomCode}</p>
+                  <p className='truncate text-sm font-bold text-foreground/65'>{t('discover.hostedBy', { name: room.hostName })}</p>
                 </div>
-              );
-            })}
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </>
+                <span
+                  className={cn(
+                    'shrink-0 rounded-md border-2 border-border px-2 py-0.5 text-xs font-extrabold uppercase',
+                    room.phase === 'lobby' ? 'bg-p-green text-white' : 'bg-background text-foreground/70',
+                  )}
+                >
+                  {t(`discover.phase.${room.phase}`)}
+                </span>
+              </div>
+
+              <div className='flex flex-wrap items-center justify-between gap-x-3 gap-y-2'>
+                <span
+                  className='flex items-center gap-1.5'
+                  role='img'
+                  aria-label={`${room.playerCount}/${room.maxPlayers}`}
+                >
+                  {Array.from({ length: room.maxPlayers }, (_, seat) => (
+                    <span
+                      key={seat}
+                      className={cn('size-5 rounded-full border-3 border-border', seat < room.playerCount ? seatColors[seat % seatColors.length] : 'bg-background')}
+                    />
+                  ))}
+                  <span className='ml-1 text-sm font-extrabold'>
+                    {room.playerCount}/{room.maxPlayers}
+                  </span>
+                </span>
+                <RoomSettingIcons settings={room.settings} />
+              </div>
+
+              <Button className='mt-auto w-full' disabled={!joinable} onClick={() => joinRoom(room.roomCode)}>
+                {t('discover.join')} <ArrowRight size={18} strokeWidth={3} />
+              </Button>
+            </li>
+          );
+        })}
+      </ul>
+    </PageShell>
   );
 }
+
+const seatColors = ['bg-p-red', 'bg-p-blue', 'bg-p-green', 'bg-p-yellow'];
 
 const BOOLEAN_SETTINGS = [
   { key: 'automaticSingleMove', icon: Sparkles, labelKey: 'room.settings.autoMoves', infoKey: 'room.settings.autoMovesInfo' },
@@ -157,7 +157,7 @@ function RoomSettingIcons({ settings }: { settings: RoomSettings }) {
   const { t } = useTranslation();
 
   return (
-    <div className='mt-2 flex flex-wrap items-center gap-1'>
+    <div className='flex items-center gap-0.5'>
       <TapTooltip
         label={`${t('room.settings.moveTime')}: ${settings.moveTimeSeconds}s`}
         content={<SettingTooltipBody title={t('room.settings.moveTime')} value={`${settings.moveTimeSeconds}s`} info={t('room.settings.moveTimeInfo')} />}
@@ -173,7 +173,7 @@ function RoomSettingIcons({ settings }: { settings: RoomSettings }) {
             key={key}
             label={`${t(labelKey)}: ${state}`}
             content={<SettingTooltipBody title={t(labelKey)} value={state} valueOn={on} info={t(infoKey)} />}
-            className={cn(SETTING_BADGE_CLASS, 'w-7', on ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400')}
+            className={cn(SETTING_BADGE_CLASS, 'w-8', on ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400')}
           >
             <Icon size={16} />
           </TapTooltip>
@@ -184,7 +184,7 @@ function RoomSettingIcons({ settings }: { settings: RoomSettings }) {
 }
 
 const SETTING_BADGE_CLASS =
-  'inline-flex h-7 items-center justify-center rounded-full transition-colors hover:bg-background-alternative focus-visible:bg-background-alternative focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground';
+  'inline-flex h-8 items-center justify-center rounded-full transition-colors hover:bg-foreground/10 focus-visible:bg-foreground/10 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground';
 
 function SettingTooltipBody({ title, value, valueOn, info }: { title: string; value: string; valueOn?: boolean; info: string }) {
   return (

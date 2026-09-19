@@ -3,34 +3,87 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Design tokens. "Toybox": warm paper, thick ink outlines, hard offset shadows and four saturated
+   player colors. Everything else in the app derives from these, so a re-theme happens here. */
 :root {
-  --background: #f4f0e7;
-  --foreground: #1c1917;
-  --grid-line: rgba(28, 25, 23, 0.045);
-  --border: #000000;
+  --background: #fdf2d8;
+  --foreground: #1e1533;
+  --border: #1e1533;
   --background-alternative: #ffffff;
-  --shadow-color: #000000;
-  --shadow: 6px 6px 0 var(--shadow-color);
+  --shadow-color: #1e1533;
+  --shadow: 5px 5px 0 var(--shadow-color);
+  --dot: rgba(30, 21, 51, 0.11);
+
+  --primary: #ffc82c;
+  --primary-foreground: #1e1533;
+  /* Only ever used for small text (labels, bullets), so it has to be dark enough to read on paper and white. */
+  --accent: #c62828;
+
+  --footer: #1e1533;
+  --footer-foreground: #fdf2d8;
+
+  --p-red: #ff5252;
+  --p-blue: #3d7bff;
+  --p-green: #2dbd6e;
+  --p-yellow: #ffc82c;
+  --p-red-soft: #ffc9c4;
+  --p-blue-soft: #c6d9ff;
+  --p-green-soft: #c2eed3;
+  --p-yellow-soft: #ffeaa6;
+  --p-red-deep: #a12a2a;
+  --p-blue-deep: #1a3f9e;
+  --p-green-deep: #146a3b;
+  --p-yellow-deep: #a87a00;
 }
 
 .dark {
-  --background: #292524;
-  --foreground: #fafaf9;
-  --grid-line: rgba(244, 240, 231, 0.06);
-  --border: #000000;
-  --background-alternative: #222222;
-  --shadow-color: #000000;
-  --shadow: 6px 6px 0 var(--shadow-color);
+  --background: #191430;
+  --foreground: #f6efff;
+  --border: #07040f;
+  --background-alternative: #2a2348;
+  --shadow-color: #07040f;
+  --dot: rgba(246, 239, 255, 0.06);
+
+  --primary: #ffc82c;
+  --primary-foreground: #1e1533;
+  --accent: #ff6b6b;
+
+  --footer: #0e0a1e;
+  --footer-foreground: #f6efff;
+
+  --p-red-soft: #7a3040;
+  --p-blue-soft: #2f477f;
+  --p-green-soft: #24603f;
+  --p-yellow-soft: #6f5f1f;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-shadow: var(--shadow-color);
-  --font-display: var(--font-display);
   --color-border: var(--border);
   --color-background-alternative: var(--background-alternative);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-footer: var(--footer);
+  --color-footer-foreground: var(--footer-foreground);
+  --color-p-red: var(--p-red);
+  --color-p-blue: var(--p-blue);
+  --color-p-green: var(--p-green);
+  --color-p-yellow: var(--p-yellow);
+  --color-p-red-soft: var(--p-red-soft);
+  --color-p-blue-soft: var(--p-blue-soft);
+  --color-p-green-soft: var(--p-green-soft);
+  --color-p-yellow-soft: var(--p-yellow-soft);
+  --color-p-red-deep: var(--p-red-deep);
+  --color-p-blue-deep: var(--p-blue-deep);
+  --color-p-green-deep: var(--p-green-deep);
+  --color-p-yellow-deep: var(--p-yellow-deep);
+  --font-display: var(--font-lilita), 'Arial Rounded MT Bold', ui-rounded, system-ui, sans-serif;
   --shadow-card: var(--shadow);
+  --shadow-toy: 0 4px 0 var(--shadow-color);
+  --shadow-toy-sm: 3px 3px 0 var(--shadow-color);
 
   /* Centralized animation registry */
   --animate-movable-piece: piece-ready 1.15s ease-in-out infinite;
@@ -45,7 +98,8 @@
   --animate-toast-exit: toast-exit 0.2s ease-in both;
   --animate-piece-capture-flight: piece-capture-flight 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-piece-spawn-flight: piece-spawn-flight 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  --animate-fade-up: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-bob: bob 1.6s ease-in-out infinite;
+  --animate-float: float 5s ease-in-out infinite;
 }
 
 * {
@@ -53,14 +107,33 @@
 }
 html {
   scroll-behavior: smooth;
+  /* Anchor jumps (the navbar's "Play" link) shouldn't land flush against the viewport edge. */
+  scroll-padding-top: 1rem;
+  /* Reserve the scrollbar's width always, so pages don't shift sideways when one gets long enough to scroll. */
+  scrollbar-gutter: stable;
 }
 
 body {
   margin: 0;
-  font-family: var(--font-sans), sans-serif;
-  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 24px 24px;
-  min-height: 100vh;
+  color: var(--foreground);
+  font-family: var(--font-nunito), ui-rounded, system-ui, sans-serif;
+  font-weight: 600;
+  background-color: var(--background);
+  background-image: radial-gradient(var(--dot) 2px, transparent 2px);
+  background-size: 26px 26px;
+  min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The display face only ships one weight; a synthesized bold smears it. */
+.font-display {
+  font-weight: 400;
+  font-synthesis: none;
+}
+
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
 @keyframes piece-spawn-flight {
@@ -254,38 +327,27 @@ body {
   }
 }
 
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    translate: 0 20px;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
-}
-
 @utility link-underline {
   @apply relative after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-current after:transition-[width] after:duration-250 after:ease-in-out hover:after:w-full;
 }
 
-/* One-shot entrance animations, played as soon as the element mounts - used above the fold (hero,
-   room shell/header) where there's nothing to scroll past before it's visible. */
-@utility home-reveal {
-  animation: var(--animate-fade-up);
+/* The same sequenced pop-in as `reveal-item`, but as a plain CSS animation that starts on load: for the
+   hero, which is on screen before anything scrolls. It needs no JavaScript, so the hero is never
+   left blank while the page hydrates. Set `style={{ '--i': n }}` for its place in the order. With
+   `backwards` fill the element only takes the "from" look during its delay, so it settles into its
+   own resting styles (including any tilt) afterwards. */
+@keyframes reveal-pop {
+  from {
+    opacity: 0;
+    translate: 0 2.5rem;
+    scale: 0.92;
+    rotate: var(--reveal-rotate, 0deg);
+  }
 }
 
-@utility home-board {
-  animation: var(--animate-fade-up);
-  animation-delay: 0.15s;
-}
-
-@utility room-shell {
-  animation: fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@utility room-header {
-  animation: fade-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+@utility reveal-load {
+  animation: reveal-pop 0.8s cubic-bezier(0.34, 1.45, 0.64, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 170ms + 100ms);
 }
 
 @utility card-hover-lift {
@@ -298,57 +360,153 @@ body {
   }
 }
 
-/* Scroll-triggered reveal: hidden until the `Reveal` component (scroll-reveal.tsx) marks the
-   element `data-in-view` via IntersectionObserver. `stagger-fade-in` additionally staggers its
-   direct children so a row of cards reveals left-to-right instead of all at once. */
-@utility scroll-reveal {
+/* Sequenced scroll reveal. Wrap a section in `Reveal` (scroll-reveal.tsx), which marks it
+   `data-in-view` once it scrolls into view, then give each piece `reveal-item` and its place in the
+   order as `style={{ '--i': n }}`: pieces pop in one after another (eyebrow, title, link, then the
+   cards). Put it on a wrapper, not on an element that has its own hover transition: the delay
+   would apply to that too. */
+@utility reveal-item {
   opacity: 0;
-  translate: 0 24px;
+  translate: 0 2.5rem;
+  scale: 0.92;
+  rotate: var(--reveal-rotate, 0deg);
   transition:
-    opacity 0.6s ease-out,
-    translate 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.5s ease-out,
+    translate 0.8s cubic-bezier(0.34, 1.45, 0.64, 1),
+    scale 0.8s cubic-bezier(0.34, 1.45, 0.64, 1),
+    rotate 0.8s cubic-bezier(0.34, 1.45, 0.64, 1);
+  transition-delay: calc(var(--i, 0) * var(--step, 170ms));
 
-  &[data-in-view] {
+  [data-in-view] & {
     opacity: 1;
     translate: 0 0;
+    scale: 1;
+    rotate: 0deg;
   }
 }
 
-@utility stagger-fade-in {
-  & > * {
-    opacity: 0;
-    translate: 0 20px;
-    transition:
-      opacity 0.6s ease-out,
-      translate 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  &[data-in-view] > * {
-    opacity: 1;
+@keyframes bob {
+  0%,
+  100% {
     translate: 0 0;
   }
+  50% {
+    translate: 0 -4px;
+  }
+}
 
-  &[data-in-view] > *:nth-child(1) {
-    transition-delay: 0ms;
+@keyframes float {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: var(--float-rotate, 0deg);
   }
-  &[data-in-view] > *:nth-child(2) {
-    transition-delay: 100ms;
+  50% {
+    translate: 0 -14px;
+    rotate: calc(var(--float-rotate, 0deg) + 6deg);
   }
-  &[data-in-view] > *:nth-child(3) {
-    transition-delay: 200ms;
+}
+
+/* A chunky "toy" surface: thick ink outline plus a hard offset shadow. */
+@utility toy-card {
+  border: 3px solid var(--border);
+  border-radius: 0.875rem;
+  background-color: var(--background-alternative);
+  box-shadow: var(--shadow);
+}
+
+@utility toy-tile {
+  border: 3px solid var(--border);
+  border-radius: 0.625rem;
+  background-color: var(--background);
+}
+
+/* Small caps label used above titles; color is set by the caller. */
+@utility eyebrow {
+  /* The font variable next/font puts on <body>. (`--font-display` only exists inside the Tailwind theme, so
+     referencing it here silently fell back to the body font.) */
+  font-family: var(--font-lilita), 'Arial Rounded MT Bold', ui-rounded, system-ui, sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Room layout. On a phone the turn panel, board and panels are a plain column (a flex column, not a
+   grid: a sticky grid item can't leave its own grid area, and the turn panel has to stay pinned).
+   From `lg` up, or on a phone held sideways, it becomes a named-area grid: board plus one rail on a
+   laptop, rail | board | rail on ultrawide. The DOM order is the reading and focus order throughout.
+   `--room-chrome` is how much vertical space everything except the board needs; the board is capped
+   to the remaining viewport height so it never pushes the turn info off screen. */
+.room-grid {
+  --room-chrome: 16rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.room-grid > .room-hud {
+  grid-area: hud;
+}
+/* The turn panel follows you down the page on a phone, so whose turn it is and what was rolled
+   never scroll out of view. */
+.room-grid > .room-hud[data-sticky] {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 30;
+}
+.room-grid > .room-board {
+  grid-area: board;
+}
+.room-grid > .room-players {
+  grid-area: players;
+}
+.room-grid > .room-side {
+  grid-area: side;
+}
+
+/* Wide enough for a side rail, or a phone on its side: board left, everything else in one rail. */
+@media (min-width: 64rem), (orientation: landscape) and (min-width: 36rem) and (max-height: 34rem) {
+  .room-grid {
+    --room-chrome: 7.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+    grid-template-areas:
+      'board hud'
+      'board players'
+      'board side';
+    grid-template-rows: auto auto 1fr;
+    align-items: start;
+    gap: 1rem 1.5rem;
   }
-  &[data-in-view] > *:nth-child(4) {
-    transition-delay: 300ms;
+  .room-grid > .room-hud[data-sticky] {
+    position: static;
   }
+}
+
+/* Ultrawide: players and turn info on the left, room and settings on the right, board centered. */
+@media (min-width: 90rem) {
+  .room-grid {
+    grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr) minmax(18rem, 22rem);
+    grid-template-areas:
+      'hud board side'
+      'players board side';
+    grid-template-rows: auto 1fr;
+    gap: 1rem 2rem;
+  }
+}
+
+.room-board-size {
+  width: min(100%, max(18rem, calc(100dvh - var(--room-chrome))));
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-reveal,
-  .home-board,
-  .room-shell,
-  .room-header,
-  .scroll-reveal,
-  .stagger-fade-in > * {
+  .animate-bob,
+  .animate-float {
+    animation: none !important;
+  }
+  .reveal-load,
+  .reveal-item {
     animation: none !important;
     transition: none !important;
     opacity: 1 !important;

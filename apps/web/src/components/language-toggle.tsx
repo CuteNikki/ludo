@@ -3,11 +3,13 @@
 import { Check, ChevronDown, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { SegmentedControl } from '@/components/segmented-control';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cookieName, languageCodes, languageNames, languages, type Language } from '@/lib/i18n/settings';
 
-export function LanguageToggle() {
+/** `dropdown` for the desktop navbar; `segmented` lays every language out at once for the mobile menu. */
+export function LanguageToggle({ layout = 'dropdown' }: { layout?: 'dropdown' | 'segmented' }) {
   const { i18n } = useTranslation();
   const current = (i18n.resolvedLanguage ?? 'en') as Language;
 
@@ -18,17 +20,23 @@ export function LanguageToggle() {
     void i18n.changeLanguage(lng);
   }
 
+  if (layout === 'segmented')
+    return (
+      <SegmentedControl
+        aria-label={i18n.t('language.aria')}
+        value={current}
+        onChange={change}
+        options={languages.map((lng) => ({ value: lng, label: languageNames[lng] }))}
+      />
+    );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant='outline'
-          aria-label={i18n.t('language.aria')}
-          className='h-10 gap-1.5 bg-background-alternative px-3 text-foreground hover:bg-background'
-        >
-          <Languages size={17} />
+        <Button variant='outline' aria-label={i18n.t('language.aria')} className='min-h-10 gap-1.5 px-3'>
+          <Languages size={18} />
           <span className='uppercase'>{languageCodes[current]}</span>
-          <ChevronDown size={14} className='text-foreground/50' />
+          <ChevronDown size={14} className='text-foreground/60' />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end'>

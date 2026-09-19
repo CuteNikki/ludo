@@ -1,5 +1,6 @@
 'use client';
 
+import { useSound } from '@/components/providers/sound';
 import { cn } from '@/lib/utils';
 import type { GameState, Piece, PlayerColor } from '@ludo/shared';
 import { useState, type CSSProperties } from 'react';
@@ -16,34 +17,38 @@ import {
 } from './board-geometry';
 import { usePieceAnimations } from './use-piece-animations';
 
-const colorStyles: Record<PlayerColor, { base: string; marker: string; pale: string; start: string; token: string }> = {
+const colorStyles: Record<PlayerColor, { base: string; marker: string; pale: string; start: string; token: string; mat: string }> = {
   red: {
-    base: 'bg-red-500',
-    marker: 'border-red-500',
-    pale: 'bg-red-300',
-    start: 'bg-background-alternative before:absolute before:inset-1 before:border-4 before:border-red-500 before:content-[""]',
-    token: 'bg-red-500 border-red-800',
+    base: 'bg-p-red',
+    marker: 'border-p-red',
+    pale: 'bg-p-red-soft',
+    start: 'bg-background-alternative before:absolute before:inset-1 before:rounded-sm before:border-4 before:border-p-red before:content-[""]',
+    token: 'bg-p-red border-p-red-deep',
+    mat: 'bg-p-red',
   },
   blue: {
-    base: 'bg-blue-600',
-    marker: 'border-blue-600',
-    pale: 'bg-blue-300',
-    start: 'bg-background-alternative before:absolute before:inset-1 before:border-4 before:border-blue-600 before:content-[""]',
-    token: 'bg-blue-600 border-blue-900',
+    base: 'bg-p-blue',
+    marker: 'border-p-blue',
+    pale: 'bg-p-blue-soft',
+    start: 'bg-background-alternative before:absolute before:inset-1 before:rounded-sm before:border-4 before:border-p-blue before:content-[""]',
+    token: 'bg-p-blue border-p-blue-deep',
+    mat: 'bg-p-blue',
   },
   green: {
-    base: 'bg-green-600',
-    marker: 'border-green-600',
-    pale: 'bg-green-300',
-    start: 'bg-background-alternative before:absolute before:inset-1 before:border-4 before:border-green-600 before:content-[""]',
-    token: 'bg-green-600 border-green-900',
+    base: 'bg-p-green',
+    marker: 'border-p-green',
+    pale: 'bg-p-green-soft',
+    start: 'bg-background-alternative before:absolute before:inset-1 before:rounded-sm before:border-4 before:border-p-green before:content-[""]',
+    token: 'bg-p-green border-p-green-deep',
+    mat: 'bg-p-green',
   },
   yellow: {
-    base: 'bg-yellow-500',
-    marker: 'border-yellow-500',
-    pale: 'bg-yellow-200',
-    start: 'bg-background-alternative before:absolute before:inset-1 before:border-4 before:border-yellow-400 before:content-[""]',
-    token: 'bg-yellow-400 border-yellow-700',
+    base: 'bg-p-yellow',
+    marker: 'border-p-yellow',
+    pale: 'bg-p-yellow-soft',
+    start: 'bg-background-alternative before:absolute before:inset-1 before:rounded-sm before:border-4 before:border-p-yellow before:content-[""]',
+    token: 'bg-p-yellow border-p-yellow-deep',
+    mat: 'bg-p-yellow',
   },
 };
 
@@ -51,10 +56,14 @@ interface GameBoardProps {
   state: GameState;
   playerId: string;
   onMove: (pieceId: string) => void;
+  /** Size the board from outside (it fills its container's width by default and stays square). */
+  className?: string;
 }
 
-export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
+export function GameBoard({ state, playerId, onMove, className }: GameBoardProps) {
   const { t } = useTranslation();
+  const { play } = useSound();
+  const activeColor = state.phase === 'playing' ? (state.players.find((player) => player.id === state.currentPlayerId)?.color ?? null) : null;
   const [preview, setPreview] = useState<{ pieceId: string; revision: number } | null>(null);
   const { animations, clearAnimation, registerNode } = usePieceAnimations(state);
 
@@ -91,8 +100,20 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
   }
 
   return (
-    <div className='aspect-square w-full max-w-170 border-4 border-border bg-border shadow-[8px_8px_0_var(--shadow-color)]'>
-      <div className='relative grid h-full w-full grid-cols-11 grid-rows-11 gap-0.5 bg-border' aria-label={t('board.ariaLabel')}>
+    // The mat around the board takes the color of whoever's turn it is, so it's readable at a glance
+    // even when the turn panel is out of view.
+    <div
+      data-active-color={activeColor ?? undefined}
+      className={cn(
+        'aspect-square w-full rounded-2xl border-4 border-border p-1.5 shadow-[8px_8px_0_var(--shadow-color)] transition-colors duration-300 sm:p-2.5',
+        activeColor ? colorStyles[activeColor].mat : 'bg-background-alternative',
+        className,
+      )}
+    >
+      <div
+        className='relative grid h-full w-full grid-cols-11 grid-rows-11 gap-0.5 overflow-hidden rounded-lg border-3 border-border bg-border'
+        aria-label={t('board.ariaLabel')}
+      >
         {Array.from({ length: 121 }, (_, index) => {
           const coordinate: Coordinate = [Math.floor(index / 11), index % 11];
           const piece = piecesByCell.get(key(coordinate));
@@ -105,7 +126,7 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
               key={key(coordinate)}
               data-cell-role={isStart ? 'start' : cellColor ? 'goal' : undefined}
               className={cn(
-                'relative grid min-h-0 min-w-0 place-items-center transition-[filter,box-shadow] duration-180 ease-out',
+                'relative grid min-h-0 min-w-0 place-items-center rounded-[3px] transition-[filter,box-shadow] duration-180 ease-out',
                 getCellStyle(coordinate, cellColor, isStart),
                 isPreviewTarget && 'z-10 brightness-95',
               )}
@@ -165,6 +186,8 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
               >
                 <button
                   type='button'
+                  // The board plays its own sounds for pieces (a preview blip, then the move itself).
+                  data-sound='none'
                   disabled={!movable}
                   onClick={() => {
                     if (!movable) return;
@@ -177,21 +200,28 @@ export function GameBoard({ state, playerId, onMove }: GameBoardProps) {
                       // below skip touch on purpose) or a keyboard click without prior focus - so
                       // show the preview first instead of moving immediately.
                       setPreview({ pieceId: piece.id, revision: state.revision });
+                      play('preview');
                     }
                   }}
                   onPointerEnter={(event) => {
                     if (event.pointerType !== 'mouse' || !movable) return;
                     setPreview({ pieceId: piece.id, revision: state.revision });
+                    play('preview');
                   }}
                   onPointerLeave={(event) => {
                     if (event.pointerType !== 'mouse') return;
                     setPreview(null);
                   }}
-                  onFocus={() => movable && setPreview({ pieceId: piece.id, revision: state.revision })}
+                  onFocus={(event) => {
+                    // Only keyboard focus previews (tab to a piece, Enter confirms). Touching a button
+                    // also focuses it on many touch devices, right before the click: previewing here
+                    // would make that same click count as the confirming one and skip the preview.
+                    if (movable && event.currentTarget.matches(':focus-visible')) setPreview({ pieceId: piece.id, revision: state.revision });
+                  }}
                   onBlur={() => setPreview(null)}
                   aria-label={t(movable ? 'board.pieceAriaMovable' : 'board.pieceAria', { name: owner.name })}
                   className={cn(
-                    'pointer-events-auto block w-[82%] h-auto aspect-square shrink-0 touch-manipulation rounded-full border-2 shadow-[inset_0_2px_0_rgba(255,255,255,.35),0_2px_3px_rgba(0,0,0,.4)] transition-[transform,box-shadow,background-color,border-color] duration-200',
+                    'pointer-events-auto block w-[82%] h-auto aspect-square shrink-0 touch-manipulation rounded-full border-[3px] shadow-[inset_0_3px_0_rgba(255,255,255,.4),0_2px_0_var(--shadow-color)] transition-[transform,box-shadow,background-color,border-color] duration-200',
                     colorStyles[owner.color].token,
                     movable && 'animate-movable-piece cursor-pointer outline-4 outline-amber-300 hover:scale-110',
                     isCaptureTarget && 'scale-90 ring-4 ring-amber-300',

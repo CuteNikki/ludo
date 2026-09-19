@@ -15,6 +15,8 @@ export class RoomError extends Error {
 const COLORS: PlayerColor[] = ['red', 'blue', 'green', 'yellow'];
 const MOVE_TIMES: MoveTimeSeconds[] = [15, 30, 45, 60];
 const BOT_NAMES = ['Robo', 'Beep', 'Chip', 'Pixel'];
+/** How long a player who dropped out of a running game keeps their seat. */
+const GAME_GRACE_MS = 5 * 60 * 1000;
 const DEFAULT_SETTINGS: RoomSettings = { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false, mustSpawnOnSix: false };
 
 interface Room {
@@ -43,7 +45,6 @@ type PlayerLeftListener = (roomCode: string, event: PlayerLeftEvent) => void;
 
 export class RoomManager {
   private readonly rooms = new Map<string, Room>();
-  private readonly cleanupTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private readonly playerCleanupTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private readonly hostTransferTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private readonly fairDice = new FairDice();
@@ -60,6 +61,7 @@ export class RoomManager {
     private readonly onPlayerLeft: PlayerLeftListener = () => undefined,
     private readonly botMoveDelayMs = 1_100,
     private readonly hostAbsenceMs = 30_000,
+    private readonly lobbyGraceMs = 15_000,
   ) {}
 
   getRoomState(roomCode: string): GameState | null {
@@ -70,6 +72,8 @@ export class RoomManager {
     const summaries: PublicRoomSummary[] = [];
     for (const room of this.rooms.values()) {
       if (!room.state.settings.isPublic) continue;
+      // Someone has to be there: a room whose players have all dropped off is about to disappear.
+      if (!room.state.players.some((player) => !player.isBot && player.connected)) continue;
       const host = room.state.players.find((player) => player.id === room.state.hostPlayerId);
       summaries.push({
         roomCode: room.state.roomCode,
@@ -127,9 +131,6 @@ export class RoomManager {
     }
     if (room.state.phase !== 'lobby') throw new RoomError('GAME_ALREADY_RUNNING', 'The game is already running.');
     if (room.state.players.length >= COLORS.length) throw new RoomError('ROOM_FULL', 'The room is full.');
-    const cleanupTimer = this.cleanupTimers.get(normalizedCode);
-    if (cleanupTimer) clearTimeout(cleanupTimer);
-    this.cleanupTimers.delete(normalizedCode);
     return this.addPlayer(room.state, playerName);
   }
 
@@ -319,21 +320,62 @@ export class RoomManager {
     player.connected = false;
     room.state.revision += 1;
     if (room.state.hostPlayerId === playerId) this.scheduleHostTransfer(roomCode);
-    const playerCleanupKey = `${roomCode}:${playerId}`;
-    const existingTimer = this.playerCleanupTimers.get(playerCleanupKey);
-    if (existingTimer) clearTimeout(existingTimer);
-    this.playerCleanupTimers.set(
-      playerCleanupKey,
-      setTimeout(
-        () => {
-          this.playerCleanupTimers.delete(playerCleanupKey);
-          const state = this.removePlayer(roomCode, playerId, 'disconnected');
-          if (state) this.onStateChange(roomCode, state);
-        },
-        5 * 60 * 1000,
-      ),
-    );
+    // In the lobby there is nothing to lose, so a closed tab goes quickly (a page reload still has time
+    // to reconnect). A running game keeps the seat much longer, so a dropped connection doesn't cost it.
+    this.scheduleDisconnectRemoval(roomCode, playerId, room.state.phase === 'lobby' ? this.lobbyGraceMs : GAME_GRACE_MS, Date.now());
     return room.state;
+  }
+
+  private scheduleDisconnectRemoval(roomCode: string, playerId: string, delayMs: number, disconnectedAt: number) {
+    const key = `${roomCode}:${playerId}`;
+    const existing = this.playerCleanupTimers.get(key);
+    if (existing) clearTimeout(existing);
+    this.playerCleanupTimers.set(
+      key,
+      setTimeout(() => {
+        this.playerCleanupTimers.delete(key);
+        const state = this.rooms.get(roomCode)?.state;
+        if (!state) return;
+        // A game may have started while they were away, and games get the longer grace period.
+        const remaining = disconnectedAt + GAME_GRACE_MS - Date.now();
+        if (state.phase !== 'lobby' && remaining > 0) {
+          this.scheduleDisconnectRemoval(roomCode, playerId, remaining, disconnectedAt);
+          return;
+        }
+        const next = this.removePlayer(roomCode, playerId, 'disconnected');
+        if (next) this.onStateChange(roomCode, next);
+      }, delayMs),
+    );
+  }
+
+  /** Stops every timer of a room and forgets it. */
+  private disposeRoom(roomCode: string) {
+    this.clearTurnTimer(roomCode);
+    this.clearHostTransfer(roomCode);
+    for (const [key, timer] of this.playerCleanupTimers) {
+      if (key.startsWith(`${roomCode}:`)) {
+        clearTimeout(timer);
+        this.playerCleanupTimers.delete(key);
+      }
+    }
+    this.rooms.delete(roomCode);
+  }
+
+  /**
+   * Lets a connected human take over a room whose host is no longer there, instead of waiting for the
+   * automatic handover. It never takes the role from a host who is still connected.
+   */
+  claimHost(roomCode: string, playerId: string): GameState {
+    const state = this.getState(roomCode);
+    const claimant = state.players.find((candidate) => candidate.id === playerId);
+    if (!claimant || claimant.isBot) throw new RoomError('PLAYER_NOT_FOUND', 'Player was not found.');
+    if (state.hostPlayerId === playerId) return state;
+    const host = state.players.find((candidate) => candidate.id === state.hostPlayerId);
+    if (host?.connected) throw new RoomError('HOST_STILL_HERE', 'The host is still here.');
+    this.clearHostTransfer(roomCode);
+    state.hostPlayerId = playerId;
+    state.revision += 1;
+    return state;
   }
 
   private removePlayer(roomCode: string, playerId: string, reason: PlayerLeftReason): GameState | null {
@@ -348,22 +390,15 @@ export class RoomManager {
     room.state.rematchPlayerIds = room.state.rematchPlayerIds.filter((candidate) => candidate !== playerId);
     this.fairDice.removePlayer(playerId);
     if (!player.isBot) this.onPlayerLeft(roomCode, { playerId, playerName: player.name, reason });
-    // A room with only bots left has nobody to play for, so it winds down like an empty one.
+    // A room with only bots left has nobody to play for. Nobody can rejoin it either (a player who left
+    // is gone, and the last human was the one holding the room up), so it is deleted straight away
+    // instead of lingering, and with it the public listing.
     if (room.state.players.every((candidate) => candidate.isBot)) {
-      this.clearTurnTimer(roomCode);
-      this.clearHostTransfer(roomCode);
       for (const bot of room.state.players) this.fairDice.removePlayer(bot.id);
       room.state.players = [];
       room.state.pieces = [];
       room.state.hostPlayerId = null;
-      const cleanupTimer = setTimeout(
-        () => {
-          this.rooms.delete(roomCode);
-          this.cleanupTimers.delete(roomCode);
-        },
-        5 * 60 * 1000,
-      );
-      this.cleanupTimers.set(roomCode, cleanupTimer);
+      this.disposeRoom(roomCode);
       return null;
     }
     if (room.state.hostPlayerId === playerId) {
@@ -569,17 +604,7 @@ export class RoomManager {
     const declined = state.players.filter((player) => !accepted.includes(player));
     for (const player of declined) this.fairDice.removePlayer(player.id);
 
-    this.rooms.delete(oldRoomCode);
-    this.clearHostTransfer(oldRoomCode);
-    const cleanupTimer = this.cleanupTimers.get(oldRoomCode);
-    if (cleanupTimer) clearTimeout(cleanupTimer);
-    this.cleanupTimers.delete(oldRoomCode);
-    for (const [key, timer] of this.playerCleanupTimers) {
-      if (key.startsWith(`${oldRoomCode}:`)) {
-        clearTimeout(timer);
-        this.playerCleanupTimers.delete(key);
-      }
-    }
+    this.disposeRoom(oldRoomCode);
 
     if (accepted.length === 0) {
       this.onRematchResolved({ oldRoomCode, newRoomCode: null, movedPlayerIds: [], newState: null });

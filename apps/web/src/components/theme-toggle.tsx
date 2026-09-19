@@ -4,6 +4,7 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { SegmentedControl } from '@/components/segmented-control';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -13,9 +14,12 @@ const themes = [
   { value: 'system', icon: Monitor },
 ] as const;
 
-const triggerClassName = 'h-10 gap-1.5 bg-background-alternative px-3 text-foreground hover:bg-background';
+type ThemeValue = (typeof themes)[number]['value'];
 
-export function ThemeToggle() {
+const triggerClassName = 'min-h-10 gap-1.5 px-3';
+
+/** `dropdown` for the desktop navbar; `segmented` lays every option out at once for the mobile menu. */
+export function ThemeToggle({ layout = 'dropdown' }: { layout?: 'dropdown' | 'segmented' }) {
   const { theme, setTheme } = useTheme();
   const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
@@ -24,22 +28,41 @@ export function ThemeToggle() {
 
   // The stored theme is only known on the client, so render a neutral placeholder until mounted.
   if (!mounted)
-    return (
+    return layout === 'segmented' ? (
+      <div aria-hidden='true' className='h-12 rounded-lg border-3 border-border bg-background-alternative' />
+    ) : (
       <Button variant='outline' disabled aria-label={t('theme.aria')} className={triggerClassName}>
-        <Monitor size={17} />
-        <ChevronDown size={14} className='text-foreground/50' />
+        <Monitor size={18} />
+        <ChevronDown size={14} className='text-foreground/60' />
       </Button>
     );
 
   const current = themes.find((option) => option.value === theme) ?? themes[2];
   const CurrentIcon = current.icon;
 
+  if (layout === 'segmented')
+    return (
+      <SegmentedControl<ThemeValue>
+        aria-label={t('theme.aria')}
+        value={current.value}
+        onChange={setTheme}
+        options={themes.map(({ value, icon: Icon }) => ({
+          value,
+          label: (
+            <>
+              <Icon size={16} /> {t(`theme.${value}`)}
+            </>
+          ),
+        }))}
+      />
+    );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant='outline' aria-label={t('theme.aria')} className={triggerClassName}>
-          <CurrentIcon size={17} />
-          <ChevronDown size={14} className='text-foreground/50' />
+          <CurrentIcon size={18} />
+          <ChevronDown size={14} className='text-foreground/60' />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end'>

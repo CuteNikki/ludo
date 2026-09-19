@@ -4,10 +4,19 @@ import { useEffect, useRef, useState } from 'react';
 
 /**
  * Marks its children `data-in-view` once they scroll into the viewport, so CSS (see the
- * `scroll-reveal`/`stagger-fade-in` utilities in globals.css) can animate them in. Stays invisible
+ * `reveal-item` utility in globals.css) can animate them in. Stays invisible
  * to `prefers-reduced-motion` visitors by revealing immediately instead of observing.
  */
-export function Reveal({ children, className }: { children: React.ReactNode; className?: string }) {
+export function Reveal({
+  children,
+  className,
+  rootMargin = '0px 0px -10% 0px',
+}: {
+  children: React.ReactNode;
+  className?: string;
+  /** Shrinks the viewport the element must enter; a larger bottom inset makes it wait until scrolled further into view. */
+  rootMargin?: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -26,11 +35,11 @@ export function Reveal({ children, className }: { children: React.ReactNode; cla
           observer.disconnect();
         }
       },
-      { threshold: 0.15, rootMargin: '0px 0px -10% 0px' },
+      { threshold: 0.15, rootMargin },
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [rootMargin]);
 
   return (
     <div ref={ref} data-in-view={visible ? '' : undefined} className={className}>
