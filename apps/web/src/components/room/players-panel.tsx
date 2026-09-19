@@ -69,20 +69,7 @@ export function PlayersPanel({ state, playerId, isHost, lastRolls, kickConfirmId
                   <Crown size={14} strokeWidth={3} /> {t('room.claimHost')}
                 </Button>
               )}
-              {!lobby && (
-                <div key={roll ?? 'none'} className={cn(roll !== null && 'animate-dice-result')}>
-                  <Die
-                    value={roll}
-                    size='sm'
-                    color={player.color}
-                    label={roll === null ? t('room.hud.noRoll', { name: player.name }) : t('room.hud.rolled', { name: player.name, value: roll })}
-                  />
-                </div>
-              )}
-              {lobby && player.ready && <Check size={20} strokeWidth={3.5} className='text-p-green' aria-label={t('room.imReady')} />}
-              {state.phase === 'finished' && state.rematchPlayerIds.includes(player.id) && (
-                <Vote size={18} className='text-amber-600 dark:text-amber-400' aria-label={t('room.rematchVotedAria', { name: player.name })} />
-              )}
+              {/* Before the die, ready check and vote, so those line up at the right edge in every row. */}
               {removable && (
                 <button
                   type='button'
@@ -96,6 +83,20 @@ export function PlayersPanel({ state, playerId, isHost, lastRolls, kickConfirmId
                 >
                   {confirming ? t('room.removeConfirm') : <UserMinus size={18} strokeWidth={2.5} />}
                 </button>
+              )}
+              {!lobby && (
+                <div key={roll ?? 'none'} className={cn(roll !== null && 'animate-dice-result')}>
+                  <Die
+                    value={roll}
+                    size='sm'
+                    color={player.color}
+                    label={roll === null ? t('room.hud.noRoll', { name: player.name }) : t('room.hud.rolled', { name: player.name, value: roll })}
+                  />
+                </div>
+              )}
+              {lobby && player.ready && <Check size={20} strokeWidth={3.5} className='text-p-green' aria-label={t('room.imReady')} />}
+              {state.phase === 'finished' && state.rematchPlayerIds.includes(player.id) && (
+                <Vote size={18} className='text-amber-600 dark:text-amber-400' aria-label={t('room.rematchVotedAria', { name: player.name })} />
               )}
             </li>
           );
