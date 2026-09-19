@@ -15,21 +15,21 @@
     "project": "Project"
   },
   "hero": {
-    "live": "The board is open",
+    "live": "Free, no sign-up",
     "titleLine1": "Roll. Move.",
     "titleEm": "Don't get mad.",
-    "subtitle": "The classic board game, rebuilt for real people and quick rounds. Open a room, share the link, start playing.",
-    "cta": "Start a round now"
+    "subtitle": "The classic board game, now in your browser. Create a room, send your friends the link, and play.",
+    "cta": "Start playing"
   },
   "preview": {
     "aria": "Illustration of a Ludo board",
     "badge": "Demo game",
-    "caption": "One round · four colors · infinite spite"
+    "caption": "2–4 players · one board"
   },
   "start": {
-    "eyebrow": "Ready?",
-    "title": "Your table is waiting.",
-    "subtitle": "Pick a name and open a room. Your friends only need the six-character code.",
+    "eyebrow": "Play",
+    "title": "Start a game",
+    "subtitle": "Enter a name and create a room. Friends join with the six-character code.",
     "nameLabel": "Your name",
     "namePlaceholder": "Player name",
     "createRoom": "Create room",
@@ -57,32 +57,32 @@
   },
   "howItWorks": {
     "eyebrow": "How it works",
-    "title": "Four steps to a good round.",
+    "title": "How a game goes",
     "steps": [
       {
-        "title": "Share a room",
-        "text": "Create a room and send the code to up to three friends."
+        "title": "Create a room",
+        "text": "Send the code or link to up to three friends."
       },
       {
-        "title": "Roll the dice",
-        "text": "Roll, pick your piece, and get all four safely home."
+        "title": "Roll and move",
+        "text": "Roll the dice, pick a piece, and get all four home."
       },
       {
-        "title": "Celebrate",
-        "text": "Knock pieces out, stay within the time limit, and take first place."
+        "title": "Capture",
+        "text": "Land on someone else's piece to send it back to their yard."
       },
       {
         "title": "Don't get mad",
-        "text": "Sent back to your yard? It happens to everyone. Laugh it off and roll again."
+        "text": "Got sent back? Happens to everyone. Roll again."
       }
     ],
     "players": {
       "title": "2–4 players",
-      "text": "Together in one room."
+      "text": "In one room."
     },
     "sync": {
-      "title": "Live sync",
-      "text": "Every move appears instantly."
+      "title": "Real time",
+      "text": "Everyone sees moves as they happen."
     },
     "fairDice": {
       "title": "Fair dice",
@@ -505,7 +505,7 @@
   },
   "notFound": {
     "title": "Page not found",
-    "text": "That page rolled off the board. Let's get you back to the game.",
+    "text": "This page doesn't exist. Head back to the start.",
     "home": "Home"
   }
 }

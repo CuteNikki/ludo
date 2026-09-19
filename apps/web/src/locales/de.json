@@ -15,21 +15,21 @@
     "project": "Projekt"
   },
   "hero": {
-    "live": "Das Brett ist eröffnet",
+    "live": "Kostenlos, ohne Anmeldung",
     "titleLine1": "Würfeln. Ziehen.",
     "titleEm": "Nicht ärgern.",
-    "subtitle": "Das klassische Brettspiel, neu zusammengesetzt für echte Menschen und schnelle Runden. Raum aufmachen, Link teilen, losspielen.",
-    "cta": "Jetzt Runde starten"
+    "subtitle": "Das klassische Brettspiel, jetzt im Browser. Raum erstellen, Link an Freunde schicken, losspielen.",
+    "cta": "Jetzt spielen"
   },
   "preview": {
     "aria": "Illustration eines Ludo-Spielfelds",
     "badge": "Demo-Spiel",
-    "caption": "Eine Runde · vier Farben · unendlich viel Schadenfreude"
+    "caption": "2–4 Spieler · ein Spielfeld"
   },
   "start": {
-    "eyebrow": "Bereit?",
-    "title": "Dein Tisch wartet schon.",
-    "subtitle": "Wähle einen Namen und eröffne eine Runde. Deine Freunde brauchen nur den sechsstelligen Code.",
+    "eyebrow": "Spielen",
+    "title": "Spiel starten",
+    "subtitle": "Gib einen Namen ein und erstelle einen Raum. Deine Freunde treten mit dem sechsstelligen Code bei.",
     "nameLabel": "Dein Name",
     "namePlaceholder": "Spielername",
     "createRoom": "Raum erstellen",
@@ -57,32 +57,32 @@
   },
   "howItWorks": {
     "eyebrow": "So funktioniert's",
-    "title": "Vier Schritte zu einer guten Runde.",
+    "title": "So läuft ein Spiel",
     "steps": [
       {
-        "title": "Raum teilen",
-        "text": "Erstelle einen Raum und schicke den Code an bis zu drei Mitspieler."
+        "title": "Raum erstellen",
+        "text": "Schick den Code oder Link an bis zu drei Freunde."
       },
       {
-        "title": "Würfelglück",
-        "text": "Würfle, wähle deine Figur und bringe alle vier sicher ins Ziel."
+        "title": "Würfeln und ziehen",
+        "text": "Würfle, wähle eine Figur und bringe alle vier ins Ziel."
       },
       {
-        "title": "Sieg feiern",
-        "text": "Schmeiß Figuren raus, bleib im Zeitlimit und hol dir den ersten Platz."
+        "title": "Schlagen",
+        "text": "Landest du auf einer fremden Figur, muss sie zurück in den Hof."
       },
       {
         "title": "Nicht ärgern",
-        "text": "Rausgeworfen? Das passiert jedem. Kurz durchatmen, lachen und weiterwürfeln."
+        "text": "Rausgeworfen? Passiert jedem. Weiterwürfeln."
       }
     ],
     "players": {
       "title": "2–4 Spieler",
-      "text": "Gemeinsam in einem Raum."
+      "text": "In einem Raum."
     },
     "sync": {
-      "title": "Live synchron",
-      "text": "Jeder Zug erscheint sofort."
+      "title": "Echtzeit",
+      "text": "Alle sehen jeden Zug sofort."
     },
     "fairDice": {
       "title": "Fairer Würfel",
@@ -505,7 +505,7 @@
   },
   "notFound": {
     "title": "Seite nicht gefunden",
-    "text": "Diese Seite ist vom Brett gefallen. Zurück ins Spiel!",
+    "text": "Diese Seite gibt es nicht. Zurück zur Startseite.",
     "home": "Start"
   }
 }
