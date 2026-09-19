@@ -128,21 +128,24 @@ export default function DiscoverPage() {
                   </span>
                 </div>
 
-                <div className='flex flex-wrap items-center justify-between gap-x-3 gap-y-2'>
-                  <span className='flex items-center gap-1.5' role='img' aria-label={`${room.playerCount}/${room.maxPlayers}`}>
-                    {Array.from({ length: room.maxPlayers }, (_, seat) => (
-                      <span
-                        key={seat}
-                        className={cn(
-                          'size-5 rounded-full border-3 border-border',
-                          seat < room.playerCount ? seatColors[seat % seatColors.length] : 'bg-background',
-                        )}
-                      />
-                    ))}
-                    <span className='ml-1 text-sm font-extrabold'>
-                      {room.playerCount}/{room.maxPlayers}
+                <div className='flex flex-col gap-1.5'>
+                  <div className='flex items-center justify-between gap-3'>
+                    <span className='flex items-center gap-1.5' role='img' aria-label={`${room.playerCount}/${room.maxPlayers}`}>
+                      {Array.from({ length: room.maxPlayers }, (_, seat) => (
+                        <span
+                          key={seat}
+                          className={cn(
+                            'size-5 rounded-full border-3 border-border',
+                            seat < room.playerCount ? seatColors[seat % seatColors.length] : 'bg-background',
+                          )}
+                        />
+                      ))}
+                      <span className='ml-1 text-sm font-extrabold'>
+                        {room.playerCount}/{room.maxPlayers}
+                      </span>
                     </span>
-                  </span>
+                    <MoveTimeBadge seconds={room.settings.moveTimeSeconds} />
+                  </div>
                   <RoomSettingIcons settings={room.settings} />
                 </div>
 
@@ -170,19 +173,27 @@ const BOOLEAN_SETTINGS = [
   { key: 'mustCapture', icon: Target, labelKey: 'room.settings.mustCapture', infoKey: 'room.settings.mustCaptureInfo' },
 ] as const;
 
-/** One icon per setting, green when on and red when off, with the current value on hover/tap. */
+/** The move time, shown next to the player count so the row of rule icons below has the card's full width. */
+function MoveTimeBadge({ seconds }: { seconds: number }) {
+  const { t } = useTranslation();
+
+  return (
+    <TapTooltip
+      label={`${t('room.settings.moveTime')}: ${seconds}s`}
+      content={<SettingTooltipBody title={t('room.settings.moveTime')} value={`${seconds}s`} info={t('room.settings.moveTimeInfo')} />}
+      className={cn(SETTING_BADGE_CLASS, 'shrink-0 gap-1 px-1.5 text-xs font-bold text-foreground/70')}
+    >
+      <Clock3 size={15} /> {seconds}s
+    </TapTooltip>
+  );
+}
+
+/** One icon per rule, green when on and red when off, with the current value on hover/tap. They wrap on very narrow cards. */
 function RoomSettingIcons({ settings }: { settings: RoomSettings }) {
   const { t } = useTranslation();
 
   return (
-    <div className='flex items-center gap-0.5'>
-      <TapTooltip
-        label={`${t('room.settings.moveTime')}: ${settings.moveTimeSeconds}s`}
-        content={<SettingTooltipBody title={t('room.settings.moveTime')} value={`${settings.moveTimeSeconds}s`} info={t('room.settings.moveTimeInfo')} />}
-        className={cn(SETTING_BADGE_CLASS, 'gap-1 px-1.5 text-xs font-bold text-foreground/70')}
-      >
-        <Clock3 size={15} /> {settings.moveTimeSeconds}s
-      </TapTooltip>
+    <div className='flex flex-wrap items-center gap-0.5'>
       {BOOLEAN_SETTINGS.map(({ key, icon: Icon, labelKey, infoKey }) => {
         const on = settings[key];
         const state = t(on ? 'discover.settingOn' : 'discover.settingOff');
