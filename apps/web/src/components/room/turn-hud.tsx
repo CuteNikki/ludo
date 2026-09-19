@@ -131,7 +131,7 @@ function Seat({ player, active, value }: { player: Player; active: boolean; valu
         !player.connected && 'opacity-50',
       )}
     >
-      <span aria-hidden='true' className={cn('absolute inset-x-2 -top-[3px] h-1.5 rounded-b-full', solidBg[player.color])} />
+      <span aria-hidden='true' className={cn('absolute inset-x-2 -top-0.75 h-1.5 rounded-b-full', solidBg[player.color])} />
       {/* Keyed by the value so a fresh roll pops in instead of silently changing. */}
       <div key={value ?? 'none'} className={cn(value !== null && 'animate-dice-result')}>
         <Die
