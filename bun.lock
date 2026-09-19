@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "ludo-realtime",
+      "devDependencies": {
+        "typescript": "^5.9.2",
+      },
     },
     "apps/server": {
       "name": "@ludo/server",
