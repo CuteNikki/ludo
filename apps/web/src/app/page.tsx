@@ -241,7 +241,8 @@ export default function HomePage() {
         >
           {features.map(({ icon: Icon, title, text }, index) => (
             <div key={title} className='reveal-item' style={order(index)}>
-              <div className='toy-card card-hover-lift flex h-full items-center gap-4 p-5'>
+              {/* The three columns start at `sm`, where a card is too narrow for the icon beside its text, so the icon stacks on top until `lg`. */}
+              <div className='toy-card card-hover-lift flex h-full items-center gap-4 p-5 sm:flex-col sm:items-start lg:flex-row lg:items-center'>
                 <span className='grid size-14 shrink-0 place-items-center rounded-xl border-3 border-border bg-primary text-primary-foreground shadow-toy'>
                   <Icon size={26} strokeWidth={2.5} />
                 </span>
