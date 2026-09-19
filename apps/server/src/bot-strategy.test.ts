@@ -11,7 +11,15 @@ function stateFor(dice: number, botPositions: number[], opponentPositions: numbe
   return {
     roomCode: 'TEST',
     hostPlayerId: 'human',
-    settings: { moveTimeSeconds: 30, automaticSingleMove: true, fairDice: true, isPublic: false, mustSpawnOnSix: false, extraTurnOnCapture: false },
+    settings: {
+      moveTimeSeconds: 30,
+      automaticSingleMove: true,
+      fairDice: true,
+      isPublic: false,
+      mustSpawnOnSix: false,
+      extraTurnOnCapture: false,
+      safeStartSquares: false,
+    },
     phase: 'playing',
     turnStage: 'move',
     turnDeadline: null,
@@ -47,6 +55,16 @@ describe('chooseBotMove', () => {
     // Bot piece 0 at 5 (+3 -> 8) hits the blue piece on board square 8 (blue relative 38);
     // piece 1 at 12 has a free move ahead instead.
     const state = stateFor(3, [5, 12], [38]);
+    expect(chooseBotMove(state, 'bot', noRandom)).toBe('bot-0');
+  });
+
+  test('treats a start square as safe from opponents about to spawn', () => {
+    // Blue's yard pieces would spawn onto square 10. Bot piece 0 (5 + 5) lands there, piece 1 (3 + 5 -> 8) doesn't.
+    // Normally that's a risk worth avoiding, but not on a safe start square.
+    const state = stateFor(5, [5, 3]);
+    expect(chooseBotMove(state, 'bot', noRandom)).toBe('bot-1');
+
+    state.settings.safeStartSquares = true;
     expect(chooseBotMove(state, 'bot', noRandom)).toBe('bot-0');
   });
 

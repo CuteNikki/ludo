@@ -6,7 +6,7 @@ The classic board game "Mensch ärgere Dich nicht" (Ludo) in the browser: real-t
 
 - **Real-time multiplayer:** the server is authoritative. Clients only send actions, and the server rolls the dice, validates every move and broadcasts the state to the room.
 - **Rooms:** create a room, share the six-character code or the link, and play. Rooms can be listed publicly on a discovery page so anyone can join.
-- **The full game:** captures, the home column, a move timer, automatic single moves, optional "must spawn on six" and "extra turn on capture" rules and a fair dice option, so no one waits forever for a six.
+- **The full game:** captures, the home column, a move timer, automatic single moves, optional "must spawn on six", "extra turn on capture" and "safe start squares" rules and a fair dice option, so no one waits forever for a six.
 - **Computer opponents:** the host can fill free seats with bots, so a game against them starts with just one human player.
 - **Host controls:** room settings, removing inactive players (even mid-game), automatic host handover and a rematch vote at the end of every game.
 - **Animation and sound:** pieces walk along the track, captured pieces fly home and the dice roll. The sound effects are synthesized with the Web Audio API, so there are no audio files.
@@ -58,7 +58,7 @@ Bots run entirely on the server. They roll like everyone else (including the fai
 
 ## Room Settings
 
-The creator of a room is the host and can configure the turn timer (15, 30, 45 or 60 seconds), automatic moves, the fair dice option, the optional "must spawn on six" and "extra turn on capture" rules and the room's public/private visibility in the lobby. Settings are synchronized to all players and locked once the game starts. Any change made in the lobby resets every player's ready status. Public rooms show up, while still in the lobby, on the `/discover` page for anyone to browse and join, along with a per-setting overview (on/off and move time) of how the room is configured.
+The creator of a room is the host and can configure the turn timer (15, 30, 45 or 60 seconds), automatic moves, the fair dice option, the optional "must spawn on six", "extra turn on capture" and "safe start squares" rules and the room's public/private visibility in the lobby. Settings are synchronized to all players and locked once the game starts. Any change made in the lobby resets every player's ready status. Public rooms show up, while still in the lobby, on the `/discover` page for anyone to browse and join, along with a per-setting overview (on/off and move time) of how the room is configured.
 
 Every player can change their name and pick a still-available player color in the lobby. Names may be duplicated, taken colors are locked, and the chosen profile persists across a reload. If no name is entered, "Guest" is used.
 

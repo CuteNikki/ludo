@@ -25,6 +25,7 @@ export interface RoomSettings {
   isPublic: boolean;
   mustSpawnOnSix: boolean;
   extraTurnOnCapture: boolean;
+  safeStartSquares: boolean;
 }
 
 export interface PublicRoomSummary {
@@ -108,4 +109,4 @@ export type RoomErrorCode =
   | 'INVALID_EVENT'
   | 'UNKNOWN';
 
-export { TRACK_LENGTH, chooseBotMove, toBoardPosition } from './bot-strategy';
+export { TRACK_LENGTH, chooseBotMove, isStartSquare, toBoardPosition } from './bot-strategy';

@@ -143,6 +143,10 @@
         "text": "Eine optionale, vom Host aktivierbare Regel: Wer eine gegnerische Figur schlägt, darf noch einmal würfeln. Das addiert sich nicht mit einer Sechs, ein schlagender Sechserwurf gibt also nur einen zusätzlichen Wurf."
       },
       {
+        "title": "Sichere Startfelder",
+        "text": "Eine optionale, vom Host aktivierbare Regel: Die vier farbigen Startfelder sind sicher. Eine Figur auf einem Startfeld kann nicht geschlagen werden, und ein von einer anderen Farbe besetztes Feld darf weder angezogen noch besetzt werden, dieser Zug ist dann nicht möglich. Ist kein anderer Zug möglich, ist der nächste Spieler dran."
+      },
+      {
         "title": "Computergegner",
         "text": "Der Host kann freie Plätze mit Bots füllen. Sie würfeln und ziehen selbstständig, und ein Spiel gegen Bots kann mit nur einem menschlichen Spieler starten."
       },
@@ -272,6 +276,8 @@
       "mustSpawnOnSixInfo": "Bei einer gewürfelten Sechs muss eine wartende Figur eingesetzt werden, statt eine bereits im Spiel befindliche Figur 6 Felder zu ziehen.",
       "extraTurnOnCapture": "Extrazug beim Schlagen",
       "extraTurnOnCaptureInfo": "Wer eine gegnerische Figur schlägt, darf noch einmal würfeln.",
+      "safeStartSquares": "Sichere Startfelder",
+      "safeStartSquaresInfo": "Figuren auf einem Startfeld können nicht geschlagen werden, und auf ein Startfeld, auf dem eine Figur einer anderen Farbe steht, darf niemand ziehen oder einsetzen.",
       "isPublic": "Öffentlicher Raum",
       "isPublicInfo": "Listet diesen Raum auf der öffentlichen Entdecken-Seite, solange er offen und noch in der Lobby ist."
     },

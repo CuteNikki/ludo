@@ -1,3 +1,4 @@
+import type { RoomSettings } from '@ludo/shared';
 import { describe, expect, test } from 'bun:test';
 
 import { RoomManager, type PlayerLeftEvent, type RematchTransition } from './room-manager';
@@ -17,6 +18,31 @@ function startGame(rolls: number[] = [6, 3]) {
   manager.setReady(first.state.roomCode, first.playerId, true);
   manager.setReady(first.state.roomCode, second.playerId, true);
   return { manager, first, second };
+}
+
+/**
+ * A two-player game (red hosts, blue joins) with the given settings on top of the defaults. `rolls`
+ * is a single fixed roll or a sequence, whose last value repeats once it runs out. Moves are never
+ * automatic, so a roll with legal moves always waits for `move`.
+ */
+function startConfiguredGame(overrides: Partial<RoomSettings>, rolls: number | number[]) {
+  const sequence = Array.isArray(rolls) ? rolls : [rolls];
+  let rollIndex = 0;
+  const manager = new RoomManager(
+    () => undefined,
+    60_000,
+    () => sequence[Math.min(rollIndex++, sequence.length - 1)]!,
+    900,
+    1_800,
+    null,
+  );
+  const host = manager.createRoom('Ada');
+  const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+  manager.setSettings(host.state.roomCode, host.playerId, { ...host.state.settings, fairDice: false, ...overrides });
+  manager.setReady(host.state.roomCode, host.playerId, true);
+  manager.setReady(host.state.roomCode, guest.playerId, true);
+  const piecesOf = (playerId: string) => host.state.pieces.filter((piece) => piece.playerId === playerId);
+  return { manager, host, guest, hostPieces: piecesOf(host.playerId), guestPieces: piecesOf(guest.playerId) };
 }
 
 describe('RoomManager game turns', () => {
@@ -58,6 +84,7 @@ describe('RoomManager game turns', () => {
       isPublic: true,
       mustSpawnOnSix: false,
       extraTurnOnCapture: false,
+      safeStartSquares: false,
     };
     expect(() => manager.setSettings(host.state.roomCode, guest.playerId, settings)).toThrow('Only the host');
     const updated = manager.setSettings(host.state.roomCode, host.playerId, settings);
@@ -84,6 +111,7 @@ describe('RoomManager game turns', () => {
       isPublic: false,
       mustSpawnOnSix: false,
       extraTurnOnCapture: false,
+      safeStartSquares: false,
     };
     manager.setSettings(host.state.roomCode, host.playerId, settings);
     manager.setReady(host.state.roomCode, host.playerId, true);
@@ -107,6 +135,7 @@ describe('RoomManager game turns', () => {
       isPublic: true,
       mustSpawnOnSix: false,
       extraTurnOnCapture: false,
+      safeStartSquares: false,
     };
     manager.setSettings(publicRoom.state.roomCode, publicRoom.playerId, settings);
     manager.createRoom('Mika'); // stays private by default
@@ -237,6 +266,7 @@ describe('RoomManager game turns', () => {
       isPublic: false,
       mustSpawnOnSix: true,
       extraTurnOnCapture: false,
+      safeStartSquares: false,
     });
     manager.setReady(host.state.roomCode, host.playerId, true);
     manager.setReady(host.state.roomCode, guest.playerId, true);
@@ -329,6 +359,118 @@ describe('RoomManager game turns', () => {
       const { extraTurnOnCapture: _omitted, ...incomplete } = host.state.settings;
 
       expect(() => manager.setSettings(host.state.roomCode, host.playerId, incomplete as never)).toThrow('Invalid room settings.');
+    });
+  });
+
+  describe('safe start squares', () => {
+    test('is disabled by default', () => {
+      const manager = new RoomManager();
+      const host = manager.createRoom('Ada');
+      expect(host.state.settings.safeStartSquares).toBe(false);
+    });
+
+    test('captures on an opponent start square when disabled', () => {
+      // Red's piece on 7 rolls a 3 onto square 10, blue's start square, where a blue piece waits.
+      const { manager, host, guestPieces, hostPieces } = startConfiguredGame({}, 3);
+      hostPieces[0]!.position = 7;
+      guestPieces[0]!.position = 0;
+
+      manager.roll(host.state.roomCode, host.playerId);
+      manager.move(host.state.roomCode, host.playerId, hostPieces[0]!.id);
+
+      expect(hostPieces[0]!.position).toBe(10);
+      expect(guestPieces[0]!.position).toBe(-1);
+    });
+
+    test('captures a piece on the start square when leaving the yard when disabled', () => {
+      // Blue's piece on 30 stands on square 0, red's start square.
+      const { manager, host, guestPieces } = startConfiguredGame({}, 6);
+      guestPieces[0]!.position = 30;
+
+      const rolled = manager.roll(host.state.roomCode, host.playerId);
+      manager.move(host.state.roomCode, host.playerId, rolled.movablePieceIds[0]!);
+
+      expect(guestPieces[0]!.position).toBe(-1);
+    });
+
+    test('closes an opponent start square that is occupied when enabled', () => {
+      const { manager, host, guestPieces, hostPieces } = startConfiguredGame({ safeStartSquares: true }, 3);
+      hostPieces[0]!.position = 7;
+      guestPieces[0]!.position = 0;
+
+      const rolled = manager.roll(host.state.roomCode, host.playerId);
+
+      expect(rolled.movablePieceIds).toEqual([]);
+      expect(rolled.turnStage).toBe('no-move');
+      expect(hostPieces[0]!.position).toBe(7);
+      expect(guestPieces[0]!.position).toBe(0);
+    });
+
+    test('blocks leaving the yard while an opponent stands on the start square', () => {
+      const { manager, host, guestPieces } = startConfiguredGame({ safeStartSquares: true }, 6);
+      guestPieces[0]!.position = 30;
+
+      const rolled = manager.roll(host.state.roomCode, host.playerId);
+
+      expect(rolled.movablePieceIds).toEqual([]);
+      expect(rolled.turnStage).toBe('no-move');
+      expect(guestPieces[0]!.position).toBe(30);
+    });
+
+    test('offers the other pieces when only one move is blocked', () => {
+      const { manager, host, guestPieces, hostPieces } = startConfiguredGame({ safeStartSquares: true }, 3);
+      hostPieces[0]!.position = 7;
+      hostPieces[1]!.position = 20;
+      guestPieces[0]!.position = 0;
+
+      const rolled = manager.roll(host.state.roomCode, host.playerId);
+
+      expect(rolled.movablePieceIds).toEqual([hostPieces[1]!.id]);
+    });
+
+    test('skips the turn when the only moves are blocked', async () => {
+      let guestId = '';
+      let resolveTurn: (() => void) | undefined;
+      const turnPassed = new Promise<void>((resolve) => {
+        resolveTurn = resolve;
+      });
+      const manager = new RoomManager(
+        (_roomCode, state) => {
+          if (state.currentPlayerId === guestId) resolveTurn?.();
+        },
+        60_000,
+        () => 3,
+        5,
+        5,
+        null,
+      );
+      const host = manager.createRoom('Ada');
+      const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+      guestId = guest.playerId;
+      manager.setSettings(host.state.roomCode, host.playerId, { ...host.state.settings, fairDice: false, safeStartSquares: true });
+      manager.setReady(host.state.roomCode, host.playerId, true);
+      manager.setReady(host.state.roomCode, guest.playerId, true);
+      const hostPiece = host.state.pieces.find((piece) => piece.playerId === host.playerId)!;
+      const guestPiece = host.state.pieces.find((piece) => piece.playerId === guest.playerId)!;
+      hostPiece.position = 7;
+      guestPiece.position = 0;
+
+      await turnPassed;
+
+      expect(host.state.currentPlayerId).toBe(guest.playerId);
+      expect(hostPiece.position).toBe(7);
+      expect(guestPiece.position).toBe(0);
+    });
+
+    test('still captures on the shared track when enabled', () => {
+      const { manager, host, guestPieces, hostPieces } = startConfiguredGame({ safeStartSquares: true }, 3);
+      hostPieces[0]!.position = 5;
+      guestPieces[0]!.position = 38;
+
+      manager.roll(host.state.roomCode, host.playerId);
+      manager.move(host.state.roomCode, host.playerId, hostPieces[0]!.id);
+
+      expect(guestPieces[0]!.position).toBe(-1);
     });
   });
 
@@ -764,6 +906,7 @@ describe('RoomManager closed tabs and empty rooms', () => {
     isPublic: true,
     mustSpawnOnSix: false,
     extraTurnOnCapture: false,
+    safeStartSquares: false,
   };
 
   /** Short lobby grace period, everything else default; `onLeft` sees who was dropped and why. */

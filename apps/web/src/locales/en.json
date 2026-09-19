@@ -143,6 +143,10 @@
         "text": "An optional rule the host can enable: capturing an opponent's piece earns you another roll. It doesn't stack with a six, so a capturing six still gives just one extra roll."
       },
       {
+        "title": "Safe start squares",
+        "text": "An optional rule the host can enable: the four colored start squares are safe. A piece standing on one can't be captured, and a square occupied by another color can't be landed on or spawned onto, so that move isn't available. If no other move is possible, the turn passes."
+      },
+      {
         "title": "Computer opponents",
         "text": "The host can fill free seats with bots. They roll and move on their own, and a game against bots can start with just one human player."
       },
@@ -272,6 +276,8 @@
       "mustSpawnOnSixInfo": "Rolling a six forces a figure out of the yard if one is waiting there, instead of letting a figure already on the board move 6 tiles.",
       "extraTurnOnCapture": "Extra turn on capture",
       "extraTurnOnCaptureInfo": "Capturing an opponent's piece earns you another roll.",
+      "safeStartSquares": "Safe start squares",
+      "safeStartSquaresInfo": "Pieces on a start square can't be captured, and nobody can land or leave the yard onto a start square that another color's piece is standing on.",
       "isPublic": "Public room",
       "isPublicInfo": "Lists this room on the public discovery page while it's open and still in the lobby."
     },

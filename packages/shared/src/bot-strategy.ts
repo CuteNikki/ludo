@@ -8,6 +8,11 @@ export function toBoardPosition(color: PlayerColor, relativePosition: number): n
   return (START_OFFSETS[color] + relativePosition) % TRACK_LENGTH;
 }
 
+/** Whether a square on the shared track is one of the four start squares. */
+export function isStartSquare(boardPosition: number): boolean {
+  return Object.values(START_OFFSETS).includes(boardPosition);
+}
+
 /**
  * Picks which of the currently movable pieces a bot should move. Every option is scored on a few
  * simple heuristics - capture > enter the home stretch > leave the yard > escape danger - with a
@@ -25,8 +30,14 @@ export function chooseBotMove(state: GameState, playerId: string, random: () => 
       return owner ? [{ piece, color: owner.color }] : [];
     });
 
+  /** Nothing can be captured on a start square when the safe squares rule is on. */
+  function isSafe(boardPosition: number): boolean {
+    return state.settings.safeStartSquares && isStartSquare(boardPosition);
+  }
+
   /** Whether an opponent could land on `boardPosition` next turn: a piece 1-6 squares behind it, or a six that spawns onto it. */
   function isThreatened(boardPosition: number): boolean {
+    if (isSafe(boardPosition)) return false;
     return opponents.some(({ piece, color }) => {
       if (piece.position === -1) return toBoardPosition(color, 0) === boardPosition;
       if (piece.position >= TRACK_LENGTH) return false;

@@ -1,5 +1,5 @@
-import type { GameState, MoveTimeSeconds, Player, PlayerColor, PlayerLeftReason, PublicRoomSummary, RoomErrorCode, RoomSettings } from '@ludo/shared';
-import { chooseBotMove, toBoardPosition } from '@ludo/shared';
+import type { GameState, MoveTimeSeconds, Piece, Player, PlayerColor, PlayerLeftReason, PublicRoomSummary, RoomErrorCode, RoomSettings } from '@ludo/shared';
+import { TRACK_LENGTH, chooseBotMove, isStartSquare, toBoardPosition } from '@ludo/shared';
 
 import { FairDice } from './fair-dice';
 
@@ -25,6 +25,7 @@ const DEFAULT_SETTINGS: RoomSettings = {
   isPublic: false,
   mustSpawnOnSix: false,
   extraTurnOnCapture: false,
+  safeStartSquares: false,
 };
 
 interface Room {
@@ -167,7 +168,8 @@ export class RoomManager {
       typeof settings.fairDice !== 'boolean' ||
       typeof settings.isPublic !== 'boolean' ||
       typeof settings.mustSpawnOnSix !== 'boolean' ||
-      typeof settings.extraTurnOnCapture !== 'boolean'
+      typeof settings.extraTurnOnCapture !== 'boolean' ||
+      typeof settings.safeStartSquares !== 'boolean'
     )
       throw new RoomError('INVALID_SETTINGS', 'Invalid room settings.');
 
@@ -292,18 +294,9 @@ export class RoomManager {
     if (!piece || !player) throw new RoomError('PIECE_NOT_FOUND', 'The piece was not found.');
 
     piece.position = piece.position === -1 ? 0 : piece.position + state.diceResult;
-    let captured = false;
-    if (piece.position < 40) {
-      const target = toBoardPosition(player.color, piece.position);
-      for (const opponentPiece of state.pieces) {
-        if (opponentPiece.playerId === playerId || opponentPiece.position < 0 || opponentPiece.position >= 40) continue;
-        const opponent = state.players.find((candidate) => candidate.id === opponentPiece.playerId);
-        if (opponent && toBoardPosition(opponent.color, opponentPiece.position) === target) {
-          opponentPiece.position = -1;
-          captured = true;
-        }
-      }
-    }
+    const capturedPieces = this.getOpponentPiecesAt(state, player, piece.position);
+    for (const capturedPiece of capturedPieces) capturedPiece.position = -1;
+    const captured = capturedPieces.length > 0;
 
     if (state.pieces.filter((candidate) => candidate.playerId === playerId).every((candidate) => candidate.position >= 40)) {
       this.finishGame(state, playerId);
@@ -495,6 +488,27 @@ export class RoomManager {
     return room.state;
   }
 
+  /** The opponent pieces on the shared track that a piece of `player` landing on `relativePosition` (relative to its own start) would share a square with. */
+  private getOpponentPiecesAt(state: GameState, player: Player, relativePosition: number): Piece[] {
+    if (relativePosition < 0 || relativePosition >= TRACK_LENGTH) return [];
+    const target = toBoardPosition(player.color, relativePosition);
+    return state.pieces.filter((candidate) => {
+      if (candidate.playerId === player.id || candidate.position < 0 || candidate.position >= TRACK_LENGTH) return false;
+      const owner = state.players.find((other) => other.id === candidate.playerId);
+      return owner !== undefined && toBoardPosition(owner.color, candidate.position) === target;
+    });
+  }
+
+  /**
+   * With safe start squares, an opponent standing on a start square can't be captured, and the square
+   * can't be shared either, so nobody else can land or spawn there until it leaves.
+   */
+  private isBlockedBySafeSquare(state: GameState, player: Player, relativePosition: number): boolean {
+    if (!state.settings.safeStartSquares || relativePosition < 0 || relativePosition >= TRACK_LENGTH) return false;
+    if (!isStartSquare(toBoardPosition(player.color, relativePosition))) return false;
+    return this.getOpponentPiecesAt(state, player, relativePosition).length > 0;
+  }
+
   private getMovablePieces(state: GameState, playerId: string, diceResult: number) {
     const player = state.players.find((candidate) => candidate.id === playerId);
     if (!player) return [];
@@ -503,6 +517,7 @@ export class RoomManager {
     const movable = ownPieces.filter((piece) => {
       const targetPosition = piece.position === -1 ? (diceResult === 6 ? 0 : -1) : piece.position + diceResult;
       if (targetPosition < 0 || targetPosition > 43) return false;
+      if (this.isBlockedBySafeSquare(state, player, targetPosition)) return false;
       return !ownPieces.some((other) => other.id !== piece.id && other.position === targetPosition);
     });
 
