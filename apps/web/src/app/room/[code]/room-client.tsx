@@ -327,6 +327,16 @@ function RoomLoading() {
   );
 }
 
+function OrDivider({ className }: { className?: string }) {
+  const { t } = useTranslation();
+
+  return (
+    <div className={cn('flex items-center gap-3 text-xs font-extrabold uppercase text-foreground/70', className)}>
+      <span className='h-0.5 flex-1 rounded-full bg-foreground/20' /> {t('start.or')} <span className='h-0.5 flex-1 rounded-full bg-foreground/20' />
+    </div>
+  );
+}
+
 function Message({
   title,
   detail,
@@ -350,19 +360,20 @@ function Message({
         <h1 className='font-display text-4xl leading-tight'>{title}</h1>
         <p className='mt-3 font-bold text-foreground/70'>{detail}</p>
         {watchCode && (
-          <div className='mt-6'>
-            <Button asChild size='lg' className='w-full'>
+          <>
+            <p className='mt-1 font-bold text-foreground/70'>{t('room.message.watchHint')}</p>
+            <Button asChild size='lg' className='mt-6 w-full'>
               <a href={`/watch/${watchCode}`}>
                 <Eye size={20} strokeWidth={3} /> {t('room.message.watch')}
               </a>
             </Button>
-            <p className='mt-2 text-xs font-bold text-foreground/60'>{t('room.message.watchHint')}</p>
-          </div>
+            {showRoomChoices && <OrDivider className='mt-6' />}
+          </>
         )}
         {showRoomChoices && (
           <>
             <form
-              className='mt-7 flex gap-2'
+              className={cn('flex gap-2', watchCode ? 'mt-6' : 'mt-7')}
               onSubmit={(event) => {
                 event.preventDefault();
                 if (roomCode.length !== 6) return;
@@ -400,11 +411,10 @@ function Message({
             <p className='mt-2 h-4 text-xs font-bold text-foreground/60' aria-live='polite'>
               {submitting ? t('room.message.lookingUpRoom') : ''}
             </p>
-            <div className='mt-2 flex items-center gap-3 text-xs font-extrabold uppercase text-foreground/70'>
-              <span className='h-0.5 flex-1 rounded-full bg-foreground/20' /> {t('start.or')} <span className='h-0.5 flex-1 rounded-full bg-foreground/20' />
-            </div>
+            <OrDivider className='mt-2' />
             <div className='mt-4 flex flex-col justify-center gap-3 sm:flex-row'>
-              <Button asChild>
+              {/* With a Watch button above, that is the one main action, so this one steps back. */}
+              <Button variant={watchCode ? 'outline' : 'default'} asChild>
                 <a href='/room/new'>
                   <Plus size={18} strokeWidth={3} /> {t('room.message.newRoom')}
                 </a>
