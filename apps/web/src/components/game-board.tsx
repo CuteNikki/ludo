@@ -1,20 +1,14 @@
 'use client';
 
-import { useSound } from '@/components/providers/sound';
-import { cn } from '@/lib/utils';
 import type { GameState, Piece, PlayerColor } from '@ludo/shared';
 import { useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  type Coordinate,
-  getCellColor,
-  getCellPosition,
-  getPieceCoordinate,
-  getYardColor,
-  isPathCoordinate,
-  isStartCoordinate,
-  key,
-} from './board-geometry';
+
+import { cn } from '@/lib/utils';
+
+import { useSound } from '@/components/providers/sound';
+
+import { getCellColor, getCellPosition, getPieceCoordinate, getYardColor, isPathCoordinate, isStartCoordinate, key, type Coordinate } from './board-geometry';
 import { usePieceAnimations } from './use-piece-animations';
 
 const colorStyles: Record<PlayerColor, { base: string; marker: string; pale: string; start: string; token: string; mat: string }> = {

@@ -1,14 +1,16 @@
 'use client';
 
-import { ArrowLeft, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+
+import { ArrowLeft, Users } from 'lucide-react';
+
+import { order } from '@/lib/reveal';
 
 import { PAGE_DECOR_A } from '@/components/decor';
 import { Die } from '@/components/die';
 import { PageShell } from '@/components/page-shell';
 import { Button } from '@/components/ui/button';
-import { order } from '@/lib/reveal';
 
 /** What a visitor sees at an address that doesn't exist: a bad roll, and two ways back into the game. */
 export function NotFoundContent() {
@@ -21,7 +23,10 @@ export function NotFoundContent() {
           {/* The worst roll there is. */}
           <Die value={1} size='xl' color='red' className='animate-bob rotate-6' label='1' />
         </div>
-        <p className='eyebrow reveal-load mt-6 inline-flex rounded-md border-2 border-border bg-background-alternative px-2 py-0.5 text-foreground shadow-[0_2px_0_var(--shadow-color)]' style={order(2)}>
+        <p
+          className='eyebrow reveal-load mt-6 inline-flex rounded-md border-2 border-border bg-background-alternative px-2 py-0.5 text-foreground shadow-[0_2px_0_var(--shadow-color)]'
+          style={order(2)}
+        >
           404
         </p>
         <h1 className='reveal-load mt-3 font-display text-4xl leading-tight sm:text-5xl' style={order(3)}>

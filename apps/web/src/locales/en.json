@@ -315,15 +315,11 @@
       "sections": [
         {
           "title": "Operator",
-          "paragraphs": [
-            "This website and the game server behind it are operated by the person named above. Contact them using the details above."
-          ]
+          "paragraphs": ["This website and the game server behind it are operated by the person named above. Contact them using the details above."]
         },
         {
           "title": "Responsible for content",
-          "paragraphs": [
-            "The person named above is responsible for the content of this website pursuant to § 18 (2) MStV."
-          ]
+          "paragraphs": ["The person named above is responsible for the content of this website pursuant to § 18 (2) MStV."]
         },
         {
           "title": "Liability for content",
@@ -423,9 +419,7 @@
         },
         {
           "title": "Changes",
-          "paragraphs": [
-            "We may update this policy when the service changes. The date at the top shows when it was last updated."
-          ]
+          "paragraphs": ["We may update this policy when the service changes. The date at the top shows when it was last updated."]
         }
       ]
     },
@@ -446,9 +440,7 @@
         },
         {
           "title": "Fair use",
-          "paragraphs": [
-            "Please play nicely. You agree not to:"
-          ],
+          "paragraphs": ["Please play nicely. You agree not to:"],
           "items": [
             "use names that are offensive, hateful, unlawful, or that impersonate or identify other people;",
             "harass other players or deliberately disrupt games;",
@@ -477,15 +469,11 @@
         },
         {
           "title": "Open source",
-          "paragraphs": [
-            "The source code is available in the project repository on GitHub, linked in the footer."
-          ]
+          "paragraphs": ["The source code is available in the project repository on GitHub, linked in the footer."]
         },
         {
           "title": "Changes to these terms",
-          "paragraphs": [
-            "We may update these terms when the service changes. Continuing to use Ludo after an update means you accept the new version."
-          ]
+          "paragraphs": ["We may update these terms when the service changes. Continuing to use Ludo after an update means you accept the new version."]
         },
         {
           "title": "Governing law",

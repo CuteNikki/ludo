@@ -1,6 +1,6 @@
-import { describe, expect, test } from 'bun:test';
 import type { GameState, Piece } from '@ludo/shared';
 import { chooseBotMove, toBoardPosition } from '@ludo/shared';
+import { describe, expect, test } from 'bun:test';
 
 /** Two-player state: the bot is red, the opponent blue, with the given piece positions (padded with yard pieces). */
 function stateFor(dice: number, botPositions: number[], opponentPositions: number[] = []): GameState {

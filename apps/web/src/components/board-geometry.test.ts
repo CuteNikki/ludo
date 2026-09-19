@@ -1,5 +1,6 @@
-import { describe, expect, test } from 'bun:test';
 import type { Piece } from '@ludo/shared';
+import { describe, expect, test } from 'bun:test';
+
 import {
   PATH,
   START_OFFSETS,

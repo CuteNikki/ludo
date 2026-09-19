@@ -1,13 +1,15 @@
 'use client';
 
-import { Dices, Flag, Home, Repeat, Shield, Swords, Trophy, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+import { Dices, Flag, Home, Repeat, Shield, Swords, Trophy, Users } from 'lucide-react';
+
+import { order } from '@/lib/reveal';
+import { cn } from '@/lib/utils';
 
 import { PAGE_DECOR_B } from '@/components/decor';
 import { PageHeader, PageShell } from '@/components/page-shell';
 import { Reveal } from '@/components/scroll-reveal';
-import { order } from '@/lib/reveal';
-import { cn } from '@/lib/utils';
 
 const sectionIcons = [Users, Dices, Repeat, Swords, Home, Trophy];
 const sectionColors = ['bg-p-red', 'bg-p-blue', 'bg-p-yellow', 'bg-p-green'] as const;
@@ -29,7 +31,11 @@ export default function RulesPage() {
           {sections.map((section, index) => {
             const Icon = sectionIcons[index] ?? Dices;
             return (
-              <li key={section.title} className='reveal-item toy-card flex flex-col gap-3 p-5 sm:p-6' style={order(1 + index, index % 2 === 0 ? '-3deg' : '3deg')}>
+              <li
+                key={section.title}
+                className='reveal-item toy-card flex flex-col gap-3 p-5 sm:p-6'
+                style={order(1 + index, index % 2 === 0 ? '-3deg' : '3deg')}
+              >
                 <div className='flex items-center gap-3'>
                   <span
                     className={cn(

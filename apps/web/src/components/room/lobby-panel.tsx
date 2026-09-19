@@ -1,16 +1,18 @@
 'use client';
 
 import type { MoveTimeSeconds, Player, PlayerColor, RoomSettings } from '@ludo/shared';
-import { Check, Clock3, Dice6, Dices, Globe, Info, Palette, Settings2, Sparkles, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { Check, Clock3, Dice6, Dices, Globe, Info, Palette, Settings2, Sparkles, UserRound } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
 
 import { onSolid, solidBg } from '@/components/room/player-color';
 import { SegmentedControl } from '@/components/segmented-control';
 import { TapTooltip } from '@/components/tap-tooltip';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { cn } from '@/lib/utils';
 
 const COLORS: PlayerColor[] = ['red', 'blue', 'green', 'yellow'];
 const MOVE_TIMES: MoveTimeSeconds[] = [15, 30, 45, 60];
@@ -34,7 +36,15 @@ export function LobbyPanel({ me, players, settings, isHost, onProfileChange, onS
   );
 }
 
-function PlayerProfile({ player, players, onChange }: { player: Player; players: Player[]; onChange: (profile: { name: string; color: PlayerColor }) => void }) {
+function PlayerProfile({
+  player,
+  players,
+  onChange,
+}: {
+  player: Player;
+  players: Player[];
+  onChange: (profile: { name: string; color: PlayerColor }) => void;
+}) {
   const { t } = useTranslation();
   const [draftName, setDraftName] = useState(player.name);
   const onChangeRef = useRef(onChange);
@@ -135,7 +145,9 @@ function LobbySettings({ settings, isHost, onChange }: { settings: RoomSettings;
           <Settings2 size={22} strokeWidth={2.5} /> {t('room.settings.title')}
         </h2>
         {!isHost && (
-          <span className='rounded-md border-2 border-border bg-background px-1.5 py-0.5 text-[10px] font-extrabold uppercase'>{t('room.settings.hostOnly')}</span>
+          <span className='rounded-md border-2 border-border bg-background px-1.5 py-0.5 text-[10px] font-extrabold uppercase'>
+            {t('room.settings.hostOnly')}
+          </span>
         )}
       </div>
 

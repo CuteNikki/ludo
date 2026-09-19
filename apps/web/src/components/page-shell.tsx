@@ -1,8 +1,9 @@
 import type { LucideIcon } from 'lucide-react';
 
-import { DecorLayer, type DecorItem } from '@/components/decor';
 import { order } from '@/lib/reveal';
 import { cn } from '@/lib/utils';
+
+import { DecorLayer, type DecorItem } from '@/components/decor';
 
 const widths = {
   narrow: 'max-w-3xl',
@@ -56,7 +57,10 @@ export function PageHeader({
     <header className='mb-8 flex flex-col gap-5 sm:mb-10 sm:flex-row sm:items-center sm:justify-between'>
       <div className='flex min-w-0 items-center gap-4 sm:gap-5'>
         <div
-          className={cn('reveal-load grid size-14 shrink-0 -rotate-3 place-items-center rounded-xl border-3 border-border shadow-toy sm:size-16', accents[accent])}
+          className={cn(
+            'reveal-load grid size-14 shrink-0 -rotate-3 place-items-center rounded-xl border-3 border-border shadow-toy sm:size-16',
+            accents[accent],
+          )}
           style={order(0, '25deg')}
         >
           <Icon className='size-7 sm:size-8' strokeWidth={2.5} />

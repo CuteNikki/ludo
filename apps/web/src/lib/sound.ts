@@ -78,7 +78,14 @@ interface ToneOptions {
   attack?: number;
 }
 
-function tone(c: AudioContext, out: AudioNode, at: number, freq: number, duration: number, { type = 'sine', gain = 0.2, endFreq, attack = 0.004 }: ToneOptions = {}) {
+function tone(
+  c: AudioContext,
+  out: AudioNode,
+  at: number,
+  freq: number,
+  duration: number,
+  { type = 'sine', gain = 0.2, endFreq, attack = 0.004 }: ToneOptions = {},
+) {
   const osc = c.createOscillator();
   const env = c.createGain();
   osc.type = type;
@@ -92,7 +99,13 @@ function tone(c: AudioContext, out: AudioNode, at: number, freq: number, duratio
   osc.stop(at + duration + 0.03);
 }
 
-function noise(c: AudioContext, out: AudioNode, at: number, duration: number, { freq = 2000, q = 1, gain = 0.15, filter = 'bandpass' as BiquadFilterType } = {}) {
+function noise(
+  c: AudioContext,
+  out: AudioNode,
+  at: number,
+  duration: number,
+  { freq = 2000, q = 1, gain = 0.15, filter = 'bandpass' as BiquadFilterType } = {},
+) {
   if (!noiseBuffer) {
     noiseBuffer = c.createBuffer(1, c.sampleRate, c.sampleRate);
     const data = noiseBuffer.getChannelData(0);

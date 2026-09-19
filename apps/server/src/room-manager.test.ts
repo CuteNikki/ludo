@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+
 import { RoomManager, type PlayerLeftEvent, type RematchTransition } from './room-manager';
 
 function startGame(rolls: number[] = [6, 3]) {
@@ -96,15 +97,21 @@ describe('RoomManager game turns', () => {
     manager.createRoom('Mika'); // stays private by default
 
     const listed = manager.listPublicRooms();
-    expect(listed).toEqual([
-      { roomCode: publicRoom.state.roomCode, hostName: 'Ada', playerCount: 2, maxPlayers: 4, phase: 'lobby', settings },
-    ]);
+    expect(listed).toEqual([{ roomCode: publicRoom.state.roomCode, hostName: 'Ada', playerCount: 2, maxPlayers: 4, phase: 'lobby', settings }]);
   });
 
   test('reports an accurate reason for kicks, voluntary leaves and disconnect timeouts', async () => {
     const leftEvents: PlayerLeftEvent[] = [];
-    const manager = new RoomManager(() => undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, (_roomCode, event) =>
-      leftEvents.push(event),
+    const manager = new RoomManager(
+      () => undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      (_roomCode, event) => leftEvents.push(event),
     );
     const host = manager.createRoom('Ada');
     const kicked = manager.joinRoom(host.state.roomCode, 'Linus');
@@ -198,7 +205,14 @@ describe('RoomManager game turns', () => {
   });
 
   test('forces a spawn on six over moving a board piece when "must spawn on six" is enabled', () => {
-    const manager = new RoomManager(() => undefined, 60_000, () => 6, 900, 1_800, null);
+    const manager = new RoomManager(
+      () => undefined,
+      60_000,
+      () => 6,
+      900,
+      1_800,
+      null,
+    );
     const host = manager.createRoom('Ada');
     const guest = manager.joinRoom(host.state.roomCode, 'Linus');
     manager.setSettings(host.state.roomCode, host.playerId, {
@@ -433,8 +447,16 @@ describe('RoomManager bots', () => {
 
   test('removes a bot silently, without a leave notification', () => {
     const leftEvents: PlayerLeftEvent[] = [];
-    const manager = new RoomManager(() => undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, (_roomCode, event) =>
-      leftEvents.push(event),
+    const manager = new RoomManager(
+      () => undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      (_roomCode, event) => leftEvents.push(event),
     );
     const host = manager.createRoom('Ada');
     manager.addBot(host.state.roomCode, host.playerId);
@@ -468,7 +490,16 @@ describe('RoomManager bots', () => {
 
   test('carries bots into the rematch room once every human has voted', () => {
     const transitions: RematchTransition[] = [];
-    const manager = new RoomManager(() => undefined, 60_000, () => 6, 900, 1_800, null, 30_000, (transition) => transitions.push(transition));
+    const manager = new RoomManager(
+      () => undefined,
+      60_000,
+      () => 6,
+      900,
+      1_800,
+      null,
+      30_000,
+      (transition) => transitions.push(transition),
+    );
     const host = manager.createRoom('Ada');
     manager.addBot(host.state.roomCode, host.playerId);
     manager.setReady(host.state.roomCode, host.playerId, true);
@@ -494,7 +525,14 @@ describe('RoomManager bots', () => {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function startThreePlayerGame() {
-  const manager = new RoomManager(() => undefined, 60_000, () => 1, 900, 1_800, null);
+  const manager = new RoomManager(
+    () => undefined,
+    60_000,
+    () => 1,
+    900,
+    1_800,
+    null,
+  );
   const host = manager.createRoom('Ada');
   const second = manager.joinRoom(host.state.roomCode, 'Linus');
   const third = manager.joinRoom(host.state.roomCode, 'Mika');
@@ -559,7 +597,16 @@ describe('RoomManager in-game moderation', () => {
     const transitionPromise = new Promise<RematchTransition>((resolve) => {
       resolveTransition = resolve;
     });
-    const manager = new RoomManager(() => undefined, 60_000, () => 1, 900, 1_800, null, 20, (transition) => resolveTransition?.(transition));
+    const manager = new RoomManager(
+      () => undefined,
+      60_000,
+      () => 1,
+      900,
+      1_800,
+      null,
+      20,
+      (transition) => resolveTransition?.(transition),
+    );
     const host = manager.createRoom('Ada');
     const second = manager.joinRoom(host.state.roomCode, 'Linus');
     const third = manager.joinRoom(host.state.roomCode, 'Mika');
@@ -630,7 +677,20 @@ describe('RoomManager closed tabs and empty rooms', () => {
 
   /** Short lobby grace period, everything else default; `onLeft` sees who was dropped and why. */
   function lobbyManager(lobbyGraceMs: number, onLeft: (event: PlayerLeftEvent) => void = () => undefined) {
-    return new RoomManager(() => undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, (_roomCode, event) => onLeft(event), undefined, 60_000, lobbyGraceMs);
+    return new RoomManager(
+      () => undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      (_roomCode, event) => onLeft(event),
+      undefined,
+      60_000,
+      lobbyGraceMs,
+    );
   }
 
   test('drops a player who closed their tab from the lobby once the grace period ends', async () => {

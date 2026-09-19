@@ -1,8 +1,9 @@
 import type { PlayerColor } from '@ludo/shared';
 import type { CSSProperties } from 'react';
 
-import { Die } from '@/components/die';
 import { cn } from '@/lib/utils';
+
+import { Die } from '@/components/die';
 
 interface Placement {
   /** Position and visibility, per breakpoint, on the wrapper that pops in. */
@@ -69,10 +70,35 @@ export function DecorLayer({ items, className }: { items: DecorItem[]; className
 
 /** The hero's scatter. */
 export const HOME_DECOR: DecorItem[] = [
-  { kind: 'die', value: 5, size: 'lg', className: 'right-3 top-14 sm:right-[9%] sm:top-16 lg:left-[42%] lg:right-auto lg:top-[7%]', inner: 'scale-75 sm:scale-100', order: 5, tilt: -14, drift: 0 },
+  {
+    kind: 'die',
+    value: 5,
+    size: 'lg',
+    className: 'right-3 top-14 sm:right-[9%] sm:top-16 lg:left-[42%] lg:right-auto lg:top-[7%]',
+    inner: 'scale-75 sm:scale-100',
+    order: 5,
+    tilt: -14,
+    drift: 0,
+  },
   { kind: 'die', value: 3, size: 'md', color: 'blue', className: 'left-[4%] bottom-3 sm:bottom-5 lg:left-[46%] lg:bottom-[6%]', order: 7, tilt: 12, drift: -2 },
-  { kind: 'piece', color: 'green', size: 'lg', className: 'hidden md:right-[3%] md:top-[26rem] md:block lg:right-[1.5%] lg:top-3', order: 6, tilt: 0, drift: -1 },
-  { kind: 'piece', color: 'red', size: 'md', className: 'hidden md:left-[3%] md:top-[19rem] md:block lg:left-[48%] lg:top-[52%]', order: 8, tilt: 0, drift: -3 },
+  {
+    kind: 'piece',
+    color: 'green',
+    size: 'lg',
+    className: 'hidden md:right-[3%] md:top-[26rem] md:block lg:right-[1.5%] lg:top-3',
+    order: 6,
+    tilt: 0,
+    drift: -1,
+  },
+  {
+    kind: 'piece',
+    color: 'red',
+    size: 'md',
+    className: 'hidden md:left-[3%] md:top-[19rem] md:block lg:left-[48%] lg:top-[52%]',
+    order: 8,
+    tilt: 0,
+    drift: -3,
+  },
   { kind: 'piece', color: 'yellow', size: 'sm', className: 'right-[8%] bottom-8 lg:right-[7%] lg:bottom-[4%]', order: 9, tilt: 0, drift: -1.5 },
 ];
 

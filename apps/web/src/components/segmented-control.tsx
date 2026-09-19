@@ -32,7 +32,9 @@ export function SegmentedControl<T extends string | number>({
             onClick={() => onChange(option.value)}
             className={cn(
               'inline-flex h-9 touch-manipulation items-center justify-center gap-1.5 rounded-md px-2 font-display text-sm tracking-wide transition-colors focus-visible:outline-3 focus-visible:outline-offset-1 focus-visible:outline-foreground disabled:cursor-not-allowed disabled:opacity-50',
-              selected ? 'bg-primary text-primary-foreground shadow-[0_2px_0_var(--shadow-color)] ring-2 ring-border' : 'text-foreground/70 hover:bg-foreground/10',
+              selected
+                ? 'bg-primary text-primary-foreground shadow-[0_2px_0_var(--shadow-color)] ring-2 ring-border'
+                : 'text-foreground/70 hover:bg-foreground/10',
             )}
           >
             {option.label}

@@ -1,12 +1,14 @@
 'use client';
 
-import { Check, ChevronDown, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+import { Check, ChevronDown, Languages } from 'lucide-react';
+
+import { cookieName, languageCodes, languageNames, languages, type Language } from '@/lib/i18n/settings';
 
 import { SegmentedControl } from '@/components/segmented-control';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { cookieName, languageCodes, languageNames, languages, type Language } from '@/lib/i18n/settings';
 
 /** `dropdown` for the desktop navbar; `segmented` lays every language out at once for the mobile menu. */
 export function LanguageToggle({ layout = 'dropdown' }: { layout?: 'dropdown' | 'segmented' }) {

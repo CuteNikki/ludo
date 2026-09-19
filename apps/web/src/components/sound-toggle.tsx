@@ -1,7 +1,8 @@
 'use client';
 
-import { Volume2, VolumeX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+import { Volume2, VolumeX } from 'lucide-react';
 
 import { useSound } from '@/components/providers/sound';
 import { SegmentedControl } from '@/components/segmented-control';

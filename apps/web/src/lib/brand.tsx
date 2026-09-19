@@ -64,7 +64,15 @@ export function BoardSvg({ size }: { size: number }) {
           [2, 1],
           [2, 2],
         ].map(([dr, dc]) => (
-          <circle key={`${color}-${dr}-${dc}`} cx={(col + dc! + 0.5) * cell} cy={(row + dr! + 0.5) * cell} r={cell * 0.36} fill={brand[color]} stroke={brand.ink} strokeWidth={3} />
+          <circle
+            key={`${color}-${dr}-${dc}`}
+            cx={(col + dc! + 0.5) * cell}
+            cy={(row + dr! + 0.5) * cell}
+            r={cell * 0.36}
+            fill={brand[color]}
+            stroke={brand.ink}
+            strokeWidth={3}
+          />
         )),
       )}
     </svg>

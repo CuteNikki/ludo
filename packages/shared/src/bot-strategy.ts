@@ -48,7 +48,9 @@ export function chooseBotMove(state: GameState, playerId: string, random: () => 
       score += piece.position < TRACK_LENGTH ? 45 : 2;
     } else {
       const targetBoard = toBoardPosition(player.color, target);
-      const victim = opponents.find(({ piece: other, color }) => other.position >= 0 && other.position < TRACK_LENGTH && toBoardPosition(color, other.position) === targetBoard);
+      const victim = opponents.find(
+        ({ piece: other, color }) => other.position >= 0 && other.position < TRACK_LENGTH && toBoardPosition(color, other.position) === targetBoard,
+      );
       if (victim) score += 80 + victim.piece.position * 0.5;
       if (isThreatened(targetBoard)) score -= 30;
     }

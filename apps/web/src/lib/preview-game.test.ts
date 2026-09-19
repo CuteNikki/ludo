@@ -1,5 +1,6 @@
-import { describe, expect, test } from 'bun:test';
 import type { GameState } from '@ludo/shared';
+import { describe, expect, test } from 'bun:test';
+
 import { createPreviewPlayers, createPreviewState, playPreviewTurn } from './preview-game';
 
 const players = createPreviewPlayers((key) => key);

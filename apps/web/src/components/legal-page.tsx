@@ -1,11 +1,13 @@
 'use client';
 
-import { Scale } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+import { Scale } from 'lucide-react';
+
+import { order } from '@/lib/reveal';
 
 import { PAGE_DECOR_A } from '@/components/decor';
 import { PageHeader, PageShell } from '@/components/page-shell';
-import { order } from '@/lib/reveal';
 
 interface LegalSection {
   title: string;

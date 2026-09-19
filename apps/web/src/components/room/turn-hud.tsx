@@ -2,13 +2,15 @@
 
 import type { GameState, Player } from '@ludo/shared';
 import type { TFunction } from 'i18next';
-import { Bot, Check, Clock3, LogOut, RotateCcw, Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+import { Bot, Check, Clock3, LogOut, RotateCcw, Trophy } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
 
 import { Die } from '@/components/die';
 import { PlayerToken, onSolid, softBg, solidBg } from '@/components/room/player-color';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 interface TurnHudProps {
   state: GameState;

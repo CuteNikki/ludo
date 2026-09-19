@@ -16,11 +16,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ siz
   const pixels = Number(size);
   // The mark takes 70% of the icon, which keeps it inside the safe area if a platform crops it to a circle.
   return new ImageResponse(
-    (
-      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: brand.paper }}>
-        <LogoMarkSvg size={Math.round(pixels * 0.7)} />
-      </div>
-    ),
+    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: brand.paper }}>
+      <LogoMarkSvg size={Math.round(pixels * 0.7)} />
+    </div>,
     { width: pixels, height: pixels },
   );
 }

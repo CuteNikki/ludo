@@ -1,10 +1,15 @@
 'use client';
 
-import { ArrowRight, BookOpen, Bot, CircleAlert, Dices, Flag, Laugh, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { ArrowRight, BookOpen, Bot, CircleAlert, Dices, Flag, Laugh, Link2, Plus, Sparkles, Users, X } from 'lucide-react';
+
+import { usePlayerName } from '@/lib/player-name';
+import { order } from '@/lib/reveal';
+import { cn } from '@/lib/utils';
 
 import { DecorLayer, HOME_DECOR } from '@/components/decor';
 import { PreviewBoard } from '@/components/preview-board';
@@ -13,9 +18,6 @@ import { Toast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { usePlayerName } from '@/lib/player-name';
-import { order } from '@/lib/reveal';
-import { cn } from '@/lib/utils';
 
 const NOTICE_COPY = {
   kicked: { titleKey: 'toast.kickedTitle', textKey: 'toast.kickedText' },
@@ -89,14 +91,20 @@ export default function HomePage() {
 
         <div className='relative mx-auto grid w-full max-w-7xl gap-12 px-4 pb-24 pt-10 sm:px-6 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-14 lg:px-8 lg:pb-24 2xl:max-w-[100rem] 2xl:gap-24'>
           <div className='mx-auto w-full min-w-0 max-w-xl lg:mx-0 lg:max-w-none'>
-            <p className='reveal-load mb-5 inline-flex items-center gap-2.5 rounded-full border-3 border-border bg-background-alternative px-4 py-1.5 shadow-toy' style={order(0)}>
+            <p
+              className='reveal-load mb-5 inline-flex items-center gap-2.5 rounded-full border-3 border-border bg-background-alternative px-4 py-1.5 shadow-toy'
+              style={order(0)}
+            >
               <span className='relative flex size-3 items-center justify-center'>
                 <span className='absolute size-3 animate-ping rounded-full bg-p-green' />
                 <span className='absolute size-3 rounded-full border-2 border-border bg-p-green' />
               </span>
               <span className='eyebrow'>{t('hero.live')}</span>
             </p>
-            <h1 className='reveal-load font-display text-[2.6rem] leading-[1.05] sm:text-7xl lg:text-[min(4.5rem,calc(6vw-0.25rem))] 2xl:text-8xl' style={order(1)}>
+            <h1
+              className='reveal-load font-display text-[2.6rem] leading-[1.05] sm:text-7xl lg:text-[min(4.5rem,calc(6vw-0.25rem))] 2xl:text-8xl'
+              style={order(1)}
+            >
               {t('hero.titleLine1')}
               <br />
               <span
@@ -109,7 +117,9 @@ export default function HomePage() {
             <p
               className='reveal-load mt-6 max-w-xl text-lg font-semibold leading-8 text-foreground/80 sm:text-xl 2xl:max-w-2xl 2xl:text-2xl 2xl:leading-9'
               style={order(3)}
-            >{t('hero.subtitle')}</p>
+            >
+              {t('hero.subtitle')}
+            </p>
 
             {/* The scroll target of the navbar's "Play" link. It is this plain wrapper, not the card: the card animates in,
                 and a scroll aimed at it would land where it starts rather than where it ends up. */}
@@ -118,13 +128,7 @@ export default function HomePage() {
                 <Label htmlFor='name' className='mb-2'>
                   {t('start.nameLabel')}
                 </Label>
-                <Input
-                  id='name'
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  maxLength={24}
-                  placeholder={t('start.namePlaceholder')}
-                />
+                <Input id='name' value={name} onChange={(event) => setName(event.target.value)} maxLength={24} placeholder={t('start.namePlaceholder')} />
                 <div className='mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 @lg:grid-cols-2'>
                   <Button size='lg' onClick={() => enter('/room/new')}>
                     <Plus size={20} strokeWidth={3} /> {t('start.createRoom')}
@@ -134,7 +138,8 @@ export default function HomePage() {
                   </Button>
                 </div>
                 <div className='my-5 flex items-center gap-3 text-sm font-extrabold uppercase text-foreground/70'>
-                  <span className='h-0.5 flex-1 rounded-full bg-foreground/20' /> {t('start.or')} <span className='h-0.5 flex-1 rounded-full bg-foreground/20' />
+                  <span className='h-0.5 flex-1 rounded-full bg-foreground/20' /> {t('start.or')}{' '}
+                  <span className='h-0.5 flex-1 rounded-full bg-foreground/20' />
                 </div>
                 <Label htmlFor='room' className='mb-2'>
                   {t('start.roomLabel')}
@@ -177,7 +182,9 @@ export default function HomePage() {
                 <span className='absolute bottom-1 hidden font-display text-[11px] uppercase tracking-wider sm:block'>{t('preview.badge')}</span>
               </div>
               <PreviewBoard />
-              <p className='reveal-load eyebrow mt-6 text-center text-foreground/65' style={order(6)}>{t('preview.caption')}</p>
+              <p className='reveal-load eyebrow mt-6 text-center text-foreground/65' style={order(6)}>
+                {t('preview.caption')}
+              </p>
             </div>
           </div>
         </div>
@@ -228,7 +235,10 @@ export default function HomePage() {
       </section>
 
       <section>
-        <Reveal rootMargin='0px 0px -30% 0px' className='mx-auto grid w-full max-w-7xl gap-6 px-4 py-16 sm:grid-cols-3 sm:px-6 sm:py-20 lg:px-8 2xl:max-w-[100rem]'>
+        <Reveal
+          rootMargin='0px 0px -30% 0px'
+          className='mx-auto grid w-full max-w-7xl gap-6 px-4 py-16 sm:grid-cols-3 sm:px-6 sm:py-20 lg:px-8 2xl:max-w-[100rem]'
+        >
           {features.map(({ icon: Icon, title, text }, index) => (
             <div key={title} className='reveal-item' style={order(index)}>
               <div className='toy-card card-hover-lift flex h-full items-center gap-4 p-5'>

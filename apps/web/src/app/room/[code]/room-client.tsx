@@ -1,24 +1,27 @@
 'use client';
 
+import type { ClientEvent, GameState, Player, PlayerLeftReason, RoomErrorCode, RoomSettings, ServerEvent } from '@ludo/shared';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { ArrowLeft, ArrowRight, Plus } from 'lucide-react';
+
+import { order } from '@/lib/reveal';
+import { cn } from '@/lib/utils';
+
 import { DecorLayer, ROOM_DECOR } from '@/components/decor';
 import { GameBoard } from '@/components/game-board';
+import { useSound } from '@/components/providers/sound';
 import { LobbyPanel } from '@/components/room/lobby-panel';
 import { PlayersPanel } from '@/components/room/players-panel';
 import { RoomCard } from '@/components/room/room-card';
 import { GameOver, TurnHud } from '@/components/room/turn-hud';
 import { useLastRolls } from '@/components/room/use-last-rolls';
 import { useRoomSounds } from '@/components/room/use-room-sounds';
-import { useSound } from '@/components/providers/sound';
 import { Toast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { order } from '@/lib/reveal';
-import { cn } from '@/lib/utils';
-import type { ClientEvent, GameState, Player, PlayerLeftReason, RoomErrorCode, RoomSettings, ServerEvent } from '@ludo/shared';
-import { ArrowLeft, ArrowRight, Plus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 export function RoomClient({ requestedCode }: { requestedCode: string }) {
   const { t } = useTranslation();
@@ -266,9 +269,9 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
               kickConfirmId={kickConfirmId}
               onRemove={removePlayer}
               onClaimHost={() => emit({ type: 'room:claimHost', payload: {} })}
-            onAddBot={() => emit({ type: 'room:addBot', payload: {} })}
+              onAddBot={() => emit({ type: 'room:addBot', payload: {} })}
               onToggleReady={(ready) => emit({ type: 'player:ready', payload: { ready } })}
-            onLeave={leaveRoom}
+              onLeave={leaveRoom}
             />
           </div>
 
@@ -360,7 +363,14 @@ function Message({ title, detail, showRoomChoices = false }: { title: string; de
                 disabled={submitting}
                 className='min-w-0 flex-1 font-display text-xl uppercase tracking-[.2em] placeholder:font-display placeholder:tracking-[.2em]'
               />
-              <Button type='submit' variant='outline' size='icon' className='size-12' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6 || submitting}>
+              <Button
+                type='submit'
+                variant='outline'
+                size='icon'
+                className='size-12'
+                aria-label={t('start.joinAria')}
+                disabled={roomCode.length !== 6 || submitting}
+              >
                 <ArrowRight size={22} strokeWidth={3} />
               </Button>
             </form>

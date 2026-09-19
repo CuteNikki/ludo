@@ -1,14 +1,16 @@
 'use client';
 
 import type { GameState, Player } from '@ludo/shared';
-import { Bot, Check, Crown, UserMinus, Users, Vote } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+import { Bot, Check, Crown, UserMinus, Users, Vote } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
 
 import { Die } from '@/components/die';
 import { PlayerToken, softBg } from '@/components/room/player-color';
 import { LeaveButton } from '@/components/room/room-card';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 interface PlayersPanelProps {
   state: GameState;
@@ -23,7 +25,18 @@ interface PlayersPanelProps {
   onLeave: () => void;
 }
 
-export function PlayersPanel({ state, playerId, isHost, lastRolls, kickConfirmId, onRemove, onClaimHost, onAddBot, onToggleReady, onLeave }: PlayersPanelProps) {
+export function PlayersPanel({
+  state,
+  playerId,
+  isHost,
+  lastRolls,
+  kickConfirmId,
+  onRemove,
+  onClaimHost,
+  onAddBot,
+  onToggleReady,
+  onLeave,
+}: PlayersPanelProps) {
   const { t } = useTranslation();
   const me = state.players.find((player) => player.id === playerId);
   const lobby = state.phase === 'lobby';
@@ -62,7 +75,9 @@ export function PlayersPanel({ state, playerId, isHost, lastRolls, kickConfirmId
               </span>
 
               {!player.connected && (
-                <span className='shrink-0 rounded-md border-2 border-border bg-background px-1.5 py-0.5 text-[10px] font-extrabold uppercase'>{t('room.away')}</span>
+                <span className='shrink-0 rounded-md border-2 border-border bg-background px-1.5 py-0.5 text-[10px] font-extrabold uppercase'>
+                  {t('room.away')}
+                </span>
               )}
               {canClaimHost && player.id === state.hostPlayerId && (
                 <Button size='sm' className='min-h-8 shrink-0 px-2.5 text-xs' onClick={onClaimHost} aria-label={t('room.claimHostAria')}>

@@ -321,9 +321,7 @@
         },
         {
           "title": "Verantwortlich für den Inhalt",
-          "paragraphs": [
-            "Für den Inhalt dieser Website ist die oben genannte Person nach § 18 Abs. 2 MStV verantwortlich."
-          ]
+          "paragraphs": ["Für den Inhalt dieser Website ist die oben genannte Person nach § 18 Abs. 2 MStV verantwortlich."]
         },
         {
           "title": "Haftung für Inhalte",
@@ -373,9 +371,7 @@
         },
         {
           "title": "Cookies und Browser-Speicher",
-          "paragraphs": [
-            "Ludo speichert Folgendes in deinem Browser. Es dient nur den von dir gewünschten Funktionen und enthält keine Tracking-Kennungen:"
-          ],
+          "paragraphs": ["Ludo speichert Folgendes in deinem Browser. Es dient nur den von dir gewünschten Funktionen und enthält keine Tracking-Kennungen:"],
           "items": [
             "Cookie ludo_lng (bis zu einem Jahr): merkt sich die gewählte Sprache.",
             "Local Storage ludo-theme: merkt sich deine Wahl von hellem, dunklem oder System-Farbschema.",
@@ -423,9 +419,7 @@
         },
         {
           "title": "Änderungen",
-          "paragraphs": [
-            "Wir können diese Erklärung anpassen, wenn sich der Dienst ändert. Das Datum oben zeigt, wann sie zuletzt aktualisiert wurde."
-          ]
+          "paragraphs": ["Wir können diese Erklärung anpassen, wenn sich der Dienst ändert. Das Datum oben zeigt, wann sie zuletzt aktualisiert wurde."]
         }
       ]
     },
@@ -446,9 +440,7 @@
         },
         {
           "title": "Faire Nutzung",
-          "paragraphs": [
-            "Bitte spiel fair. Du verpflichtest dich, nicht:"
-          ],
+          "paragraphs": ["Bitte spiel fair. Du verpflichtest dich, nicht:"],
           "items": [
             "Namen zu verwenden, die beleidigend, hasserfüllt oder rechtswidrig sind oder andere Personen nachahmen oder identifizieren;",
             "andere Spieler zu belästigen oder Spiele absichtlich zu stören;",
@@ -477,9 +469,7 @@
         },
         {
           "title": "Open Source",
-          "paragraphs": [
-            "Der Quellcode ist im Projekt-Repository auf GitHub verfügbar, verlinkt in der Fußzeile."
-          ]
+          "paragraphs": ["Der Quellcode ist im Projekt-Repository auf GitHub verfügbar, verlinkt in der Fußzeile."]
         },
         {
           "title": "Änderungen dieser Bedingungen",

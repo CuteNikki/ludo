@@ -11,7 +11,11 @@ function clean(value: string | undefined): string | null {
 export const operator = {
   name: clean(process.env.NEXT_PUBLIC_LEGAL_NAME),
   /** Address lines separated by `;`, e.g. `Example Street 1; 12345 Example City; Germany`. */
-  addressLines: (clean(process.env.NEXT_PUBLIC_LEGAL_ADDRESS)?.split(';').map((line) => line.trim()).filter(Boolean)) ?? [],
+  addressLines:
+    clean(process.env.NEXT_PUBLIC_LEGAL_ADDRESS)
+      ?.split(';')
+      .map((line) => line.trim())
+      .filter(Boolean) ?? [],
   email: clean(process.env.NEXT_PUBLIC_LEGAL_EMAIL),
   phone: clean(process.env.NEXT_PUBLIC_LEGAL_PHONE),
 };

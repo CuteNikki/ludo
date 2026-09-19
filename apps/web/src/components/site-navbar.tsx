@@ -1,17 +1,19 @@
 'use client';
 
-import { BookOpen, Menu, Play, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { BookOpen, Menu, Play, Users, X } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
 
 import { LanguageToggle } from '@/components/language-toggle';
 import { LogoMark, Wordmark } from '@/components/logo';
 import { SoundToggle } from '@/components/sound-toggle';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 /** The one navbar, mounted by the root layout. Links collapse into a menu panel below `lg`. */
 export function SiteNavbar() {
@@ -46,7 +48,11 @@ export function SiteNavbar() {
         {t('nav.skip')}
       </a>
       <div className='mx-auto flex h-16 w-full max-w-480 items-center gap-2 px-4 sm:px-6 lg:px-8'>
-        <Link href='/' aria-label={t('nav.home')} className='flex items-center gap-2.5 rounded-lg focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-foreground'>
+        <Link
+          href='/'
+          aria-label={t('nav.home')}
+          className='flex items-center gap-2.5 rounded-lg focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-foreground'
+        >
           <LogoMark />
           <Wordmark className='text-4xl' />
         </Link>
@@ -62,7 +68,9 @@ export function SiteNavbar() {
                 {...newTab}
                 className={cn(
                   'inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-lg border-3 px-3.5 font-display tracking-wide transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-foreground',
-                  active ? 'border-border bg-primary text-primary-foreground shadow-[0_3px_0_var(--shadow-color)]' : 'border-transparent hover:bg-foreground/10',
+                  active
+                    ? 'border-border bg-primary text-primary-foreground shadow-[0_3px_0_var(--shadow-color)]'
+                    : 'border-transparent hover:bg-foreground/10',
                 )}
               >
                 <Icon size={18} strokeWidth={2.5} /> {label}
@@ -97,7 +105,10 @@ export function SiteNavbar() {
       </div>
 
       {open && (
-        <div id='mobile-menu' className='animate-status-swap absolute inset-x-0 top-full border-b-3 border-border bg-background-alternative shadow-toy lg:hidden'>
+        <div
+          id='mobile-menu'
+          className='animate-status-swap absolute inset-x-0 top-full border-b-3 border-border bg-background-alternative shadow-toy lg:hidden'
+        >
           <div className='mx-auto grid max-w-lg gap-3 px-4 py-4 sm:px-6'>
             <nav aria-label={t('nav.aria')} className='grid gap-2'>
               {links.map(({ href, label, icon: Icon }) => (

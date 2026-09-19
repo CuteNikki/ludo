@@ -74,7 +74,9 @@ const server = Bun.serve<SocketData>({
 
         if (event.type === 'room:join') {
           // Someone coming back to a seat they already have isn't news; a new player is.
-          const returning = !!event.payload.playerId && !!rooms.getRoomState(event.payload.roomCode.toUpperCase())?.players.some((player) => player.id === event.payload.playerId);
+          const returning =
+            !!event.payload.playerId &&
+            !!rooms.getRoomState(event.payload.roomCode.toUpperCase())?.players.some((player) => player.id === event.payload.playerId);
           const joined = rooms.joinRoom(event.payload.roomCode, event.payload.playerName, event.payload.playerId);
           joinSocket(socket, joined.state.roomCode, joined.playerId);
           send(socket, { type: 'room:joined', payload: joined });

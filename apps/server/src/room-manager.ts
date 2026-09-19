@@ -1,5 +1,6 @@
 import type { GameState, MoveTimeSeconds, Player, PlayerColor, PlayerLeftReason, PublicRoomSummary, RoomErrorCode, RoomSettings } from '@ludo/shared';
 import { chooseBotMove, toBoardPosition } from '@ludo/shared';
+
 import { FairDice } from './fair-dice';
 
 export class RoomError extends Error {
@@ -623,9 +624,7 @@ export class RoomManager {
       turnStage: 'rolling',
       turnDeadline: null,
       players: accepted,
-      pieces: accepted.flatMap((player) =>
-        Array.from({ length: 4 }, (_, index) => ({ id: `${player.id}-${index}`, playerId: player.id, position: -1 })),
-      ),
+      pieces: accepted.flatMap((player) => Array.from({ length: 4 }, (_, index) => ({ id: `${player.id}-${index}`, playerId: player.id, position: -1 }))),
       currentPlayerId: null,
       diceResult: null,
       movablePieceIds: [],

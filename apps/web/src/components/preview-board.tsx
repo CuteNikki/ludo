@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { GameBoard } from '@/components/game-board';
 import { createPreviewPlayers, createPreviewState, playPreviewTurn } from '@/lib/preview-game';
+
+import { GameBoard } from '@/components/game-board';
 
 const FIRST_TURN_DELAY_MS = 1_000;
 const TURN_DELAY_MS = 1_400;

@@ -1,19 +1,22 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { PAGE_DECOR_A } from '@/components/decor';
-import { PageHeader, PageShell } from '@/components/page-shell';
-import { TapTooltip } from '@/components/tap-tooltip';
+import type { ClientEvent, PublicRoomSummary, RoomSettings, ServerEvent } from '@ludo/shared';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { ArrowRight, Clock3, Dice6, Dices, RefreshCw, Sparkles, Users } from 'lucide-react';
+
 import { usePlayerName } from '@/lib/player-name';
 import { order } from '@/lib/reveal';
 import { cn } from '@/lib/utils';
-import type { ClientEvent, PublicRoomSummary, RoomSettings, ServerEvent } from '@ludo/shared';
-import { ArrowRight, Clock3, Dice6, Dices, RefreshCw, Sparkles, Users } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslation } from 'react-i18next';
+
+import { PAGE_DECOR_A } from '@/components/decor';
+import { PageHeader, PageShell } from '@/components/page-shell';
+import { TapTooltip } from '@/components/tap-tooltip';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const REFRESH_INTERVAL_MS = 5_000;
 
@@ -105,7 +108,11 @@ export default function DiscoverPage() {
             const joinable = room.phase === 'lobby' && room.playerCount < room.maxPlayers;
             return (
               // Rooms appear and disappear as the list refreshes; a new card pops in, the others stay put.
-              <li key={room.roomCode} className='reveal-load toy-card flex flex-col gap-4 p-5' style={order(6 + Math.min(index, 5), index % 2 === 0 ? '-3deg' : '3deg')}>
+              <li
+                key={room.roomCode}
+                className='reveal-load toy-card flex flex-col gap-4 p-5'
+                style={order(6 + Math.min(index, 5), index % 2 === 0 ? '-3deg' : '3deg')}
+              >
                 <div className='flex items-start justify-between gap-3'>
                   <div className='min-w-0'>
                     <p className='truncate font-display text-3xl tracking-[.12em]'>{room.roomCode}</p>
@@ -122,15 +129,14 @@ export default function DiscoverPage() {
                 </div>
 
                 <div className='flex flex-wrap items-center justify-between gap-x-3 gap-y-2'>
-                  <span
-                    className='flex items-center gap-1.5'
-                    role='img'
-                    aria-label={`${room.playerCount}/${room.maxPlayers}`}
-                  >
+                  <span className='flex items-center gap-1.5' role='img' aria-label={`${room.playerCount}/${room.maxPlayers}`}>
                     {Array.from({ length: room.maxPlayers }, (_, seat) => (
                       <span
                         key={seat}
-                        className={cn('size-5 rounded-full border-3 border-border', seat < room.playerCount ? seatColors[seat % seatColors.length] : 'bg-background')}
+                        className={cn(
+                          'size-5 rounded-full border-3 border-border',
+                          seat < room.playerCount ? seatColors[seat % seatColors.length] : 'bg-background',
+                        )}
                       />
                     ))}
                     <span className='ml-1 text-sm font-extrabold'>

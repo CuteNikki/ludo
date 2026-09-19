@@ -1,6 +1,7 @@
 import type { GameState } from '@ludo/shared';
 import { useEffect, useRef, useState } from 'react';
-import { type Coordinate, YARDS, getCellPosition, getPieceCoordinate } from './board-geometry';
+
+import { YARDS, getCellPosition, getPieceCoordinate, type Coordinate } from './board-geometry';
 
 /**
  * What a piece is visually doing right now, and where it should be drawn while that's happening.

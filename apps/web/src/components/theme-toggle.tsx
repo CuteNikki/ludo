@@ -1,8 +1,10 @@
 'use client';
-import { Check, ChevronDown, Monitor, Moon, Sun } from 'lucide-react';
+
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { Check, ChevronDown, Monitor, Moon, Sun } from 'lucide-react';
 
 import { SegmentedControl } from '@/components/segmented-control';
 import { Button } from '@/components/ui/button';

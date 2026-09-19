@@ -66,7 +66,8 @@ export function useRoomSounds(state: GameState | null, playerId: string | null, 
   }, [state, playerId, play]);
 
   // The last seconds of your own move timer.
-  const myMove = !!state && !!playerId && state.phase === 'playing' && state.turnStage === 'move' && state.currentPlayerId === playerId && state.turnDeadline !== null;
+  const myMove =
+    !!state && !!playerId && state.phase === 'playing' && state.turnStage === 'move' && state.currentPlayerId === playerId && state.turnDeadline !== null;
   const secondsLeft = myMove && state.turnDeadline !== null ? Math.max(0, Math.ceil((state.turnDeadline - now) / 1000)) : null;
   useEffect(() => {
     if (secondsLeft !== null && secondsLeft > 0 && secondsLeft <= TICK_FROM_SECONDS) play('tick');

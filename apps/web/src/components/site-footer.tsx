@@ -1,11 +1,13 @@
 'use client';
 
-import { Github } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 
-import { LogoMark, Wordmark } from '@/components/logo';
+import { Github } from 'lucide-react';
+
 import { repositoryUrl } from '@/lib/legal';
+
+import { LogoMark, Wordmark } from '@/components/logo';
 
 const linkClassName =
   'inline-flex items-center gap-1.5 rounded-sm py-1 font-bold text-footer-foreground/75 transition-colors hover:text-primary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary';
