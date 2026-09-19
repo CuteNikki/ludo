@@ -292,7 +292,7 @@
       "mustCapture": "Must capture",
       "mustCaptureInfo": "If a move can capture an opponent's piece, you have to make it. Capturing takes priority over must spawn on six.",
       "isPublic": "Public room",
-      "isPublicInfo": "Lists this room on the public discovery page while it's open and still in the lobby."
+      "isPublicInfo": "Lists this room on the public discovery page, while it's in the lobby and while a game is running."
     },
     "colors": {
       "red": "Red",

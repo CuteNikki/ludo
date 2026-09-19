@@ -97,6 +97,8 @@ export class RoomManager {
     const summaries: PublicRoomSummary[] = [];
     for (const room of this.rooms.values()) {
       if (!room.state.settings.isPublic) continue;
+      // A finished game only lingers for the rematch vote, so there is nothing left to join or watch.
+      if (room.state.phase === 'finished') continue;
       // Someone has to be there: a room whose players have all dropped off is about to disappear.
       if (!room.state.players.some((player) => !player.isBot && player.connected)) continue;
       const host = room.state.players.find((player) => player.id === room.state.hostPlayerId);

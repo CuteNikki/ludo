@@ -292,7 +292,7 @@
       "mustCapture": "Schlagzwang",
       "mustCaptureInfo": "Kann ein Zug eine gegnerische Figur schlagen, musst du ihn machen. Schlagen geht dem Einsetzen bei Sechs vor.",
       "isPublic": "Öffentlicher Raum",
-      "isPublicInfo": "Listet diesen Raum auf der öffentlichen Entdecken-Seite, solange er offen und noch in der Lobby ist."
+      "isPublicInfo": "Listet diesen Raum auf der öffentlichen Entdecken-Seite, solange er in der Lobby ist und solange ein Spiel läuft."
     },
     "colors": {
       "red": "Rot",

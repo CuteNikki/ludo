@@ -202,6 +202,19 @@ describe('RoomManager game turns', () => {
     expect(listed).toEqual([{ roomCode: publicRoom.state.roomCode, hostName: 'Ada', playerCount: 2, maxPlayers: 4, phase: 'lobby', settings }]);
   });
 
+  test('lists public rooms while a game is running but not once it has finished', () => {
+    const manager = new RoomManager();
+    const host = manager.createRoom('Ada');
+    manager.joinRoom(host.state.roomCode, 'Linus');
+    manager.setSettings(host.state.roomCode, host.playerId, { ...host.state.settings, isPublic: true });
+
+    host.state.phase = 'playing';
+    expect(manager.listPublicRooms().map((room) => room.phase)).toEqual(['playing']);
+
+    host.state.phase = 'finished';
+    expect(manager.listPublicRooms()).toEqual([]);
+  });
+
   test('reports an accurate reason for kicks, voluntary leaves and disconnect timeouts', async () => {
     const leftEvents: PlayerLeftEvent[] = [];
     const manager = new RoomManager(

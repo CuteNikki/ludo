@@ -58,7 +58,7 @@ Bots run entirely on the server. They roll like everyone else (including the fai
 
 ## Room Settings
 
-The creator of a room is the host and can configure the turn timer (15, 30, 45 or 60 seconds), automatic moves, the fair dice option, the optional "must spawn on six", "extra turn on capture", "safe start squares", "three tries" and "must capture" rules and the room's public/private visibility in the lobby. Settings are synchronized to all players and locked once the game starts. Any change made in the lobby resets every player's ready status. Public rooms show up, while still in the lobby, on the `/discover` page for anyone to browse and join, along with a per-setting overview (on/off and move time) of how the room is configured.
+The creator of a room is the host and can configure the turn timer (15, 30, 45 or 60 seconds), automatic moves, the fair dice option, the optional "must spawn on six", "extra turn on capture", "safe start squares", "three tries" and "must capture" rules and the room's public/private visibility in the lobby. Settings are synchronized to all players and locked once the game starts. Any change made in the lobby resets every player's ready status. Public rooms show up on the `/discover` page for anyone to browse, and join while they are in the lobby, and stay listed while a game is running (a finished game is dropped), along with a per-setting overview (on/off and move time) of how the room is configured.
 
 Every player can change their name and pick a still-available player color in the lobby. Names may be duplicated, taken colors are locked, and the chosen profile persists across a reload. If no name is entered, "Guest" is used.
 
