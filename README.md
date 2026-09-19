@@ -5,7 +5,7 @@ The classic board game "Mensch ärgere Dich nicht" (Ludo) in the browser: real-t
 ## Features
 
 - **Real-time multiplayer:** the server is authoritative. Clients only send actions, and the server rolls the dice, validates every move and broadcasts the state to the room.
-- **Rooms:** create a room, share the six-character code or the link, and play. Rooms can be listed publicly on a discovery page so anyone can join.
+- **Rooms:** create a room, share the six-character code or the link, and play. Rooms can be listed publicly on a discovery page so anyone can join, or watch a game that is full or already running.
 - **The full game:** captures, the home column, a move timer, automatic single moves, optional "must spawn on six", "extra turn on capture", "safe start squares", "three tries" and "must capture" rules and a fair dice option, so no one waits forever for a six.
 - **Computer opponents:** the host can fill free seats with bots, so a game against them starts with just one human player.
 - **Host controls:** room settings, removing inactive players (even mid-game), automatic host handover and a rematch vote at the end of every game.
@@ -49,6 +49,10 @@ Clients only ever send actions such as `room:create`, `room:join`, `player:ready
 The server automatically rolls the dice at the start of every turn and synchronizes the roll animation and result with all clients. If there is no valid move, this is briefly displayed and the next player automatically takes their turn. If there is no other possible move, the figure is moved automatically after a short display. Only when there are multiple options does the configured time remain to select a highlighted figure. The server validates every move, resolves captures, and automatically advances to the next connected player when time runs out. A tab can reclaim its seat for up to five minutes after a reload.
 
 The "Fair Dice" option ensures that every number is rolled regularly so no one has to wait long for a six. The order of the rolls themselves stays random.
+
+## Spectating
+
+Anyone can watch a public room without a seat: the `/discover` page offers **Watch** (`/watch/<code>`) on rooms that are full or already running, along with how many people are watching. A spectator (`room:spectate`) receives the room's state updates but can't act in it, since the server only accepts actions from a joined player. Private rooms can't be watched and look exactly like a missing room. Spectators don't keep a room alive: when the players leave or a rematch starts, they are told the room has closed.
 
 ## Bots
 

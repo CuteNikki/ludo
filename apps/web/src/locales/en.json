@@ -47,6 +47,8 @@
     "empty": "No public rooms right now. Create one and toggle \"Public room\" in the lobby settings.",
     "hostedBy": "Hosted by {{name}}",
     "join": "Join",
+    "watch": "Watch",
+    "spectators": "{{count}} watching",
     "settingOn": "On",
     "settingOff": "Off",
     "phase": {
@@ -54,6 +56,20 @@
       "full": "Full",
       "playing": "In progress",
       "finished": "Finished"
+    }
+  },
+  "spectate": {
+    "watching": "Watching",
+    "back": "Back to rooms",
+    "waitingToStart": "Waiting for the game to start.",
+    "rematchNote": "The players are voting on a rematch.",
+    "notFound": {
+      "title": "Room not found",
+      "text": "This room doesn't exist, isn't public, or has already closed."
+    },
+    "ended": {
+      "title": "This game is over",
+      "text": "The room has closed, or the players moved on to a rematch."
     }
   },
   "howItWorks": {

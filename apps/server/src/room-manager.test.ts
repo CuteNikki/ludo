@@ -199,7 +199,9 @@ describe('RoomManager game turns', () => {
     manager.createRoom('Mika'); // stays private by default
 
     const listed = manager.listPublicRooms();
-    expect(listed).toEqual([{ roomCode: publicRoom.state.roomCode, hostName: 'Ada', playerCount: 2, maxPlayers: 4, phase: 'lobby', settings }]);
+    expect(listed).toEqual([
+      { roomCode: publicRoom.state.roomCode, hostName: 'Ada', playerCount: 2, maxPlayers: 4, phase: 'lobby', settings, spectatorCount: 0 },
+    ]);
   });
 
   test('lists public rooms while a game is running but not once it has finished', () => {
@@ -213,6 +215,58 @@ describe('RoomManager game turns', () => {
 
     host.state.phase = 'finished';
     expect(manager.listPublicRooms()).toEqual([]);
+  });
+
+  test('lets anyone watch a public room and counts the watchers', () => {
+    const manager = new RoomManager();
+    const host = manager.createRoom('Ada');
+    manager.joinRoom(host.state.roomCode, 'Linus');
+    manager.setSettings(host.state.roomCode, host.playerId, { ...host.state.settings, isPublic: true });
+
+    expect(manager.spectate(host.state.roomCode)).toBe(host.state);
+    manager.spectate(host.state.roomCode);
+    expect(manager.listPublicRooms()[0]?.spectatorCount).toBe(2);
+
+    manager.stopSpectating(host.state.roomCode);
+    expect(manager.listPublicRooms()[0]?.spectatorCount).toBe(1);
+    manager.stopSpectating(host.state.roomCode);
+    manager.stopSpectating(host.state.roomCode);
+    expect(manager.listPublicRooms()[0]?.spectatorCount).toBe(0);
+  });
+
+  test('treats a private room like a missing one when someone tries to watch it', () => {
+    const manager = new RoomManager();
+    const host = manager.createRoom('Ada');
+    manager.joinRoom(host.state.roomCode, 'Linus');
+
+    expect(() => manager.spectate(host.state.roomCode)).toThrow('not found');
+    expect(() => manager.spectate('ZZZZZZ')).toThrow('not found');
+  });
+
+  test('tells the listener when a room closes so watchers can be sent away', () => {
+    const closed: string[] = [];
+    const manager = new RoomManager(
+      () => undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      (roomCode) => closed.push(roomCode),
+    );
+    const host = manager.createRoom('Ada');
+    manager.addBot(host.state.roomCode, host.playerId);
+
+    // A room with only bots left is torn down straight away.
+    manager.leaveRoom(host.state.roomCode, host.playerId);
+
+    expect(closed).toEqual([host.state.roomCode]);
   });
 
   test('reports an accurate reason for kicks, voluntary leaves and disconnect timeouts', async () => {

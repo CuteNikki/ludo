@@ -23,6 +23,8 @@ interface PlayersPanelProps {
   onAddBot: () => void;
   onToggleReady: (ready: boolean) => void;
   onLeave: () => void;
+  /** A read-only view for someone watching without a seat: no ready button and no leave button (the page has its own way out). */
+  spectating?: boolean;
 }
 
 export function PlayersPanel({
@@ -36,6 +38,7 @@ export function PlayersPanel({
   onAddBot,
   onToggleReady,
   onLeave,
+  spectating = false,
 }: PlayersPanelProps) {
   const { t } = useTranslation();
   const me = state.players.find((player) => player.id === playerId);
@@ -123,7 +126,8 @@ export function PlayersPanel({
           <Bot size={18} strokeWidth={2.5} /> {t('room.addBot')}
         </Button>
       )}
-      {lobby && (
+      {lobby && spectating && <p className='mt-4 text-sm font-bold leading-6 text-foreground/70'>{t('spectate.waitingToStart')}</p>}
+      {lobby && !spectating && (
         <>
           <Button size='lg' className='mt-4 w-full' variant={me?.ready ? 'outline' : 'default'} onClick={() => onToggleReady(!me?.ready)}>
             {me?.ready ? t('room.notReady') : t('room.imReady')}
@@ -132,7 +136,7 @@ export function PlayersPanel({
         </>
       )}
       {/* Once the game is running there is no invitation card, so leaving lives with the players. */}
-      {state.phase === 'playing' && (
+      {state.phase === 'playing' && !spectating && (
         <div className='mt-4 border-t-3 border-dashed border-border/20 pt-4'>
           <LeaveButton onLeave={onLeave} />
         </div>

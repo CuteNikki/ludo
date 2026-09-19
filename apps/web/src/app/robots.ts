@@ -5,7 +5,7 @@ import { siteUrl } from '@/lib/site';
 export default function robots(): MetadataRoute.Robots {
   return {
     // Rooms are throwaway games between friends, not pages anyone should find through a search.
-    rules: { userAgent: '*', allow: '/', disallow: '/room/' },
+    rules: { userAgent: '*', allow: '/', disallow: ['/room/', '/watch/'] },
     sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ArrowRight, Clock3, Dice6, Dices, RefreshCw, Repeat, ShieldCheck, Sparkles, Swords, Target, Users } from 'lucide-react';
+import { ArrowRight, Clock3, Dice6, Dices, Eye, RefreshCw, Repeat, ShieldCheck, Sparkles, Swords, Target, Users } from 'lucide-react';
 
 import { usePlayerName } from '@/lib/player-name';
 import { order } from '@/lib/reveal';
@@ -58,6 +58,10 @@ export default function DiscoverPage() {
 
   function joinRoom(roomCode: string) {
     router.push(`/room/${roomCode}`);
+  }
+
+  function watchRoom(roomCode: string) {
+    router.push(`/watch/${roomCode}`);
   }
 
   return (
@@ -147,14 +151,24 @@ export default function DiscoverPage() {
                         {room.playerCount}/{room.maxPlayers}
                       </span>
                     </span>
-                    <MoveTimeBadge seconds={room.settings.moveTimeSeconds} />
+                    <div className='flex items-center gap-2'>
+                      {room.spectatorCount > 0 && <SpectatorCount count={room.spectatorCount} />}
+                      <MoveTimeBadge seconds={room.settings.moveTimeSeconds} />
+                    </div>
                   </div>
                   <RoomSettingIcons settings={room.settings} />
                 </div>
 
-                <Button className='mt-auto w-full' disabled={!joinable} onClick={() => joinRoom(room.roomCode)}>
-                  {t('discover.join')} <ArrowRight size={18} strokeWidth={3} />
-                </Button>
+                {/* A room you can't join is one you can still watch. */}
+                {joinable ? (
+                  <Button className='mt-auto w-full' onClick={() => joinRoom(room.roomCode)}>
+                    {t('discover.join')} <ArrowRight size={18} strokeWidth={3} />
+                  </Button>
+                ) : (
+                  <Button variant='outline' className='mt-auto w-full' onClick={() => watchRoom(room.roomCode)}>
+                    <Eye size={18} strokeWidth={3} /> {t('discover.watch')}
+                  </Button>
+                )}
               </li>
             );
           })}
@@ -175,6 +189,18 @@ const BOOLEAN_SETTINGS = [
   { key: 'threeTriesToLeaveYard', icon: Repeat, labelKey: 'room.settings.threeTriesToLeaveYard', infoKey: 'room.settings.threeTriesToLeaveYardInfo' },
   { key: 'mustCapture', icon: Target, labelKey: 'room.settings.mustCapture', infoKey: 'room.settings.mustCaptureInfo' },
 ] as const;
+
+/** How many people are watching the room, shown only when someone is. */
+function SpectatorCount({ count }: { count: number }) {
+  const { t } = useTranslation();
+  const label = t('discover.spectators', { count });
+
+  return (
+    <span role='img' aria-label={label} title={label} className='inline-flex items-center gap-1 text-xs font-bold text-foreground/70'>
+      <Eye size={15} /> {count}
+    </span>
+  );
+}
 
 /** The move time, shown next to the player count so the row of rule icons below has the card's full width. */
 function MoveTimeBadge({ seconds }: { seconds: number }) {

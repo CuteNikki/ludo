@@ -47,6 +47,8 @@
     "empty": "Gerade keine öffentlichen Räume. Erstelle einen und aktiviere \"Öffentlicher Raum\" in den Lobby-Einstellungen.",
     "hostedBy": "Gehostet von {{name}}",
     "join": "Beitreten",
+    "watch": "Zuschauen",
+    "spectators": "{{count}} schauen zu",
     "settingOn": "An",
     "settingOff": "Aus",
     "phase": {
@@ -54,6 +56,20 @@
       "full": "Voll",
       "playing": "Läuft",
       "finished": "Beendet"
+    }
+  },
+  "spectate": {
+    "watching": "Zuschauen",
+    "back": "Zurück zu den Räumen",
+    "waitingToStart": "Warten auf den Spielstart.",
+    "rematchNote": "Die Spieler stimmen über eine Revanche ab.",
+    "notFound": {
+      "title": "Raum nicht gefunden",
+      "text": "Diesen Raum gibt es nicht, er ist nicht öffentlich oder wurde schon geschlossen."
+    },
+    "ended": {
+      "title": "Dieses Spiel ist vorbei",
+      "text": "Der Raum wurde geschlossen, oder die Spieler sind in eine Revanche gewechselt."
     }
   },
   "howItWorks": {

@@ -47,7 +47,11 @@ interface Room {
   state: GameState;
   turnTimer?: ReturnType<typeof setTimeout>;
   counters: TurnCounters;
+  /** How many sockets are watching without a seat. */
+  spectators: number;
 }
+
+const newRoom = (state: GameState): Room => ({ state, counters: freshCounters(), spectators: 0 });
 
 type StateListener = (roomCode: string, state: GameState) => void;
 
@@ -68,6 +72,8 @@ export interface PlayerLeftEvent {
 
 type PlayerLeftListener = (roomCode: string, event: PlayerLeftEvent) => void;
 
+type RoomClosedListener = (roomCode: string) => void;
+
 export class RoomManager {
   private readonly rooms = new Map<string, Room>();
   private readonly playerCleanupTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -87,6 +93,7 @@ export class RoomManager {
     private readonly botMoveDelayMs = 1_100,
     private readonly hostAbsenceMs = 30_000,
     private readonly lobbyGraceMs = 15_000,
+    private readonly onRoomClosed: RoomClosedListener = () => undefined,
   ) {}
 
   getRoomState(roomCode: string): GameState | null {
@@ -109,9 +116,27 @@ export class RoomManager {
         maxPlayers: COLORS.length,
         phase: room.state.phase,
         settings: room.state.settings,
+        spectatorCount: room.spectators,
       });
     }
     return summaries;
+  }
+
+  /**
+   * Starts watching a public room. The caller keeps the returned state up to date by listening to the
+   * room's broadcasts; a spectator has no seat, so nothing here lets them act. A private room looks
+   * exactly like a missing one, so its code can't be probed.
+   */
+  spectate(roomCode: string): GameState {
+    const room = this.rooms.get(roomCode);
+    if (!room || !room.state.settings.isPublic) throw new RoomError('ROOM_NOT_FOUND', 'The room was not found.');
+    room.spectators += 1;
+    return room.state;
+  }
+
+  stopSpectating(roomCode: string) {
+    const room = this.rooms.get(roomCode);
+    if (room) room.spectators = Math.max(0, room.spectators - 1);
   }
 
   createRoom(playerName: string): { playerId: string; state: GameState } {
@@ -135,7 +160,7 @@ export class RoomManager {
       rematchPlayerIds: [],
       revision: 0,
     };
-    this.rooms.set(roomCode, { state, counters: freshCounters() });
+    this.rooms.set(roomCode, newRoom(state));
     const joined = this.addPlayer(state, playerName);
     state.hostPlayerId = joined.playerId;
     return joined;
@@ -375,7 +400,7 @@ export class RoomManager {
     );
   }
 
-  /** Stops every timer of a room and forgets it. */
+  /** Stops every timer of a room and forgets it, telling anyone still watching that it is gone. */
   private disposeRoom(roomCode: string) {
     this.clearTurnTimer(roomCode);
     this.clearHostTransfer(roomCode);
@@ -386,6 +411,7 @@ export class RoomManager {
       }
     }
     this.rooms.delete(roomCode);
+    this.onRoomClosed(roomCode);
   }
 
   /**
@@ -723,7 +749,7 @@ export class RoomManager {
       rematchPlayerIds: [],
       revision: 0,
     };
-    this.rooms.set(newRoomCode, { state: newState, counters: freshCounters() });
+    this.rooms.set(newRoomCode, newRoom(newState));
 
     this.onRematchResolved({ oldRoomCode, newRoomCode, movedPlayerIds: accepted.map((player) => player.id), newState });
   }

@@ -6,6 +6,8 @@ interface SocketData {
   clientId: string;
   roomCode?: string;
   playerId?: string;
+  /** The public room this socket is watching without a seat (never together with `roomCode`). */
+  spectatingRoom?: string;
 }
 
 /**
@@ -35,6 +37,13 @@ const rooms = new RoomManager(
   },
   (roomCode, event) => {
     broadcast(roomCode, { type: 'player:left', payload: event });
+  },
+  undefined,
+  undefined,
+  undefined,
+  (roomCode) => {
+    // Watchers have no seat to lose, so this is how they learn the game is gone.
+    broadcast(roomCode, { type: 'room:closed', payload: { roomCode } });
   },
 );
 
@@ -93,6 +102,22 @@ const server = Bun.serve<SocketData>({
           return;
         }
 
+        if (event.type === 'room:spectate') {
+          if (socket.data.playerId) throw new Error('You are already in a room.');
+          const spectatedCode = event.payload.roomCode.toUpperCase();
+          if (socket.data.spectatingRoom !== spectatedCode) {
+            const state = rooms.spectate(spectatedCode);
+            stopSpectating(socket);
+            socket.data.spectatingRoom = spectatedCode;
+            socket.subscribe(spectatedCode);
+            send(socket, { type: 'room:spectating', payload: { state } });
+          } else {
+            const state = rooms.getRoomState(spectatedCode);
+            if (state) send(socket, { type: 'room:spectating', payload: { state } });
+          }
+          return;
+        }
+
         const { roomCode, playerId } = socket.data;
         if (!roomCode || !playerId) throw new Error('You have not joined a room.');
 
@@ -132,6 +157,7 @@ const server = Bun.serve<SocketData>({
       }
     },
     close(socket) {
+      stopSpectating(socket);
       const { roomCode, playerId } = socket.data;
       if (!roomCode || !playerId) return;
       const key = socketKey(roomCode, playerId);
@@ -148,6 +174,7 @@ const server = Bun.serve<SocketData>({
 });
 
 function joinSocket(socket: Bun.ServerWebSocket<SocketData>, roomCode: string, playerId: string) {
+  stopSpectating(socket);
   if (socket.data.roomCode && socket.data.roomCode !== roomCode) socket.unsubscribe(socket.data.roomCode);
   // A socket that re-joins (or moves to another seat) must not be counted twice.
   if (socket.data.roomCode && socket.data.playerId) {
@@ -161,6 +188,14 @@ function joinSocket(socket: Bun.ServerWebSocket<SocketData>, roomCode: string, p
   socket.data.roomCode = roomCode;
   socket.data.playerId = playerId;
   socket.subscribe(roomCode);
+}
+
+function stopSpectating(socket: Bun.ServerWebSocket<SocketData>) {
+  const { spectatingRoom } = socket.data;
+  if (!spectatingRoom) return;
+  rooms.stopSpectating(spectatingRoom);
+  socket.unsubscribe(spectatingRoom);
+  delete socket.data.spectatingRoom;
 }
 
 function send(socket: Bun.ServerWebSocket<SocketData>, event: ServerEvent) {

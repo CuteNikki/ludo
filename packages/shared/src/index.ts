@@ -37,6 +37,8 @@ export interface PublicRoomSummary {
   maxPlayers: number;
   phase: GameState['phase'];
   settings: RoomSettings;
+  /** How many people are watching the room without playing. */
+  spectatorCount: number;
 }
 
 export interface GameState {
@@ -69,7 +71,9 @@ export type ClientEvent =
   | { type: 'player:ready'; payload: { ready: boolean } }
   | { type: 'game:rematch'; payload: Record<string, never> }
   | { type: 'game:move'; payload: { pieceId: string } }
-  | { type: 'room:discover'; payload: Record<string, never> };
+  | { type: 'room:discover'; payload: Record<string, never> }
+  /** Watch a public room without a seat: the socket then receives its state updates but can't act in it. */
+  | { type: 'room:spectate'; payload: { roomCode: string } };
 
 export type PlayerLeftReason = 'left' | 'kicked' | 'disconnected';
 
@@ -80,6 +84,8 @@ export type ServerEvent =
   | { type: 'player:left'; payload: { playerId: string; playerName: string; reason: PlayerLeftReason } }
   | { type: 'room:rematch'; payload: { roomCode: string | null; movedPlayerIds: string[] } }
   | { type: 'room:list'; payload: { rooms: PublicRoomSummary[] } }
+  | { type: 'room:spectating'; payload: { state: GameState } }
+  | { type: 'room:closed'; payload: { roomCode: string } }
   | { type: 'room:error'; payload: { code: RoomErrorCode; message: string } };
 
 export type RoomErrorCode =
