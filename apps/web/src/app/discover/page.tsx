@@ -73,19 +73,23 @@ export default function DiscoverPage() {
         </span>
       </PageHeader>
 
-      <section className='reveal-load toy-card mb-8 p-5 sm:p-6' style={order(4)}>
-        <Label htmlFor='discover-name' className='mb-2'>
-          {t('start.nameLabel')}
-        </Label>
-        <Input
-          id='discover-name'
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          maxLength={24}
-          placeholder={t('start.namePlaceholder')}
-          className='max-w-sm'
-        />
-      </section>
+      {/* The pop-in is on a wrapper, not on the card that directly holds the field: password managers (Proton Pass)
+          freeze and release animations on a field's parent, which would replay it on every keystroke. */}
+      <div className='reveal-load mb-8' style={order(4)}>
+        <section className='toy-card p-5 sm:p-6'>
+          <Label htmlFor='discover-name' className='mb-2'>
+            {t('start.nameLabel')}
+          </Label>
+          <Input
+            id='discover-name'
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            maxLength={24}
+            placeholder={t('start.namePlaceholder')}
+            className='max-w-sm'
+          />
+        </section>
+      </div>
 
       <h2 className='reveal-load mb-4 font-display text-3xl' style={order(5)}>
         {t('discover.listTitle')}

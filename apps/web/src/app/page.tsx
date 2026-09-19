@@ -124,51 +124,55 @@ export default function HomePage() {
             {/* The scroll target of the navbar's "Play" link. It is this plain wrapper, not the card: the card animates in,
                 and a scroll aimed at it would land where it starts rather than where it ends up. */}
             <div id='start' className='mt-8 w-full max-w-xl'>
-              <section className='reveal-load toy-card @container w-full p-5 sm:p-6' style={order(4)}>
-                <Label htmlFor='name' className='mb-2'>
-                  {t('start.nameLabel')}
-                </Label>
-                <Input id='name' value={name} onChange={(event) => setName(event.target.value)} maxLength={24} placeholder={t('start.namePlaceholder')} />
-                <div className='mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 @lg:grid-cols-2'>
-                  <Button size='lg' onClick={() => enter('/room/new')}>
-                    <Plus size={20} strokeWidth={3} /> {t('start.createRoom')}
-                  </Button>
-                  <Button size='lg' variant='outline' onClick={() => enter('/room/new?bots=3')}>
-                    <Bot size={20} strokeWidth={2.5} /> <span className='truncate'>{t('start.playComputer')}</span>
-                  </Button>
-                </div>
-                <div className='my-5 flex items-center gap-3 text-sm font-extrabold uppercase text-foreground/70'>
-                  <span className='h-0.5 flex-1 rounded-full bg-foreground/20' /> {t('start.or')}{' '}
-                  <span className='h-0.5 flex-1 rounded-full bg-foreground/20' />
-                </div>
-                <Label htmlFor='room' className='mb-2'>
-                  {t('start.roomLabel')}
-                </Label>
-                <form
-                  className='flex gap-2'
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    if (roomCode.length === 6) enter(`/room/${roomCode}`);
-                  }}
-                >
-                  <Input
-                    id='room'
-                    value={roomCode}
-                    onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
-                    maxLength={6}
-                    placeholder={t('start.roomPlaceholder')}
-                    autoComplete='off'
-                    autoCorrect='off'
-                    autoCapitalize='characters'
-                    spellCheck={false}
-                    inputMode='text'
-                    className='min-w-0 flex-1 font-display text-xl uppercase tracking-[.2em] placeholder:font-display placeholder:tracking-[.2em]'
-                  />
-                  <Button type='submit' variant='outline' size='icon' className='size-12' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6}>
-                    <ArrowRight size={22} strokeWidth={3} />
-                  </Button>
-                </form>
-              </section>
+              {/* The pop-in is on this wrapper, not on the card: the name field's parent is the card, and password managers
+                  (Proton Pass) freeze and release animations on a field's parent, which would replay the pop-in on every keystroke. */}
+              <div className='reveal-load' style={order(4)}>
+                <section className='toy-card @container w-full p-5 sm:p-6'>
+                  <Label htmlFor='name' className='mb-2'>
+                    {t('start.nameLabel')}
+                  </Label>
+                  <Input id='name' value={name} onChange={(event) => setName(event.target.value)} maxLength={24} placeholder={t('start.namePlaceholder')} />
+                  <div className='mt-4 grid grid-cols-[minmax(0,1fr)] gap-3 @lg:grid-cols-2'>
+                    <Button size='lg' onClick={() => enter('/room/new')}>
+                      <Plus size={20} strokeWidth={3} /> {t('start.createRoom')}
+                    </Button>
+                    <Button size='lg' variant='outline' onClick={() => enter('/room/new?bots=3')}>
+                      <Bot size={20} strokeWidth={2.5} /> <span className='truncate'>{t('start.playComputer')}</span>
+                    </Button>
+                  </div>
+                  <div className='my-5 flex items-center gap-3 text-sm font-extrabold uppercase text-foreground/70'>
+                    <span className='h-0.5 flex-1 rounded-full bg-foreground/20' /> {t('start.or')}{' '}
+                    <span className='h-0.5 flex-1 rounded-full bg-foreground/20' />
+                  </div>
+                  <Label htmlFor='room' className='mb-2'>
+                    {t('start.roomLabel')}
+                  </Label>
+                  <form
+                    className='flex gap-2'
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      if (roomCode.length === 6) enter(`/room/${roomCode}`);
+                    }}
+                  >
+                    <Input
+                      id='room'
+                      value={roomCode}
+                      onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
+                      maxLength={6}
+                      placeholder={t('start.roomPlaceholder')}
+                      autoComplete='off'
+                      autoCorrect='off'
+                      autoCapitalize='characters'
+                      spellCheck={false}
+                      inputMode='text'
+                      className='min-w-0 flex-1 font-display text-xl uppercase tracking-[.2em] placeholder:font-display placeholder:tracking-[.2em]'
+                    />
+                    <Button type='submit' variant='outline' size='icon' className='size-12' aria-label={t('start.joinAria')} disabled={roomCode.length !== 6}>
+                      <ArrowRight size={22} strokeWidth={3} />
+                    </Button>
+                  </form>
+                </section>
+              </div>
             </div>
           </div>
 

@@ -335,7 +335,12 @@ body {
    hero, which is on screen before anything scrolls. It needs no JavaScript, so the hero is never
    left blank while the page hydrates. Set `style={{ '--i': n }}` for its place in the order. With
    `backwards` fill the element only takes the "from" look during its delay, so it settles into its
-   own resting styles (including any tilt) afterwards. */
+   own resting styles (including any tilt) afterwards.
+
+   Don't put it on an element that directly contains a text field. Password managers such as Proton Pass
+   set `animation: none` on a field's parent and remove it again whenever they reposition their icon,
+   and that restarts this animation: the element vanishes for its delay and pops in again on every
+   keystroke. Put it on a wrapper around that element instead. */
 @keyframes reveal-pop {
   from {
     opacity: 0;
