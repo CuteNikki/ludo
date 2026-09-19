@@ -361,7 +361,6 @@ function Message({
         <p className='mt-3 font-bold text-foreground/70'>{detail}</p>
         {watchCode && (
           <>
-            <p className='mt-1 font-bold text-foreground/70'>{t('room.message.watchHint')}</p>
             <Button asChild size='lg' className='mt-6 w-full'>
               <a href={`/watch/${watchCode}`}>
                 <Eye size={20} strokeWidth={3} /> {t('room.message.watch')}
@@ -411,8 +410,9 @@ function Message({
             <p className='mt-2 h-4 text-xs font-bold text-foreground/60' aria-live='polite'>
               {submitting ? t('room.message.lookingUpRoom') : ''}
             </p>
-            <OrDivider className='mt-2' />
-            <div className='mt-4 flex flex-col justify-center gap-3 sm:flex-row'>
+            {/* The "or" after the Watch button already separates that from these, so there's only the one. */}
+            {!watchCode && <OrDivider className='mt-2' />}
+            <div className={cn('flex flex-col justify-center gap-3 sm:flex-row', watchCode ? 'mt-2' : 'mt-4')}>
               {/* With a Watch button above, that is the one main action, so this one steps back. */}
               <Button variant={watchCode ? 'outline' : 'default'} asChild>
                 <a href='/room/new'>

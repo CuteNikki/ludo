@@ -327,8 +327,7 @@
       "toHomepage": "Start",
       "gameRunning": "Spiel läuft bereits",
       "roomFull": "Raum ist voll",
-      "watch": "Dem Spiel zuschauen",
-      "watchHint": "Dieser Raum ist öffentlich, du kannst also zuschauen, ohne mitzuspielen."
+      "watch": "Zuschauen"
     },
     "away": "Abwesend",
     "claimHost": "Übernehmen",

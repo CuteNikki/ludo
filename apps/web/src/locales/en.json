@@ -327,8 +327,7 @@
       "toHomepage": "Home",
       "gameRunning": "Game already started",
       "roomFull": "Room is full",
-      "watch": "Watch this game",
-      "watchHint": "This room is public, so you can follow along without playing."
+      "watch": "Watch"
     },
     "away": "Away",
     "claimHost": "Take over",
