@@ -48,7 +48,6 @@
     "hostedBy": "Hosted by {{name}}",
     "join": "Join",
     "watch": "Watch",
-    "spectators": "{{count}} watching",
     "settingOn": "On",
     "settingOff": "Off",
     "phase": {
@@ -60,6 +59,7 @@
   },
   "spectate": {
     "watching": "Watching",
+    "count": "{{count}} watching",
     "back": "Back to rooms",
     "waitingToStart": "Waiting for the game to start.",
     "rematchNote": "The players are voting on a rematch.",

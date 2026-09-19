@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { Die } from '@/components/die';
 import { PlayerToken, softBg } from '@/components/room/player-color';
 import { LeaveButton } from '@/components/room/room-card';
+import { SpectatorCount } from '@/components/room/spectator-count';
 import { Button } from '@/components/ui/button';
 
 interface PlayersPanelProps {
@@ -49,9 +50,12 @@ export function PlayersPanel({
 
   return (
     <section className='toy-card p-4 sm:p-5'>
-      <h2 className='mb-3 flex items-center gap-2 font-display text-2xl'>
-        <Users size={22} strokeWidth={2.5} /> {t('room.players')} {state.players.length}/4
-      </h2>
+      <div className='mb-3 flex items-center justify-between gap-3'>
+        <h2 className='flex items-center gap-2 font-display text-2xl'>
+          <Users size={22} strokeWidth={2.5} /> {t('room.players')} {state.players.length}/4
+        </h2>
+        {state.spectatorCount > 0 && <SpectatorCount count={state.spectatorCount} labelled className='shrink-0 text-sm' />}
+      </div>
 
       <ul className='space-y-2'>
         {state.players.map((player) => {

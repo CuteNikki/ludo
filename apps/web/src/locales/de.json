@@ -48,7 +48,6 @@
     "hostedBy": "Gehostet von {{name}}",
     "join": "Beitreten",
     "watch": "Zuschauen",
-    "spectators": "{{count}} schauen zu",
     "settingOn": "An",
     "settingOff": "Aus",
     "phase": {
@@ -60,6 +59,7 @@
   },
   "spectate": {
     "watching": "Zuschauen",
+    "count": "{{count}} schauen zu",
     "back": "Zurück zu den Räumen",
     "waitingToStart": "Warten auf den Spielstart.",
     "rematchNote": "Die Spieler stimmen über eine Revanche ab.",

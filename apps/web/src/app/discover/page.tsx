@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 
 import { PAGE_DECOR_A } from '@/components/decor';
 import { PageHeader, PageShell } from '@/components/page-shell';
+import { SpectatorCount } from '@/components/room/spectator-count';
 import { TapTooltip } from '@/components/tap-tooltip';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -189,18 +190,6 @@ const BOOLEAN_SETTINGS = [
   { key: 'threeTriesToLeaveYard', icon: Repeat, labelKey: 'room.settings.threeTriesToLeaveYard', infoKey: 'room.settings.threeTriesToLeaveYardInfo' },
   { key: 'mustCapture', icon: Target, labelKey: 'room.settings.mustCapture', infoKey: 'room.settings.mustCaptureInfo' },
 ] as const;
-
-/** How many people are watching the room, shown only when someone is. */
-function SpectatorCount({ count }: { count: number }) {
-  const { t } = useTranslation();
-  const label = t('discover.spectators', { count });
-
-  return (
-    <span role='img' aria-label={label} title={label} className='inline-flex items-center gap-1 text-xs font-bold text-foreground/70'>
-      <Eye size={15} /> {count}
-    </span>
-  );
-}
 
 /** The move time, shown next to the player count so the row of rule icons below has the card's full width. */
 function MoveTimeBadge({ seconds }: { seconds: number }) {

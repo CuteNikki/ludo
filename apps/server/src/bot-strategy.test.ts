@@ -36,6 +36,7 @@ function stateFor(dice: number, botPositions: number[], opponentPositions: numbe
     winnerId: null,
     rematchDeadline: null,
     rematchPlayerIds: [],
+    spectatorCount: 0,
     revision: 0,
   };
 }

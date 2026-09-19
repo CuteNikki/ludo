@@ -234,6 +234,23 @@ describe('RoomManager game turns', () => {
     expect(manager.listPublicRooms()[0]?.spectatorCount).toBe(0);
   });
 
+  test('keeps the watcher count in the room state without touching the revision', () => {
+    const manager = new RoomManager();
+    const host = manager.createRoom('Ada');
+    manager.setSettings(host.state.roomCode, host.playerId, { ...host.state.settings, isPublic: true });
+    const revision = host.state.revision;
+
+    manager.spectate(host.state.roomCode);
+    manager.spectate(host.state.roomCode);
+    expect(host.state.spectatorCount).toBe(2);
+
+    expect(manager.stopSpectating(host.state.roomCode)?.spectatorCount).toBe(1);
+    // The board ties a piece preview to the revision, so watchers coming and going must not bump it.
+    expect(host.state.revision).toBe(revision);
+    // Nothing to report once the room is gone.
+    expect(manager.stopSpectating('ZZZZZZ')).toBeNull();
+  });
+
   test('treats a private room like a missing one when someone tries to watch it', () => {
     const manager = new RoomManager();
     const host = manager.createRoom('Ada');

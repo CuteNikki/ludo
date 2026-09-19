@@ -48,6 +48,7 @@ export function createPreviewState(previewPlayers: PreviewPlayer[]): GameState {
     winnerId: null,
     rematchDeadline: null,
     rematchPlayerIds: [],
+    spectatorCount: 0,
     revision: 0,
   };
 }

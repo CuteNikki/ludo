@@ -56,6 +56,8 @@ export interface GameState {
   winnerId: string | null;
   rematchDeadline: number | null;
   rematchPlayerIds: string[];
+  /** How many people are watching without a seat. */
+  spectatorCount: number;
   revision: number;
 }
 

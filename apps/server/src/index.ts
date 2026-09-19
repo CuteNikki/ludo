@@ -108,6 +108,8 @@ const server = Bun.serve<SocketData>({
           if (socket.data.spectatingRoom !== spectatedCode) {
             const state = rooms.spectate(spectatedCode);
             stopSpectating(socket);
+            // Tell the players and other watchers before subscribing, so the newcomer only gets `room:spectating`.
+            broadcast(spectatedCode, { type: 'game:state', payload: state });
             socket.data.spectatingRoom = spectatedCode;
             socket.subscribe(spectatedCode);
             send(socket, { type: 'room:spectating', payload: { state } });
@@ -193,9 +195,11 @@ function joinSocket(socket: Bun.ServerWebSocket<SocketData>, roomCode: string, p
 function stopSpectating(socket: Bun.ServerWebSocket<SocketData>) {
   const { spectatingRoom } = socket.data;
   if (!spectatingRoom) return;
-  rooms.stopSpectating(spectatingRoom);
+  const state = rooms.stopSpectating(spectatingRoom);
   socket.unsubscribe(spectatingRoom);
   delete socket.data.spectatingRoom;
+  // The watcher count is part of the state; there is nobody to tell once the room is gone.
+  if (state) broadcast(spectatingRoom, { type: 'game:state', payload: state });
 }
 
 function send(socket: Bun.ServerWebSocket<SocketData>, event: ServerEvent) {

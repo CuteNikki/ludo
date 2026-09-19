@@ -47,11 +47,9 @@ interface Room {
   state: GameState;
   turnTimer?: ReturnType<typeof setTimeout>;
   counters: TurnCounters;
-  /** How many sockets are watching without a seat. */
-  spectators: number;
 }
 
-const newRoom = (state: GameState): Room => ({ state, counters: freshCounters(), spectators: 0 });
+const newRoom = (state: GameState): Room => ({ state, counters: freshCounters() });
 
 type StateListener = (roomCode: string, state: GameState) => void;
 
@@ -116,7 +114,7 @@ export class RoomManager {
         maxPlayers: COLORS.length,
         phase: room.state.phase,
         settings: room.state.settings,
-        spectatorCount: room.spectators,
+        spectatorCount: room.state.spectatorCount,
       });
     }
     return summaries;
@@ -126,17 +124,24 @@ export class RoomManager {
    * Starts watching a public room. The caller keeps the returned state up to date by listening to the
    * room's broadcasts; a spectator has no seat, so nothing here lets them act. A private room looks
    * exactly like a missing one, so its code can't be probed.
+   *
+   * The watcher count is part of the state so the players can see it. Unlike other changes it leaves
+   * `revision` alone: the board ties a piece preview to the revision, so a spectator arriving while a
+   * player is mid-move would otherwise cancel that player's preview.
    */
   spectate(roomCode: string): GameState {
     const room = this.rooms.get(roomCode);
     if (!room || !room.state.settings.isPublic) throw new RoomError('ROOM_NOT_FOUND', 'The room was not found.');
-    room.spectators += 1;
+    room.state.spectatorCount += 1;
     return room.state;
   }
 
-  stopSpectating(roomCode: string) {
+  /** Returns the updated state to broadcast, or `null` if the room is already gone. */
+  stopSpectating(roomCode: string): GameState | null {
     const room = this.rooms.get(roomCode);
-    if (room) room.spectators = Math.max(0, room.spectators - 1);
+    if (!room) return null;
+    room.state.spectatorCount = Math.max(0, room.state.spectatorCount - 1);
+    return room.state;
   }
 
   createRoom(playerName: string): { playerId: string; state: GameState } {
@@ -158,6 +163,7 @@ export class RoomManager {
       winnerId: null,
       rematchDeadline: null,
       rematchPlayerIds: [],
+      spectatorCount: 0,
       revision: 0,
     };
     this.rooms.set(roomCode, newRoom(state));
@@ -747,6 +753,7 @@ export class RoomManager {
       winnerId: null,
       rematchDeadline: null,
       rematchPlayerIds: [],
+      spectatorCount: 0,
       revision: 0,
     };
     this.rooms.set(newRoomCode, newRoom(newState));
