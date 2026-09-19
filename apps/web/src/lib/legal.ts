@@ -23,3 +23,5 @@ export const operator = {
 export const isOperatorConfigured = Boolean(operator.name && operator.addressLines.length > 0 && operator.email);
 
 export const repositoryUrl = 'https://github.com/CuteNikki/ludo';
+
+export const author = { name: 'Nikki Sophie', url: 'https://niso.moe/' };

@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 
 import { Github } from 'lucide-react';
 
-import { repositoryUrl } from '@/lib/legal';
+import { author, repositoryUrl } from '@/lib/legal';
+import { siteName } from '@/lib/site';
+import { cn } from '@/lib/utils';
 
 import { LogoMark, Wordmark } from '@/components/logo';
 
@@ -44,7 +46,7 @@ export function SiteFooter() {
         <span className='bg-p-yellow' />
         <span className='bg-p-green' />
       </div>
-      <div className='mx-auto grid w-full max-w-480 gap-10 px-4 py-10 sm:px-6 sm:py-12 md:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))] lg:px-8'>
+      <div className='mx-auto grid w-full max-w-480 gap-10 px-4 pb-8 pt-10 sm:px-6 sm:pt-12 md:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))] lg:px-8'>
         <div className='max-w-sm'>
           <div className='flex items-center gap-2.5'>
             <LogoMark />
@@ -78,6 +80,20 @@ export function SiteFooter() {
             </li>
           </ul>
         </nav>
+      </div>
+
+      <div className='mx-auto w-full max-w-480 px-4 sm:px-6 lg:px-8'>
+        <div className='flex flex-wrap items-center justify-between gap-x-6 border-t-2 border-footer-foreground/15 py-3 text-sm font-bold text-footer-foreground/75'>
+          <p>
+            © {new Date().getFullYear()} {siteName}
+          </p>
+          <p>
+            {t('madeBy')}{' '}
+            <a href={author.url} target='_blank' rel='noreferrer' className={cn(linkClassName, 'text-primary')}>
+              {author.name}
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   );
