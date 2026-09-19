@@ -1,7 +1,7 @@
 import type { Piece, RoomSettings } from '@ludo/shared';
 import { describe, expect, test } from 'bun:test';
 
-import { RoomManager, type PlayerLeftEvent, type RematchTransition } from './room-manager';
+import { RoomError, RoomManager, type PlayerLeftEvent, type RematchTransition } from './room-manager';
 
 function startGame(rolls: number[] = [6, 3]) {
   let rollIndex = 0;
@@ -249,6 +249,37 @@ describe('RoomManager game turns', () => {
     expect(host.state.revision).toBe(revision);
     // Nothing to report once the room is gone.
     expect(manager.stopSpectating('ZZZZZZ')).toBeNull();
+  });
+
+  test('says a refused join can watch instead only for a public room', () => {
+    const joinError = (manager: RoomManager, roomCode: string) => {
+      try {
+        manager.joinRoom(roomCode, 'Late');
+      } catch (error) {
+        return error;
+      }
+      throw new Error('the join was not refused');
+    };
+
+    const manager = new RoomManager();
+    const publicRoom = manager.createRoom('Ada');
+    manager.setSettings(publicRoom.state.roomCode, publicRoom.playerId, { ...publicRoom.state.settings, isPublic: true });
+    const privateRoom = manager.createRoom('Bo');
+
+    // A running game and a full lobby are both turned away, and both can be watched when public.
+    for (const room of [publicRoom, privateRoom]) room.state.phase = 'playing';
+    const runningPublic = joinError(manager, publicRoom.state.roomCode) as RoomError;
+    const runningPrivate = joinError(manager, privateRoom.state.roomCode) as RoomError;
+    expect(runningPublic.code).toBe('GAME_ALREADY_RUNNING');
+    expect(runningPublic.canWatch).toBe(true);
+    expect(runningPrivate.code).toBe('GAME_ALREADY_RUNNING');
+    expect(runningPrivate.canWatch).toBe(false);
+
+    publicRoom.state.phase = 'lobby';
+    for (const name of ['B', 'C', 'D']) manager.joinRoom(publicRoom.state.roomCode, name);
+    const fullPublic = joinError(manager, publicRoom.state.roomCode) as RoomError;
+    expect(fullPublic.code).toBe('ROOM_FULL');
+    expect(fullPublic.canWatch).toBe(true);
   });
 
   test('treats a private room like a missing one when someone tries to watch it', () => {

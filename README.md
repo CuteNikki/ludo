@@ -52,7 +52,7 @@ The "Fair Dice" option ensures that every number is rolled regularly so no one h
 
 ## Spectating
 
-Anyone can watch a public room without a seat: the `/discover` page offers **Watch** (`/watch/<code>`) on rooms that are full or already running, along with how many people are watching; the players see that count in their room too. A spectator (`room:spectate`) receives the room's state updates but can't act in it, since the server only accepts actions from a joined player. Private rooms can't be watched and look exactly like a missing room. Spectators don't keep a room alive: when the players leave or a rematch starts, they are told the room has closed.
+Anyone can watch a public room without a seat: the `/discover` page offers **Watch** (`/watch/<code>`) on rooms that are full or already running, along with how many people are watching; the players see that count in their room too. A spectator (`room:spectate`) receives the room's state updates but can't act in it, since the server only accepts actions from a joined player. Opening the link of a public room that is full or already running offers a **Watch** button instead of a dead end (the server flags such a refused join with `canWatch`). Private rooms can't be watched and look exactly like a missing room. Spectators don't keep a room alive: when the players leave or a rematch starts, they are told the room has closed.
 
 ## Bots
 

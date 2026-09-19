@@ -154,6 +154,7 @@ const server = Bun.serve<SocketData>({
           payload: {
             code: error instanceof RoomError ? error.code : 'UNKNOWN',
             message: error instanceof Error ? error.message : 'Unknown Error.',
+            ...(error instanceof RoomError && error.canWatch ? { canWatch: true } : {}),
           },
         });
       }

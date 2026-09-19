@@ -7,6 +7,8 @@ export class RoomError extends Error {
   constructor(
     public readonly code: RoomErrorCode,
     message: string,
+    /** For a refused join: the room is public, so the person can watch it instead. */
+    public readonly canWatch = false,
   ) {
     super(message);
     this.name = 'RoomError';
@@ -187,8 +189,10 @@ export class RoomManager {
       room.state.revision += 1;
       return { playerId: reconnectingPlayer.id, state: room.state };
     }
-    if (room.state.phase !== 'lobby') throw new RoomError('GAME_ALREADY_RUNNING', 'The game is already running.');
-    if (room.state.players.length >= COLORS.length) throw new RoomError('ROOM_FULL', 'The room is full.');
+    // Someone turned away from a public room can be offered a seat in the audience instead.
+    const canWatch = room.state.settings.isPublic;
+    if (room.state.phase !== 'lobby') throw new RoomError('GAME_ALREADY_RUNNING', 'The game is already running.', canWatch);
+    if (room.state.players.length >= COLORS.length) throw new RoomError('ROOM_FULL', 'The room is full.', canWatch);
     return this.addPlayer(room.state, playerName);
   }
 

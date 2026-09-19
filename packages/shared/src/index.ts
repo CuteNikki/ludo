@@ -88,7 +88,15 @@ export type ServerEvent =
   | { type: 'room:list'; payload: { rooms: PublicRoomSummary[] } }
   | { type: 'room:spectating'; payload: { state: GameState } }
   | { type: 'room:closed'; payload: { roomCode: string } }
-  | { type: 'room:error'; payload: { code: RoomErrorCode; message: string } };
+  | {
+      type: 'room:error';
+      payload: {
+        code: RoomErrorCode;
+        message: string;
+        /** Set when a join was refused (the game is running or the room is full) but the room is public, so it can be watched instead. */
+        canWatch?: boolean;
+      };
+    };
 
 export type RoomErrorCode =
   | 'ROOM_NOT_FOUND'

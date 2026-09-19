@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ArrowLeft, ArrowRight, Plus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Eye, Plus } from 'lucide-react';
 
 import { order } from '@/lib/reveal';
 import { cn } from '@/lib/utils';
@@ -28,7 +28,7 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
   const socketRef = useRef<WebSocket | null>(null);
   const [state, setState] = useState<GameState | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
-  const [error, setError] = useState<{ code: RoomErrorCode; message: string } | null>(null);
+  const [error, setError] = useState<{ code: RoomErrorCode; message: string; canWatch?: boolean } | null>(null);
   // `id` keys each notice's <Toast>, so a repeat of the same notice restarts its timer.
   const noticeIdRef = useRef(0);
   const [notice, setNotice] = useState<{ id: number; code: RoomErrorCode } | null>(null);
@@ -169,6 +169,8 @@ export function RoomClient({ requestedCode }: { requestedCode: string }) {
         title={titles[error.code] ?? t('room.message.connectionFailed')}
         detail={t(`room.errors.${error.code}`, { defaultValue: t('room.errors.UNKNOWN') })}
         showRoomChoices={cannotEnter}
+        // A public game that is running or full can't be joined, but it can be watched.
+        watchCode={error.canWatch ? requestedCode : undefined}
       />
     );
   }
@@ -325,7 +327,18 @@ function RoomLoading() {
   );
 }
 
-function Message({ title, detail, showRoomChoices = false }: { title: string; detail: string; showRoomChoices?: boolean }) {
+function Message({
+  title,
+  detail,
+  showRoomChoices = false,
+  watchCode,
+}: {
+  title: string;
+  detail: string;
+  showRoomChoices?: boolean;
+  /** The room to offer a "watch instead" button for. */
+  watchCode?: string | undefined;
+}) {
   const { t } = useTranslation();
   const router = useRouter();
   const [roomCode, setRoomCode] = useState('');
@@ -336,6 +349,16 @@ function Message({ title, detail, showRoomChoices = false }: { title: string; de
       <div className='reveal-load toy-card w-full max-w-md p-6 sm:p-8'>
         <h1 className='font-display text-4xl leading-tight'>{title}</h1>
         <p className='mt-3 font-bold text-foreground/70'>{detail}</p>
+        {watchCode && (
+          <div className='mt-6'>
+            <Button asChild size='lg' className='w-full'>
+              <a href={`/watch/${watchCode}`}>
+                <Eye size={20} strokeWidth={3} /> {t('room.message.watch')}
+              </a>
+            </Button>
+            <p className='mt-2 text-xs font-bold text-foreground/60'>{t('room.message.watchHint')}</p>
+          </div>
+        )}
         {showRoomChoices && (
           <>
             <form
