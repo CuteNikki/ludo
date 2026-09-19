@@ -157,7 +157,7 @@
     "rematchTimeoutText": "You didn't confirm the rematch in time, so you weren't moved into the new room.",
     "close": "Dismiss notice"
   },
-  "footer": "Ludo · For people who want one more round",
+  "footer": "For people who want one more round",
   "theme": {
     "aria": "Theme",
     "light": "Light",

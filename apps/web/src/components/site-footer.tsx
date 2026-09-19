@@ -48,7 +48,7 @@ export function SiteFooter() {
             <LogoMark />
             <Wordmark className='text-4xl' />
           </div>
-          <p className='mt-4 font-bold leading-7 text-footer-foreground/75'>{t('footer')}</p>
+          <p className='mt-4 font-bold leading-7 text-footer-foreground/75 text-pretty'>{t('footer')}</p>
         </div>
 
         {columns.map((column) => (
