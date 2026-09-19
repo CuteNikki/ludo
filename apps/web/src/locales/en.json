@@ -502,5 +502,10 @@
     "off": "Sound off",
     "mute": "Turn sound off",
     "unmute": "Turn sound on"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "That page rolled off the board. Let's get you back to the game.",
+    "home": "Home"
   }
 }

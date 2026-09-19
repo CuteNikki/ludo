@@ -502,5 +502,10 @@
     "off": "Ton aus",
     "mute": "Ton ausschalten",
     "unmute": "Ton einschalten"
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "text": "Diese Seite ist vom Brett gefallen. Zurück ins Spiel!",
+    "home": "Start"
   }
 }

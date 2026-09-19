@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Lilita_One, Nunito } from 'next/font/google';
 
 import { fallbackLng } from '@/lib/i18n/settings';
+import { siteDescription, siteName, siteTitle, siteUrl, themeColors } from '@/lib/site';
 
 import { LanguageProvider } from '@/components/providers/i18n';
 import { SoundProvider } from '@/components/providers/sound';
@@ -15,37 +16,35 @@ import './globals.css';
 const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito' });
 const lilita = Lilita_One({ subsets: ['latin'], weight: '400', variable: '--font-lilita' });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-const title = 'Ludo · Real-time multiplayer board game';
-const description =
-  'Play Ludo ("Mensch ärgere Dich nicht") online in real time. Open a room, share the link, and start playing - no download or sign-up required.';
-
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title,
-  description,
-  applicationName: 'Ludo',
+  // Pages set just their own name (see the layout of each route); the site name follows.
+  title: { default: siteTitle, template: `%s · ${siteName}` },
+  description: siteDescription,
+  applicationName: siteName,
+  category: 'games',
   keywords: ['Ludo', 'Mensch ärgere Dich nicht', 'board game', 'multiplayer', 'online game', 'real-time'],
+  // The icon, the touch icon, the manifest and the share image come from the files next to this one
+  // (icon.svg, apple-icon.tsx, manifest.ts, opengraph-image.tsx).
   openGraph: {
-    title,
-    description,
+    title: siteTitle,
+    description: siteDescription,
     url: siteUrl,
-    siteName: 'Ludo',
+    siteName,
     type: 'website',
-    images: ['/opengraph-image'],
+    locale: 'en_US',
+    alternateLocale: ['de_DE'],
   },
-  twitter: {
-    card: 'summary_large_image',
-    title,
-    description,
-    images: ['/opengraph-image'],
-  },
+  twitter: { card: 'summary_large_image', title: siteTitle, description: siteDescription },
+  appleWebApp: { capable: true, title: siteName, statusBarStyle: 'default' },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
+  colorScheme: 'light dark',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fdf2d8' },
-    { media: '(prefers-color-scheme: dark)', color: '#191430' },
+    { media: '(prefers-color-scheme: light)', color: themeColors.light },
+    { media: '(prefers-color-scheme: dark)', color: themeColors.dark },
   ],
 };
 

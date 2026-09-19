@@ -1,9 +1,25 @@
 import { ImageResponse } from 'next/og';
 
+import { BoardSvg, LogoMarkSvg, brand, loadDisplayFont } from '@/lib/brand';
+
+export const alt = 'Ludo: roll, move, and don\'t get mad. A real-time multiplayer board game.';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-export default function OpengraphImage() {
+const letters = [
+  { letter: 'L', color: brand.red },
+  { letter: 'u', color: brand.blue },
+  { letter: 'd', color: brand.green },
+  { letter: 'o', color: brand.yellow },
+];
+
+/** The picture shown when a link to the site is shared: the wordmark, the tagline and a board. */
+export default async function OpengraphImage() {
+  const font = await loadDisplayFont();
+  // Without the display font (a build with no network) fall back to a heavy system face.
+  const fontFamily = font ? 'Lilita One' : 'sans-serif';
+  const fontWeight = font ? 400 : 900;
+
   return new ImageResponse(
     (
       <div
@@ -11,45 +27,71 @@ export default function OpengraphImage() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#fdf2d8',
-          backgroundImage: 'linear-gradient(rgba(30,21,51,.1) 2px, transparent 2px), linear-gradient(90deg, rgba(30,21,51,.1) 2px, transparent 2px)',
-          backgroundSize: '48px 48px',
+          justifyContent: 'space-between',
+          padding: '0 72px',
+          backgroundColor: brand.paper,
+          backgroundImage: 'radial-gradient(rgba(30, 21, 51, 0.14) 3px, transparent 3px)',
+          backgroundSize: '44px 44px',
+          color: brand.ink,
+          fontFamily,
+          fontWeight,
         }}
       >
+        <div style={{ display: 'flex', flexDirection: 'column', width: 620 }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <LogoMarkSvg size={104} />
+            <div style={{ display: 'flex', marginLeft: 26, fontSize: 112, lineHeight: 1, letterSpacing: 3 }}>
+              {letters.map(({ letter, color }) => (
+                <span key={letter} style={{ color, WebkitTextStroke: '9px #1e1533', paintOrder: 'stroke fill' }}>
+                  {letter}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', marginTop: 44, fontSize: 88, lineHeight: 1 }}>Roll. Move.</div>
+          <div
+            style={{
+              display: 'flex',
+              alignSelf: 'flex-start',
+              marginTop: 18,
+              padding: '6px 28px 10px',
+              fontSize: 72,
+              lineHeight: 1.1,
+              color: '#ffffff',
+              backgroundColor: brand.red,
+              border: '6px solid #1e1533',
+              borderRadius: 22,
+              boxShadow: '9px 9px 0 #1e1533',
+              transform: 'rotate(-2deg)',
+            }}
+          >
+            {"Don't get mad."}
+          </div>
+
+          <div style={{ display: 'flex', marginTop: 40, fontSize: 32, lineHeight: 1.35, color: '#4a4063' }}>
+            Real-time multiplayer. Open a room, share the link, play.
+          </div>
+        </div>
+
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 168,
-            height: 168,
-            borderRadius: 28,
-            backgroundColor: '#1e1533',
-            marginBottom: 40,
+            padding: 12,
+            backgroundColor: brand.red,
+            border: '8px solid #1e1533',
+            borderRadius: 30,
+            boxShadow: '14px 14px 0 #1e1533',
+            transform: 'rotate(3deg)',
           }}
         >
-          {/* lucide "dices" glyph, redrawn as filled shapes since Satori doesn't support stroked paths */}
-          <svg width="96" height="96" viewBox="0 0 24 24" fill="none">
-            <rect x="2" y="10" width="12" height="12" rx="2" fill="#fdf2d8" />
-            <circle cx="6" cy="18" r="1.4" fill="#1e1533" />
-            <circle cx="10" cy="14" r="1.4" fill="#1e1533" />
-            <path
-              d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6l7.92 8Z"
-              fill="#fdf2d8"
-            />
-            <circle cx="15" cy="6" r="1.4" fill="#1e1533" />
-            <circle cx="18" cy="9" r="1.4" fill="#1e1533" />
-          </svg>
-        </div>
-        <div style={{ display: 'flex', fontSize: 96, fontWeight: 900, color: '#1e1533', letterSpacing: -2 }}>Ludo</div>
-        <div style={{ display: 'flex', marginTop: 16, fontSize: 34, fontWeight: 700, color: '#5b4f78' }}>
-          Real-time multiplayer · open a room, share the link, play
+          <div style={{ display: 'flex', borderRadius: 14, overflow: 'hidden', border: '5px solid #1e1533' }}>
+            <BoardSvg size={380} />
+          </div>
         </div>
       </div>
     ),
-    { ...size },
+    { ...size, ...(font ? { fonts: [{ name: 'Lilita One', data: font, weight: 400 as const, style: 'normal' as const }] } : {}) },
   );
 }
