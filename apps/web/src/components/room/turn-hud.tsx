@@ -35,8 +35,11 @@ export function TurnHud({ state, playerId, lastRolls, secondsLeft }: TurnHudProp
 
   return (
     <div className='toy-card overflow-hidden' aria-live='polite'>
-      <div className={cn('flex items-center gap-3 p-3 transition-colors duration-300 sm:gap-4 sm:p-4', softBg[current.color])}>
-        <div key={`${current.id}-${state.turnStage}-${state.diceResult}`} className={cn('p-1.5', !rolling && state.diceResult !== null && 'animate-dice-result')}>
+      <div className={cn('flex items-center gap-3 p-3 pb-0 transition-colors duration-300 sm:gap-4', softBg[current.color])}>
+        <div
+          key={`${current.id}-${state.turnStage}-${state.diceResult}`}
+          className={cn('p-1.5', !rolling && state.diceResult !== null && 'animate-dice-result')}
+        >
           <Die
             value={state.diceResult}
             rolling={rolling}
@@ -56,15 +59,13 @@ export function TurnHud({ state, playerId, lastRolls, secondsLeft }: TurnHudProp
           >
             {isMyTurn ? t('room.hud.yourTurn') : t('room.yourTurn')}
           </p>
-          <p className='mt-1 flex items-center gap-2 font-display text-2xl leading-tight sm:text-3xl'>
+          <p className='mt-0.5 flex items-center gap-2 font-display text-2xl leading-tight sm:text-3xl'>
             <PlayerToken color={current.color} className='size-6' />
             <span className='min-w-0 truncate'>{current.name}</span>
             {current.isBot && <Bot size={20} className='shrink-0 text-foreground/60' aria-label={t('room.bot')} />}
           </p>
           {/* Two lines are always reserved, so a longer or shorter status never resizes the panel (and shoves the board around). */}
-          <p className='mt-0.5 line-clamp-2 min-h-10 text-sm font-bold leading-5 text-foreground/80'>
-            {statusText(state, current, isMyTurn, t)}
-          </p>
+          <p className='mt-0.5 line-clamp-2 min-h-10 text-sm font-bold leading-5 text-foreground/80'>{statusText(state, current, isMyTurn, t)}</p>
         </div>
       </div>
 
@@ -73,7 +74,7 @@ export function TurnHud({ state, playerId, lastRolls, secondsLeft }: TurnHudProp
           banner's color; it keeps its height so the panel doesn't jump when a countdown starts. */}
       <div
         className={cn(
-          'flex h-11 items-center gap-3 border-y-3 px-3 transition-colors duration-300 sm:px-4',
+          'flex h-9 items-center gap-2 border-y-3 px-3 transition-colors duration-300 sm:px-4',
           showCountdown ? 'border-border bg-background' : cn('border-transparent', softBg[current.color]),
         )}
       >
@@ -173,12 +174,18 @@ export function GameOver({ state, playerId, rematchSecondsLeft, onRematch, onLea
           {winner && <PlayerToken color={winner.color} className='size-6' />}
           <span className='min-w-0 truncate'>{winner?.name}</span>
         </p>
-        <p className='eyebrow mt-3 inline-flex rounded-md border-2 border-border bg-background-alternative px-2 py-0.5 text-foreground shadow-[0_2px_0_var(--shadow-color)]'>{t('room.won')}</p>
+        <p className='eyebrow mt-3 inline-flex rounded-md border-2 border-border bg-background-alternative px-2 py-0.5 text-foreground shadow-[0_2px_0_var(--shadow-color)]'>
+          {t('room.won')}
+        </p>
       </div>
 
       <div className='border-t-3 border-border p-3 sm:p-4'>
         {voting ? (
-          <div role='status' aria-live='assertive' className='mb-3 rounded-lg border-3 border-amber-500 bg-amber-500/10 p-3 dark:border-amber-400 dark:bg-amber-400/10'>
+          <div
+            role='status'
+            aria-live='assertive'
+            className='mb-3 rounded-lg border-3 border-amber-500 bg-amber-500/10 p-3 dark:border-amber-400 dark:bg-amber-400/10'
+          >
             <p className='flex items-center justify-center gap-2 text-xs font-extrabold uppercase tracking-wide text-amber-700 dark:text-amber-400'>
               <span className='relative flex size-2 items-center justify-center'>
                 <span className='absolute size-2 animate-ping rounded-full bg-amber-500 dark:bg-amber-400' />
