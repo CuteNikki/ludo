@@ -48,6 +48,8 @@ Clients only ever send actions such as `room:create`, `room:join`, `player:ready
 
 The server automatically rolls the dice at the start of every turn and synchronizes the roll animation and result with all clients. If there is no valid move, this is briefly displayed and the next player automatically takes their turn. If there is no other possible move, the figure is moved automatically after a short display. Only when there are multiple options does the configured time remain to select a highlighted figure. The server validates every move, resolves captures, and automatically advances to the next connected player when time runs out. A tab can reclaim its seat for up to five minutes after a reload.
 
+After a move the server keeps the turn with the mover for as long as the board takes to play it (`moveAnimationMs` in `packages/shared`: a step per square, the spawn flight and the impact of a capture) and only then passes it on, so the next player's turn never starts while a piece is still walking. During that pause the turn stage is unchanged but nothing can be rolled or moved.
+
 The "Fair Dice" option ensures that every number is rolled regularly so no one has to wait long for a six. The order of the rolls themselves stays random.
 
 ## Spectating

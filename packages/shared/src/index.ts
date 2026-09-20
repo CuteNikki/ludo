@@ -128,3 +128,4 @@ export type RoomErrorCode =
   | 'UNKNOWN';
 
 export { TRACK_LENGTH, chooseBotMove, isStartSquare, toBoardPosition } from './bot-strategy';
+export { CAPTURE_IMPACT_MS, SPAWN_FLIGHT_MS, WALK_STEP_MS, moveAnimationMs } from './move-animation';

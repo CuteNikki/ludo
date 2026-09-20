@@ -45,6 +45,8 @@ const rooms = new RoomManager(
     // Watchers have no seat to lose, so this is how they learn the game is gone.
     broadcast(roomCode, { type: 'room:closed', payload: { roomCode } });
   },
+  // Hold the turn for as long as the board takes to play a move.
+  1,
 );
 
 const server = Bun.serve<SocketData>({

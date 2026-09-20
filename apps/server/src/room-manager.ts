@@ -1,5 +1,5 @@
 import type { GameState, MoveTimeSeconds, Piece, Player, PlayerColor, PlayerLeftReason, PublicRoomSummary, RoomErrorCode, RoomSettings } from '@ludo/shared';
-import { TRACK_LENGTH, chooseBotMove, isStartSquare, toBoardPosition } from '@ludo/shared';
+import { TRACK_LENGTH, chooseBotMove, isStartSquare, moveAnimationMs, toBoardPosition } from '@ludo/shared';
 
 import { FairDice } from './fair-dice';
 
@@ -94,6 +94,8 @@ export class RoomManager {
     private readonly hostAbsenceMs = 30_000,
     private readonly lobbyGraceMs = 15_000,
     private readonly onRoomClosed: RoomClosedListener = () => undefined,
+    /** How long a move's turn hand-over waits for the board to play it, relative to the real animation: 1 is as long as the board takes, 0 hands over at once. */
+    private readonly moveAnimationScale = 0,
   ) {}
 
   getRoomState(roomCode: string): GameState | null {
@@ -348,19 +350,43 @@ export class RoomManager {
     const player = state.players.find((candidate) => candidate.id === playerId);
     if (!piece || !player) throw new RoomError('PIECE_NOT_FOUND', 'The piece was not found.');
 
+    const from = piece.position;
     piece.position = piece.position === -1 ? 0 : piece.position + state.diceResult;
     const capturedPieces = this.getOpponentPiecesAt(state, player, piece.position);
     for (const capturedPiece of capturedPieces) capturedPiece.position = -1;
     const captured = capturedPieces.length > 0;
 
-    if (state.pieces.filter((candidate) => candidate.playerId === playerId).every((candidate) => candidate.position >= 40)) {
-      this.finishGame(state, playerId);
-    } else {
-      // A six and a capture each earn one extra roll; they don't stack when a six also captures.
-      this.advanceTurn(state, state.diceResult === 6 || (captured && state.settings.extraTurnOnCapture));
-    }
+    const won = state.pieces.filter((candidate) => candidate.playerId === playerId).every((candidate) => candidate.position >= 40);
+    // A six and a capture each earn one extra roll; they don't stack when a six also captures.
+    const extraTurn = state.diceResult === 6 || (captured && state.settings.extraTurnOnCapture);
+    const conclude = () => (won ? this.finishGame(state, playerId) : this.advanceTurn(state, extraTurn));
+
+    const holdMs = Math.round(moveAnimationMs({ from, to: piece.position, captured }) * this.moveAnimationScale);
+    if (holdMs > 0) this.holdTurn(state, holdMs, conclude);
+    else conclude();
     state.revision += 1;
     return state;
+  }
+
+  /**
+   * The move is made, but the turn stays with the mover while its animation plays, and only then passes on
+   * (or the game ends). Otherwise the next player's turn would start while the piece is still walking. The
+   * stage is left as it was, so the turn panel keeps saying what it said, but with no piece left to choose
+   * and no timer, nothing more can be done in the meantime. Anything that ends the turn early (a player
+   * leaving, the game ending) clears this timer.
+   */
+  private holdTurn(state: GameState, holdMs: number, thenDo: () => void) {
+    this.clearTurnTimer(state.roomCode);
+    state.movablePieceIds = [];
+    state.turnDeadline = null;
+    const room = this.rooms.get(state.roomCode);
+    if (!room) return;
+    room.turnTimer = setTimeout(() => {
+      if (state.phase !== 'playing') return;
+      thenDo();
+      state.revision += 1;
+      this.onStateChange(state.roomCode, state);
+    }, holdMs);
   }
 
   private finishGame(state: GameState, winnerId: string) {

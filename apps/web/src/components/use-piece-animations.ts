@@ -1,4 +1,4 @@
-import type { GameState } from '@ludo/shared';
+import { WALK_STEP_MS, type GameState } from '@ludo/shared';
 import { useLayoutEffect, useRef, useState } from 'react';
 
 import { YARDS, getCellPosition, getPieceCoordinate, type Coordinate } from './board-geometry';
@@ -20,7 +20,6 @@ export type PieceAnimation =
   | { kind: 'holding'; coordinate: Coordinate; token: number }
   | { kind: 'capturing'; coordinate: Coordinate; from: Coordinate; to: Coordinate; token: number };
 
-const WALK_STEP_MS = 135;
 const WALK_EASING = 'cubic-bezier(0.22, 0.8, 0.25, 1)';
 
 /**

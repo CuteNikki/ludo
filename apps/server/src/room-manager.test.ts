@@ -764,6 +764,118 @@ describe('RoomManager game turns', () => {
     });
   });
 
+  describe('holding the turn while a move plays', () => {
+    /** Like `startConfiguredGame`, but the hand-over waits for a shortened version of the board's animation. */
+    function startAnimatedGame(roll: number, scale = 0.05, autoMoveDelayMs: number | null = null) {
+      const manager = new RoomManager(
+        () => undefined,
+        60_000,
+        () => roll,
+        900,
+        1_800,
+        autoMoveDelayMs,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        scale,
+      );
+      const host = manager.createRoom('Ada');
+      const guest = manager.joinRoom(host.state.roomCode, 'Linus');
+      manager.setSettings(host.state.roomCode, host.playerId, { ...host.state.settings, fairDice: false });
+      manager.setReady(host.state.roomCode, host.playerId, true);
+      manager.setReady(host.state.roomCode, guest.playerId, true);
+      const hostPieces = host.state.pieces.filter((piece) => piece.playerId === host.playerId);
+      return { manager, host, guest, hostPieces };
+    }
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    test('keeps the turn with the mover until the move has played, then passes it on', async () => {
+      const { manager, host, guest, hostPieces } = startAnimatedGame(3);
+      hostPieces[0]!.position = 5;
+
+      manager.roll(host.state.roomCode, host.playerId);
+      const moved = manager.move(host.state.roomCode, host.playerId, hostPieces[0]!.id);
+
+      // The piece has moved, but it is still the mover's turn and the stage is unchanged (so the turn panel
+      // keeps saying what it said), and nothing more can be rolled or moved.
+      expect(hostPieces[0]!.position).toBe(8);
+      expect(moved.turnStage).toBe('move');
+      expect(moved.currentPlayerId).toBe(host.playerId);
+      expect(moved.movablePieceIds).toEqual([]);
+      expect(() => manager.roll(host.state.roomCode, host.playerId)).toThrow('already been rolled');
+      expect(() => manager.move(host.state.roomCode, host.playerId, hostPieces[0]!.id)).toThrow('cannot be moved');
+
+      await sleep(80);
+      expect(moved.currentPlayerId).toBe(guest.playerId);
+      expect(moved.turnStage).toBe('rolling');
+    });
+
+    test('keeps saying the piece is moving by itself while an automatic move plays', async () => {
+      const { manager, host, guest, hostPieces } = startAnimatedGame(3, 0.5, 5);
+      hostPieces[0]!.position = 5;
+
+      manager.roll(host.state.roomCode, host.playerId);
+      expect(host.state.turnStage).toBe('auto-move');
+
+      // The automatic move happens after its short delay; the turn then stays put while the piece walks.
+      await sleep(60);
+      expect(hostPieces[0]!.position).toBe(8);
+      expect(host.state.turnStage).toBe('auto-move');
+      expect(host.state.currentPlayerId).toBe(host.playerId);
+
+      await sleep(300);
+      expect(host.state.currentPlayerId).toBe(guest.playerId);
+      expect(host.state.turnStage).toBe('rolling');
+    });
+
+    test('lets the mover roll again afterwards when the move earned an extra turn', async () => {
+      const { manager, host, hostPieces } = startAnimatedGame(6);
+      hostPieces[0]!.position = 5;
+
+      manager.roll(host.state.roomCode, host.playerId);
+      const moved = manager.move(host.state.roomCode, host.playerId, hostPieces[0]!.id);
+      expect(moved.currentPlayerId).toBe(host.playerId);
+      expect(moved.turnStage).toBe('move');
+
+      await sleep(150);
+      expect(moved.currentPlayerId).toBe(host.playerId);
+      expect(moved.turnStage).toBe('rolling');
+    });
+
+    test('ends the game only after the winning move has played', async () => {
+      const { manager, host, hostPieces } = startAnimatedGame(1);
+      // Three pieces are packed at the end of the home column and the last one steps in behind them.
+      hostPieces[0]!.position = 43;
+      hostPieces[1]!.position = 42;
+      hostPieces[2]!.position = 41;
+      hostPieces[3]!.position = 39;
+
+      manager.roll(host.state.roomCode, host.playerId);
+      const moved = manager.move(host.state.roomCode, host.playerId, hostPieces[3]!.id);
+      expect(moved.phase).toBe('playing');
+      expect(moved.currentPlayerId).toBe(host.playerId);
+
+      await sleep(60);
+      expect(moved.phase).toBe('finished');
+      expect(moved.winnerId).toBe(host.playerId);
+    });
+
+    test('hands over at once when the animation wait is switched off', () => {
+      const { manager, host, guest, hostPieces } = startAnimatedGame(3, 0);
+      hostPieces[0]!.position = 5;
+
+      manager.roll(host.state.roomCode, host.playerId);
+      const moved = manager.move(host.state.roomCode, host.playerId, hostPieces[0]!.id);
+
+      expect(moved.currentPlayerId).toBe(guest.playerId);
+      expect(moved.turnStage).toBe('rolling');
+    });
+  });
+
   test('automatically performs the only legal move', async () => {
     let rollIndex = 0;
     const rolls = [6, 3];
