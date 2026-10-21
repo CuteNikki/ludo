@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
+    # Named, so the server's Caddy can reach it as ludo-server
+    container_name: ludo-server
     restart: unless-stopped
     networks:
       - arr-network
@@ -18,6 +20,7 @@ services:
         - NEXT_PUBLIC_LEGAL_ADDRESS=${LEGAL_ADDRESS:-}
         - NEXT_PUBLIC_LEGAL_EMAIL=${LEGAL_EMAIL:-}
         - NEXT_PUBLIC_LEGAL_PHONE=${LEGAL_PHONE:-}
+    container_name: ludo-web
     restart: unless-stopped
     depends_on:
       - server
