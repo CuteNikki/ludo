@@ -6,11 +6,6 @@ services:
     restart: unless-stopped
     networks:
       - arr-network
-    labels:
-      homepage.group: 'Infrastructure'
-      homepage.name: 'Ludo Backend'
-      homepage.icon: 'mdi-server'
-      homepage.href: 'https://ludo.niso.moe'
 
   web:
     build:
@@ -28,11 +23,6 @@ services:
       - server
     networks:
       - arr-network
-    labels:
-      homepage.group: 'Infrastructure'
-      homepage.name: 'Ludo Frontend'
-      homepage.icon: 'mdi-controller'
-      homepage.href: 'https://ludo.niso.moe'
 
 networks:
   arr-network:
