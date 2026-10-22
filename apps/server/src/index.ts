@@ -57,6 +57,10 @@ const server = Bun.serve<SocketData>({
     if (url.pathname === '/health') {
       return Response.json({ status: 'ok' });
     }
+    // Counts for the server's dashboard. Caddy only sends /ws here, so it's reachable from the server alone.
+    if (url.pathname === '/status') {
+      return Response.json(rooms.stats());
+    }
     if (url.pathname === '/ws' && serverInstance.upgrade(request, { data: { clientId: crypto.randomUUID() } })) {
       return;
     }

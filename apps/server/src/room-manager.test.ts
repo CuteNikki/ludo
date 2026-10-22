@@ -1479,3 +1479,22 @@ describe('RoomManager taking over the host role', () => {
     expect(guest.playerId).not.toBe(third.playerId);
   });
 });
+
+describe('RoomManager stats', () => {
+  test('counts rooms by phase, connected people, bots and watchers', () => {
+    const { manager, first } = startGame();
+    const lobby = manager.createRoom('Grace');
+    manager.addBot(lobby.state.roomCode, lobby.playerId);
+    manager.setSettings(lobby.state.roomCode, lobby.playerId, { ...lobby.state.settings, isPublic: true });
+    manager.spectate(lobby.state.roomCode);
+    manager.disconnectPlayer(first.state.roomCode, first.playerId);
+
+    expect(manager.stats()).toEqual({
+      rooms: { lobby: 1, playing: 1, finished: 0 },
+      // Linus and Grace; Ada has dropped off
+      players: 2,
+      bots: 1,
+      spectators: 1,
+    });
+  });
+});

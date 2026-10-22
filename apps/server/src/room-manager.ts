@@ -74,6 +74,14 @@ type PlayerLeftListener = (roomCode: string, event: PlayerLeftEvent) => void;
 
 type RoomClosedListener = (roomCode: string) => void;
 
+export interface ServerStats {
+  rooms: Record<GameState['phase'], number>;
+  /** People connected to a room, not counting bots or watchers */
+  players: number;
+  bots: number;
+  spectators: number;
+}
+
 export class RoomManager {
   private readonly rooms = new Map<string, Room>();
   private readonly playerCleanupTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -100,6 +108,21 @@ export class RoomManager {
 
   getRoomState(roomCode: string): GameState | null {
     return this.rooms.get(roomCode)?.state ?? null;
+  }
+
+  /**
+   * How busy the server is, as counts only (no room codes or names), for the server's dashboard: rooms
+   * by phase, the people connected to them, their bots and who's watching.
+   */
+  stats(): ServerStats {
+    const stats: ServerStats = { rooms: { lobby: 0, playing: 0, finished: 0 }, players: 0, bots: 0, spectators: 0 };
+    for (const { state } of this.rooms.values()) {
+      stats.rooms[state.phase] += 1;
+      stats.players += state.players.filter((player) => !player.isBot && player.connected).length;
+      stats.bots += state.players.filter((player) => player.isBot).length;
+      stats.spectators += state.spectatorCount;
+    }
+    return stats;
   }
 
   listPublicRooms(): PublicRoomSummary[] {
