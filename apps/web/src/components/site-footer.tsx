@@ -3,8 +3,6 @@
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 
-import { Github } from 'lucide-react';
-
 import { author, repositoryUrl } from '@/lib/legal';
 import { siteName } from '@/lib/site';
 import { cn } from '@/lib/utils';
@@ -13,6 +11,26 @@ import { LogoMark, Wordmark } from '@/components/logo';
 
 const linkClassName =
   'inline-flex items-center gap-1.5 rounded-sm py-1 font-bold text-footer-foreground/75 transition-colors hover:text-primary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary';
+
+/** Lucide's GitHub mark, which Lucide 1.0 dropped along with its other brand icons. */
+function GithubIcon({ size }: { size: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox='0 0 24 24'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth={2}
+      strokeLinecap='round'
+      strokeLinejoin='round'
+      aria-hidden='true'
+    >
+      <path d='M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4' />
+      <path d='M9 18c-4.51 2-5-2-7-2' />
+    </svg>
+  );
+}
 
 /** The one footer, mounted by the root layout: tagline, site links and the legal links every page must carry. */
 export function SiteFooter() {
@@ -75,7 +93,7 @@ export function SiteFooter() {
           <ul className='mt-3 space-y-1'>
             <li>
               <a href={repositoryUrl} target='_blank' rel='noreferrer' className={linkClassName}>
-                <Github size={16} /> {t('legal.nav.github')}
+                <GithubIcon size={16} /> {t('legal.nav.github')}
               </a>
             </li>
           </ul>
