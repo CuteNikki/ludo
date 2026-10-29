@@ -8,7 +8,7 @@ import { DecorLayer, type DecorItem } from '@/components/decor';
 const widths = {
   narrow: 'max-w-3xl',
   default: 'max-w-6xl',
-  wide: 'max-w-[90rem]',
+  wide: 'max-w-360',
 } as const;
 
 const accents = {
