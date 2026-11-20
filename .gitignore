@@ -6,3 +6,6 @@ dist
 .env.local
 *.log
 *.tsbuildinfo
+
+# Settings for one server only (networks, names), kept on that server
+compose.override.yaml
